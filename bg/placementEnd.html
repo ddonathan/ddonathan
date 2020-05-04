@@ -24,7 +24,8 @@
       var query_string = QueryStringToJSON();
       console.log(query_string)
 
-      document.getElementById("terminationNotes").value = query_string.test;
+      document.getElementById("terminationNotes").value = JSON.stringify(query_string);
+      document.getElementById("entityID").value = query_string.EntityID;
     }
 
 
@@ -108,6 +109,7 @@
         <label class="label">Bill To</label>
         <input type="text" class="input" name="billTo" placeholder="">
       </div>
+      <input type="hidden" id="entityID" name="entityID" value="">
       <button type="submit" class="button is-link">Submit</button>
     </form>
   </div>
