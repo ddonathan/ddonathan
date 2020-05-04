@@ -24,7 +24,7 @@
       var query_string = QueryStringToJSON();
       console.log(query_string)
 
-      document.getElementById("terminationNotes").value = query_string;
+      document.getElementById("terminationNotes").value = JSON.stringify(query_string, null, 4);
       document.getElementById("CorporationID").value = query_string.CorporationID;
       document.getElementById("EntityID").value = query_string.EntityID;
       document.getElementById("EntityType").value = query_string.EntityType;
