@@ -24,8 +24,12 @@
       var query_string = QueryStringToJSON();
       console.log(query_string)
 
-      document.getElementById("terminationNotes").value = JSON.stringify(query_string);
-      document.getElementById("entityID").value = query_string.EntityID;
+      document.getElementById("terminationNotes").value = query_string;
+      document.getElementById("CorporationID").value = query_string.CorporationID;
+      document.getElementById("EntityID").value = query_string.EntityID;
+      document.getElementById("EntityType").value = query_string.EntityType;
+      document.getElementById("UserID").value = query_string.UserID;
+      document.getElementById("authCode").value = query_string.authCode;
     }
 
 
@@ -109,7 +113,11 @@
         <label class="label">Bill To</label>
         <input type="text" class="input" name="billTo" placeholder="">
       </div>
-      <input type="hidden" id="entityID" name="entityID" value="">
+      <input type="hidden" id="CorporationID" name="CorporationID" value="">
+      <input type="hidden" id="EntityID" name="EntityID" value="">
+      <input type="hidden" id="EntityType" name="EntityType" value="">
+      <input type="hidden" id="UserID" name="UserID" value="">
+      <input type="hidden" id="authCode" name="authCode" value="">
       <button type="submit" class="button is-link">Submit</button>
     </form>
   </div>
