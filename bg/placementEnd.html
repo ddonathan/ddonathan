@@ -46,22 +46,59 @@
         <input type="text" class="input" name="lastDayWorked" placeholder="">
       </div>
       <div class="field">
-        <label class="label">Termination Reason</label>
+        <label class="label">Termination Code</label>
         <div class="control">
           <div class="select">
-            <select name="terminationReason">
+            <select name="terminationCode">
               <option>Converted</option>
-              <option>Quit</option>
-              <option>Termed</option>
+              <option>Correct Previous Placement</option>
+              <option>Project Termed - No Start</option>
+              <option>Quit/Eligible</option>
+              <option>Quit/Not Eligible</option>
+              <option>Termed/Eligible</option>
+              <option>Termed/Not Eligible</option>
             </select>
           </div>
         </div>
       </div>
       <div class="field">
+        <label class="label">Reason Left</label>
+        <div class="control">
+          <div class="select">
+            <select name="reasonLeft">
+              <option>Contract Ended</option>
+              <option>Correct Previous Placement</option>
+              <option>Discharged for Cause</option>
+              <option>Failed Background Check</option>
+              <option>Failed Drug Screen</option>
+              <option>Funding Expired</option>
+              <option>Layoff</option>
+              <option>Maternity Leave</option>
+              <option>NO SHOW</option>
+              <option>Quit</option>
+              <option>Relocated</option>
+              <option>Replaced</option>
+              <option>Went Direct</option>
+              <option>Wrong Candidate Placed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Eligible for Rehire</label>
+        <input type="radio" class="radio" name="rehire" value="Yes"> Yes
+        <input type="radio" class="radio" name="rehire" value="No"> No
+      </div>
+      <div class="field">
+        <label class="label">Payout Completion Bonus</label>
+        <input type="text" class="input" name="payCompletionBonus" placeholder="">
+      </div>
+      <div class="field">
         <label class="label">Termination Notes</label>
         <textarea rows="2" class="textarea" name="terminationNotes" id="terminationNotes" spellcheck="true" data-ms-editor="true"></textarea>
       </div>
-      <div class="field">
+
+      <!-- <div class="field">
         <label class="label">Placement Status</label>
         <div class="control">
           <div class="select">
@@ -71,6 +108,31 @@
             </select>
           </div>
         </div>
+      </div> -->
+
+      <div class="field">
+        <label class="label">Start Day at Client</label>
+        <input type="text" class="input" name="startDayAtClient" placeholder="">
+      </div>
+      <div class="field">
+        <label class="label">Last Day Worked</label>
+        <input type="text" class="input" name="lastDayWorked" placeholder="">
+      </div>
+      <div class="field">
+        <label class="label">Salary</label>
+        <input type="text" class="input" name="salary" placeholder="">
+      </div>
+      <div class="field">
+        <label class="label">Fee $</label>
+        <input type="text" class="input" name="feeDollar" placeholder="">
+      </div>
+      <div class="field">
+        <label class="label">Bill To</label>
+        <input type="text" class="input" name="billTo" placeholder="">
+      </div>
+      <div class="field">
+        <label class="label">Special Payroll Billing Ins.</label>
+        <input type="text" class="input" name="specialPayRollBillingIns" placeholder="">
       </div>
       <div class="field">
         <label class="label">Candidate Status</label>
@@ -87,33 +149,12 @@
         <label class="label">Availability</label>
         <div class="control">
           <div class="select">
-            <select name="candidateStatus">
+            <select name="candidateAvailability">
               <option>Availabile</option>
               <option>Red Flag</option>
             </select>
           </div>
         </div>
-      </div>
-      <div class="field">
-        <label class="label">Payout Completion Bonus</label>
-        <input type="text" class="input" name="payoutCompletionBonus" placeholder="">
-      </div>
-      <div class="field">
-        <label class="label">Eligible for Rehire</label>
-        <input type="radio" class="radio" name="rehire" value="Yes"> Yes
-		<input type="radio" class="radio" name="rehire" value="No"> No
-      </div>
-      <div class="field">
-        <label class="label">Start Day at Client</label>
-        <input type="text" class="input" name="startDayAtClient" placeholder="">
-      </div>
-      <div class="field">
-        <label class="label">Termination Reason</label>
-        <input type="text" class="input" name="conversionFee" placeholder="">
-      </div>
-      <div class="field">
-        <label class="label">Bill To</label>
-        <input type="text" class="input" name="billTo" placeholder="">
       </div>
       <input type="hidden" id="CorporationID" name="CorporationID" value="">
       <input type="hidden" id="EntityID" name="EntityID" value="">
