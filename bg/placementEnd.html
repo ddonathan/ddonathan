@@ -42,6 +42,17 @@
   <div class="container">
     <form action="https://1djn5g0jik.execute-api.us-east-1.amazonaws.com/placementEnd">
       <div class="field">
+        <label class="label">Placement Status</label>
+        <div class="control">
+          <div class="select">
+            <select name="placementStatus">
+              <option>Completed</option>
+              <option>Terminated</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="field">
         <label class="label">Last Day Worked</label>
         <input type="text" class="input" name="lastDayWorked" placeholder="">
       </div>
@@ -97,19 +108,6 @@
         <label class="label">Termination Notes</label>
         <textarea rows="2" class="textarea" name="terminationNotes" id="terminationNotes" spellcheck="true" data-ms-editor="true"></textarea>
       </div>
-
-      <!-- <div class="field">
-        <label class="label">Placement Status</label>
-        <div class="control">
-          <div class="select">
-            <select name="placementStatus">
-              <option>Completed</option>
-              <option>Terminated</option>
-            </select>
-          </div>
-        </div>
-      </div> -->
-
       <div class="field">
         <label class="label">Start Day at Client</label>
         <input type="text" class="input" name="startDayAtClient" placeholder="">
