@@ -46,6 +46,7 @@
         <div class="control">
           <div class="select">
             <select name="placementStatus">
+              <option SELECTED></option>
               <option>Completed</option>
               <option>Terminated</option>
             </select>
@@ -53,7 +54,7 @@
         </div>
       </div>
       <div class="field">
-        <label class="label">Last Day Worked</label>
+        <label class="label">Last Day Worked at B&G</label>
         <input type="text" class="input" name="lastDayWorked" placeholder="">
       </div>
       <div class="field">
@@ -61,6 +62,7 @@
         <div class="control">
           <div class="select">
             <select name="terminationCode">
+              <option SELECTED></option>
               <option>Converted</option>
               <option>Correct Previous Placement</option>
               <option>Project Termed - No Start</option>
@@ -77,6 +79,7 @@
         <div class="control">
           <div class="select">
             <select name="reasonLeft">
+              <option SELECTED></option>
               <option>Contract Ended</option>
               <option>Correct Previous Placement</option>
               <option>Discharged for Cause</option>
@@ -102,7 +105,8 @@
       </div>
       <div class="field">
         <label class="label">Payout Completion Bonus</label>
-        <input type="text" class="input" name="payCompletionBonus" placeholder="">
+        <input type="radio" class="radio" name="payCompletionBonus" value="Yes"> Yes
+        <input type="radio" class="radio" name="payCompletionBonus" value="No"> No
       </div>
       <div class="field">
         <label class="label">Termination Notes</label>
