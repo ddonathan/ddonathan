@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hello Bulma!</title>
+  <title>Contract Termination Details</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   <script>
@@ -32,20 +32,18 @@
       document.getElementById("UserID").value = query_string.UserID;
       document.getElementById("authCode").value = query_string.authCode;
     }
-
-
   </script>
 </head>
 
 <body onLoad="setFormValues()">
-
   <div class="container">
+    <h1 class="title">Contract Termination Details</h1>
     <form action="https://1djn5g0jik.execute-api.us-east-1.amazonaws.com/placementEnd">
       <div class="field">
         <label class="label">Placement Status</label>
         <div class="control">
           <div class="select">
-            <select name="placementStatus">
+            <select name="placementStatus" required>
               <option SELECTED></option>
               <option>Completed</option>
               <option>Terminated</option>
@@ -55,13 +53,13 @@
       </div>
       <div class="field">
         <label class="label">Last Day Worked at B&G</label>
-        <input type="text" class="input" name="lastDayWorked" placeholder="">
+        <input type="date" class="input" name="lastDayWorked" size=5 required>
       </div>
       <div class="field">
         <label class="label">Termination Code</label>
         <div class="control">
           <div class="select">
-            <select name="terminationCode">
+            <select name="terminationCode" required>
               <option SELECTED></option>
               <option>Converted</option>
               <option>Correct Previous Placement</option>
@@ -78,7 +76,7 @@
         <label class="label">Reason Left</label>
         <div class="control">
           <div class="select">
-            <select name="reasonLeft">
+            <select name="reasonLeft" required>
               <option SELECTED></option>
               <option>Contract Ended</option>
               <option>Correct Previous Placement</option>
@@ -100,17 +98,17 @@
       </div>
       <div class="field">
         <label class="label">Eligible for Rehire</label>
-        <input type="radio" class="radio" name="rehire" value="Yes"> Yes
-        <input type="radio" class="radio" name="rehire" value="No"> No
+        <input type="radio" class="radio" name="rehire" value="Yes" required> Yes
+        <input type="radio" class="radio" name="rehire" value="No" required> No
       </div>
       <div class="field">
         <label class="label">Payout Completion Bonus</label>
-        <input type="radio" class="radio" name="payCompletionBonus" value="Yes"> Yes
-        <input type="radio" class="radio" name="payCompletionBonus" value="No"> No
+        <input type="radio" class="radio" name="payCompletionBonus" value="Yes" required> Yes
+        <input type="radio" class="radio" name="payCompletionBonus" value="No" required> No
       </div>
       <div class="field">
         <label class="label">Termination Notes</label>
-        <textarea rows="2" class="textarea" name="terminationNotes" id="terminationNotes" spellcheck="true" data-ms-editor="true"></textarea>
+        <textarea rows="2" class="textarea" name="terminationNotes" id="terminationNotes" spellcheck="true" data-ms-editor="true" required></textarea>
       </div>
       <!-- <div class="field">
         <label class="label">Start Day at Client</label>
@@ -140,8 +138,8 @@
         <label class="label">Candidate Status</label>
         <div class="control">
           <div class="select">
-            <select name="candidateStatus">
-              <option>Active</option>
+            <select name="candidateStatus" required>
+              <option SELECTED>Active</option>
               <option>Do Not Use</option>
             </select>
           </div>
@@ -151,8 +149,8 @@
         <label class="label">Availability</label>
         <div class="control">
           <div class="select">
-            <select name="candidateAvailability">
-              <option>Availabile</option>
+            <select name="candidateAvailability" required>
+              <option SELECTED>Availabile</option>
               <option>Red Flag</option>
             </select>
           </div>
@@ -169,24 +167,6 @@
     </form>
   </div>
   </div>
-
-
-
-  <script src="https://unpkg.com/vue"></script>
-  <!-- Full bundle -->
-  <script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
-
-  <!-- Individual components -->
-  <script src="https://unpkg.com/buefy/dist/components/datepicker"></script>
-  <script src="https://unpkg.com/buefy/dist/components/table"></script>
-  <script src="https://unpkg.com/buefy/dist/components/input"></script>
-
-  <script>
-    new Vue({
-      el: '#app'
-    })
-  </script>
-
 </body>
 
 </html>
