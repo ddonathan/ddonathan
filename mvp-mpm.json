@@ -26,7 +26,7 @@
         "title": "Create Perm Placements",
         "singleActionButtonLabel": "Create",
         "massActionButtonLabel": "Create all selected",
-        "formCancelButtonLabel": "Cancel!!!",
+        "formCancelButtonLabel": "Cancel",
         "formSaveButtonLabel": "Save the form",
         "filterRowsButtonLabelShow": "Show ineligible rows",
         "filterRowsButtonLabelHide": "Hide ineligible rows"
@@ -307,7 +307,7 @@
         "title": "Update Placement Rates",
         "singleActionButtonLabel": "Update",
         "massActionButtonLabel": "Update all selected",
-        "formCancelButtonLabel": "Cancel!!!",
+        "formCancelButtonLabel": "Cancel",
         "formSaveButtonLabel": "Save the form"
       },
       "fields": [
@@ -419,7 +419,7 @@
         "title": "Update Placement Rates",
         "singleActionButtonLabel": "Update",
         "massActionButtonLabel": "Update all selected",
-        "formCancelButtonLabel": "Cancel!!!",
+        "formCancelButtonLabel": "Cancel",
         "formSaveButtonLabel": "Save the form"
       },
       "fields": [
@@ -517,7 +517,7 @@
       "style": {
         "title": "Set defaults for all Placements to be created",
         "cancelButtonLabel": "Cancel",
-        "saveButtonLabel": "Next!"
+        "saveButtonLabel": "Next"
       },
       "fields": [
         {
@@ -634,10 +634,15 @@
         },
         {
           "name": "workersCompensationRate",
-          "type": "text",
+          "type": "picker",
           "label": "Workers Comp Code",
           "sortOrder": 13,
-          "defaultValue": "${jobOrder.workersCompRate.id}"
+          "pickerEntityIdProperty": "id",
+          "pickerEntityLabelProperty": "id",
+          "pickerEntityType": "WorkersCompensationRate",
+          "pickerEntityAdditionalLogic": "AND id = ${jobOrder.workersCompRate.id}",
+          "defaultValue": "${jobOrder.workersCompRate.id}",
+          "readOnly": true
         },
         {
           "name": "billingClientContact",
@@ -795,10 +800,15 @@
         },
         {
           "name": "workersCompensationRate",
-          "type": "text",
+          "type": "picker",
           "label": "Workers Comp Code",
           "sortOrder": 13,
-          "defaultValue": "${jobOrder.workersCompRate.id}"
+          "pickerEntityIdProperty": "id",
+          "pickerEntityLabelProperty": "id",
+          "pickerEntityType": "WorkersCompensationRate",
+          "pickerEntityAdditionalLogic": "AND id = ${jobOrder.workersCompRate.id}",
+          "defaultValue": "${jobOrder.workersCompRate.id}",
+          "readOnly": true
         },
         {
           "name": "billingClientContact",
