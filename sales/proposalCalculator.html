@@ -1,0 +1,417 @@
+<!-- 
+	TODO Should we set the buffer based on what the possible options are? Currently we do this with BBO vs NonBBO, but could we go further? If they haven't chosen invoicing, then building an invoice export isn't possible. 
+	TODO Should we have presets like (Enterprise Only, Growth, Healthcare, BH1, etc.)
+	TODO Should Pay/Bill be a separate option?
+	TODO Have Backoffice not show unless they choose Time/Expense or Invoicing
+	TODO Form Validation
+ -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>THQ Proposal Pricing</title>
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  <!-- Bootstrap -->
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+  <!--
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  -->
+
+  <script>
+    function QueryStringToJSON() {
+      var pairs = location.search.slice(1).split("&");
+
+      var result = {};
+      pairs.forEach(function (pair) {
+        pair = pair.split("=");
+        result[pair[0]] = decodeURIComponent(pair[1] || "");
+      });
+
+      return JSON.parse(JSON.stringify(result));
+    }
+
+    // function setFormValues() {
+    var query_string = QueryStringToJSON();
+
+    //   document.getElementById("receivedData").value = JSON.stringify(query_string, null, 4);
+    //   document.getElementById("CorporationID").value = query_string.CorporationID;
+    //   document.getElementById("EntityID").value = query_string.EntityID;
+    //   document.getElementById("EntityType").value = query_string.EntityType;
+    //   document.getElementById("UserID").value = query_string.UserID;
+    //   document.getElementById("authCode").value = query_string.authCode;
+    // }
+	
+	window.onload=function(){
+		calculatePricing();
+		
+		var form = document.querySelector('form');
+			form.addEventListener('change', function() {
+				calculatePricing();
+		});
+		
+		document.getElementById("companyName").focus();
+	}
+
+    function calculatePricing() {
+      // lookup
+      var container = {
+        lookup: {
+          buffer: 0.1,
+          padding: 2000,
+          paddingBBO: 4000,
+          baseUserPrice: 1050,
+        },
+        form: {
+          companyName: document.getElementById("companyName").value,
+		  userCount: document.getElementById("userCount").value,
+          backoffice: document.getElementById("backoffice").value,
+          plCount: document.getElementById("plCount").value,
+          npeCount: document.getElementById("npeCount").value,
+          oscpCount: document.getElementById("oscpCount").value
+        },
+        calcs: {
+          isBBO: false,
+          productsPrice: 0,
+          pricePerUser: 0,
+          additions: 0
+        }
+      }
+
+      var formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        maximumSignificantDigits: 4
+      });
+
+      // Process products
+      if (document.getElementById("ats").checked)  {
+        container.calcs.productsPrice += 65;
+        container.form.ats = true;
+      }
+      if (document.getElementById("crm").checked)  {
+        container.calcs.productsPrice += 20;
+        container.form.crm = true;
+      }
+      if (document.getElementById("time_expense").checked) {
+        container.calcs.isBBO = true;
+        container.calcs.productsPrice += 65;
+        container.form.time_expense = true;
+      }
+      if (document.getElementById("invoicing").checked) {
+        container.calcs.isBBO = true;
+        container.calcs.productsPrice += 65;
+        container.form.invoicing = true;
+      }
+      if (document.getElementById("onboarding").checked)  {
+        container.calcs.productsPrice += 65;
+        container.form.onboarding = true;
+      }
+      if (document.getElementById("vms_submittals").checked)  {
+        container.calcs.productsPrice += 30;
+        container.form.vms_submittals = true;
+      }
+      if (document.getElementById("vms_sync").checked)  {
+        container.calcs.productsPrice += 30;
+        container.form.vms_sync = true;
+      }
+      if (document.getElementById("canvas").checked)  {
+        container.calcs.productsPrice += 65;
+        container.form.canvas = true;
+      }
+
+      // Process additions
+      if (document.getElementById("newHireExport").checked)  {
+        container.calcs.additions += 500;
+        container.form.histSubmissions = true;
+      }
+      if (document.getElementById("backoffice").value === "BH1") container.calcs.additions += 16500;
+      if (document.getElementById("qbIntegration").checked)  {
+        container.calcs.additions += 500;
+        container.form.histSubmissions = true;
+      }
+      if (document.getElementById("InvoiceExport").checked)  {
+        container.calcs.additions += 500;
+        container.form.histSubmissions = true;
+      }
+      if (document.getElementById("PayDataExport").checked)  {
+        container.calcs.additions += 500;
+        container.form.histSubmissions = true;
+      }
+      if (container.form.plCount > 1) {
+         container.calcs.additions += (container.form.plCount - 1) * 2500;
+      }
+      if (container.form.npeCount) container.calcs.additions += container.form.npeCount * 2500;
+      if (container.form.oscpCount > 0) {
+        container.calcs.additions += 500
+        if (container.form.oscpCount > 1) container.calcs.additions += (container.calcs.form.oscpCount - 1) / 2 ;
+      }
+      if (document.getElementById("histSubmissions").checked) {
+        container.calcs.additions += 1250
+        container.form.histSubmissions = true;
+      }
+
+      // Find Volume container.lookup.discount
+      switch (true) {
+        case container.form.userCount < 13:
+          container.lookup.discount = 0;
+          break;
+        case container.form.userCount < 20:
+          container.lookup.discount = 0.3;
+          break;
+        case container.form.userCount < 60:
+          container.lookup.discount = 0.35;
+          break;
+        case container.form.userCount < 70:
+          container.lookup.discount = 0.4;
+          break;
+        default:
+          container.lookup.discount = 50;
+          break;
+      }
+
+      // If number of users is less than 3 then calculate based on 3
+      container.calcs.userCountCalculated = container.form.userCount;
+      if (container.calcs.userCountCalculated < 3) container.calcs.userCountCalculated = 3;
+
+      // Figure out padding
+      if (container.calcs.isBBO) {
+        container.lookup.padding = container.lookup.paddingBBO;
+        delete container.lookup.paddingBBO;
+      }
+
+      // Perform Calculations
+      container.calcs.pricePerUser = (container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount);
+      container.calcs.basePricing = container.calcs.pricePerUser * container.calcs.userCountCalculated;
+      container.calcs.ballParkLow = container.calcs.basePricing
+      container.calcs.ballParkHigh = container.calcs.basePricing + (container.lookup.padding * (1 + container.lookup.buffer))
+	  container.calcs.ballParkHigh2 = (container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer)
+
+      // Some additions require us to have the basePricing first
+      if (document.getElementById("emailsAsNotes").checked) {
+        container.calcs.additions += container.calcs.basePricing * .07
+        container.form.emailsAsNotes = true;
+      }
+      if (document.getElementById("NoDataMigration").checked) {
+        container.calcs.additions += (container.calcs.basePricing * .15 * -1);
+        container.form.NoDataMigration = true;
+      }
+
+      // Calculate Grand Total
+      container.calcs.grandTotal = container.calcs.basePricing + container.calcs.additions;
+
+      // Show prices
+      document.getElementById("companyName").innerHTML = container.form.companyName
+	  document.getElementById("ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
+	  document.getElementById("ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
+      document.getElementById("basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 500) * 500);
+      document.getElementById("additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions / 500) * 500);
+      document.getElementById("grandTotal").innerHTML = formatter.format(Math.ceil(container.calcs.grandTotal / 500) * 500);
+      console.log(JSON.stringify(container, null, 4));
+    }
+
+	// Form automation
+    function BackOfficeOptions() {
+      if (document.getElementById('backoffice').value === "") {
+        qbIntegration_div.className = 'form-check form-switch d-none';
+        InvoiceExport_div.className = 'form-check form-switch d-none';
+		PayDataExport_div.className = 'form-check form-switch d-none';
+      } else {
+        qbIntegration_div.className = 'form-check form-switch';
+        InvoiceExport_div.className = 'form-check form-switch';
+		PayDataExport_div.className = 'form-check form-switch';
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container-md">
+    <form action="proposalPricing.html" id="form" name="form" method="POST" class="needs-validation" novalidate>
+	  <h1 class="display-6">Tonic HQ Pricing Calculator</h1>
+	  <br />
+	  <div class="row mb-3">
+		<label for="companyName" class="col-sm-2 col-form-label">Company Name</label>
+		<div class="col-sm-6">
+			<input type="text" class="form-control" id="companyName" name="companyName" aria-describedby="" />
+			<div class="invalid-feedback">Please enter company name</div>
+		</div>
+	  </div>
+
+      <div class="row mb-3">
+        <label for="userCount" class="col-sm-2 col-form-label">Number of Users</label>
+        <div class="col-sm-2">
+			<input type="number" class="form-control" id="userCount" name="userCount" aria-describedby="" value="10" />
+			<div class="invalid-feedback">Please enter number of users</div>
+		</div>
+      </div>
+	  <br />
+	  <fieldset class="row mb-3">
+		<legend class="col-form-label col-sm-2 pt-0">Products</legend>
+		<div class="col-sm-10">
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="ats" name="ats" value="ats" CHECKED /> ATS</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="crm" name="crm" value="crm" CHECKED /> CRM</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="time_expense" name="time_expense" value="Time/Expense" /> Time/Expense</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="invoicing" name="invoicing" value="invoicing" /> Invoicing</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="onboarding" name="onboarding" value="onboarding" /> Onboarding</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="vms_submittals" name="vms_submittals" value="VMS Submittals" /> VMS Submittals</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="vms_sync" name="vms_sync" value="VMS Sync" /> VMS Sync</div>
+		  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="canvas" name="canvas" value="canvas" /> Canvas</div>
+		</div>
+      </fieldset>
+
+	  <div class="row mb-3">
+        <label for="backoffice" class="col-sm-2 col-form-label">Back office</label><br>
+        <div class="col-sm-3">
+			<select name="backoffice" id="backoffice" class="form-select" aria-label="" onchange="BackOfficeOptions();">
+			  <option value=""></option>
+			  <option value="BBO">BBO</option>
+			  <option value="BH1">Bullhorn One</option>
+			</select>
+			<br />
+			<div id="qbIntegration_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration" value="1" /> Quickbooks Integration</div>
+			<div id="InvoiceExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="1" /> Invoice Export</div>
+			<div id="PayDataExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="1" /> Pay Data Export</div>
+		</div>
+      </div>
+
+	  <div class="row mb-3">
+        <label for="newHireExport" class="col-sm-2 col-form-label">New Hire Export</label><br>
+        <div class="col-sm">
+			<div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="1" /></div>
+		</div>
+	  </div>
+	  
+      <div class="form-group row mb-3">
+        <label for="userCount" class="col-sm-2 col-form-label">Private Labels</label>
+        <div class="col-sm-2">
+			<input type="number" class="form-control" id="plCount" name="plCount" aria-describedby="" value="1" />
+			<div class="invalid-feedback">Please enter number of PLs</div>
+		</div>
+      </div>
+	  
+      <div class="form-group row mb-3">
+        <label for="userCount" class="col-sm-2 col-form-label">Non-production Environments</label>
+        <div class="col-sm-2">
+			<input type="number" class="form-control" id="npeCount" name="npeCount" aria-describedby="" value="0" />
+			<div class="invalid-feedback">Please enter number of NPEs</div>
+		</div>
+      </div>
+	  
+      <div class="form-group row mb-3">
+        <label for="userCount" class="col-sm-2 col-form-label">OSCPs</label>
+        <div class="col-sm-2">
+			<input type="number" class="form-control" id="oscpCount" name="oscpCount" aria-describedby="" value="0" />
+			<div class="invalid-feedback">Please enter number of OSCPs</div>
+		</div>
+      </div>
+	  <br />
+	  
+	  
+<div class="row mb-3">
+        <label for="" class="col-sm-2 col-form-label">Other Options</label>
+        <div class="col-sm-6">
+      <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="1" />Are we importing emails as notes?</div>
+      <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="1" />No data migration?</div>
+      <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="1" />Are we loading historical submissions?</div>
+      </div>
+	  </div>
+	  
+	  <br />
+      <button type="submit" class="btn btn-primary" DISABLED>Submit</button>
+    </form>
+    <br /><br />
+	<h1 class="display-6">Pricing Results</h1>
+	<div class="row"><div class="col-sm-6">
+    <table class="table table-striped table-hover">
+	<tbody>
+		<tr><td>Client: </td><td><span id="companyName"></span></td></tr>
+		<tr><td>Ballpark: </td><td><span id="ballpark"></span></td></tr>
+		<tr><td>Ballpark2: </td><td><span id="ballpark2"></span></td></tr>
+		<tr><td>Base Pricing: </td><td><span id="basePricing"></span></td></tr>
+		<tr><td>Additions: </td><td><span id="additions"></span></td></tr>
+		<tr><td>Grand Total: </td><td><span id="grandTotal"></span></td></tr>
+	</tbody>
+	</table>
+	</div></div>
+  </div>
+
+  <script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+      "use strict";
+      window.addEventListener(
+        "load",
+        function () {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName("needs-validation");
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(
+            forms,
+            function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            }
+          );
+        },
+        false
+      );
+    })();
+  </script>
+  <script>
+    // Example starter JavaScript for disabling form submissions if there are invalid fields
+    (function () {
+      "use strict";
+      window.addEventListener(
+        "load",
+        function () {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName("needs-validation");
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(
+            forms,
+            function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            }
+          );
+        },
+        false
+      );
+    })();
+  </script>
+</body>
+
+</html>
