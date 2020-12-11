@@ -228,6 +228,9 @@
           // Put the name into the products array
           container.form.products.push(value.name);
 
+          // Add to pricing
+          container.calcs.productsPrice += Number(value.pricing);
+
           // Set backoffice based on the product choices
           if (key === "time_expense" || key === "invoicing") {
             container.form.backoffice = "BBO";
