@@ -19,11 +19,11 @@
   <link rel="shortcut icon" type="image/png" href="favicon.png" />
   <!-- Bootstrap -->
   <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
 
   <!--
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -64,19 +64,21 @@
     window.onload = function () {
       calculatePricing();
 
-      var form = document.querySelector('form');
-      form.addEventListener('change', function () {
+      var form = document.querySelector("form");
+      form.addEventListener("change", function () {
         calculatePricing();
       });
 
       // Initialize all tooltips
-      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-      })
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
 
       document.getElementById("companyName").focus();
-    }
+    };
 
     function calculatePricing() {
       // lookup
@@ -92,31 +94,40 @@
           isBBO: false,
           productsPrice: 0,
           pricePerUser: 0,
-          additions: 0
-        }
-      }
+          additions: 0,
+        },
+      };
 
-      var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        maximumSignificantDigits: 4
+      var formatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumSignificantDigits: 4,
       });
 
-      var fmtPct = new Intl.NumberFormat('en-US', {
-        style: 'percent'
+      var fmtPct = new Intl.NumberFormat("en-US", {
+        style: "percent",
       });
 
       // Loop through form data and put it into the container
-      container.form = {}
-      container.form.products = []
-      var form = document.getElementById('form');
+      container.form = {};
+      container.form.products = [];
+      var form = document.getElementById("form");
       var data = new FormData(form);
       for (var [key, value] of data) {
-        container.form[key] = value
+        container.form[key] = value;
       }
 
       // Process products
-      let products = ["ats", "crm", "time_expense", "invoicing", "onboarding", "vms_submittals", "vms_sync", "canvas"]
+      let products = [
+        "ats",
+        "crm",
+        "time_expense",
+        "invoicing",
+        "onboarding",
+        "vms_submittals",
+        "vms_sync",
+        "canvas",
+      ];
       for (let product of products) {
         if (document.getElementById(product).checked) {
           let arrayData = document.getElementById(product).value.split(",");
@@ -135,7 +146,8 @@
         container.calcs.additions += 500;
         container.form.histSubmissions = true;
       }
-      if (document.getElementById("backoffice").value === "BH1") container.calcs.additions += 16500;
+      if (document.getElementById("backoffice").value === "BH1")
+        container.calcs.additions += 16500;
       if (document.getElementById("qbIntegration").checked) {
         container.calcs.additions += 500;
         container.form.histSubmissions = true;
@@ -151,13 +163,15 @@
       if (container.form.plCount > 1) {
         container.calcs.additions += (container.form.plCount - 1) * 2500;
       }
-      if (container.form.npeCount) container.calcs.additions += container.form.npeCount * 2500;
+      if (container.form.npeCount)
+        container.calcs.additions += container.form.npeCount * 2500;
       if (container.form.oscpCount > 0) {
-        container.calcs.additions += 500
-        if (container.form.oscpCount > 1) container.calcs.additions += (container.calcs.form.oscpCount - 1) / 2;
+        container.calcs.additions += 500;
+        if (container.form.oscpCount > 1)
+          container.calcs.additions += (container.form.oscpCount - 1) / 2;
       }
       if (document.getElementById("histSubmissions").checked) {
-        container.calcs.additions += 1250
+        container.calcs.additions += 1250;
         container.form.histSubmissions = true;
       }
 
@@ -179,11 +193,15 @@
           container.lookup.discount = 50;
           break;
       }
-      if (container.lookup.discount) document.getElementById("discount").innerHTML = fmtPct.format(container.lookup.discount);
+      if (container.lookup.discount)
+        document.getElementById("discount").innerHTML = fmtPct.format(
+          container.lookup.discount
+        );
 
       // If number of users is less than 3 then calculate based on 3
       container.calcs.userCountCalculated = container.form.userCount;
-      if (container.calcs.userCountCalculated < 3) container.calcs.userCountCalculated = 3;
+      if (container.calcs.userCountCalculated < 3)
+        container.calcs.userCountCalculated = 3;
 
       // Figure out padding
       if (container.calcs.isBBO) {
@@ -192,43 +210,79 @@
       }
 
       // Perform Calculations
-      container.calcs.pricePerUser = (container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount);
-      container.calcs.basePricing = container.calcs.pricePerUser * container.calcs.userCountCalculated;
-      container.calcs.ballParkLow = container.calcs.basePricing
-      container.calcs.ballParkHigh = container.calcs.basePricing + (container.lookup.padding * (1 + container.lookup.buffer))
-      container.calcs.ballParkHigh2 = (container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer)
+      container.calcs.pricePerUser =
+        (container.lookup.baseUserPrice + container.calcs.productsPrice) *
+        (1 - container.lookup.discount);
+      container.calcs.basePricing =
+        container.calcs.pricePerUser * container.calcs.userCountCalculated;
+      container.calcs.ballParkLow = container.calcs.basePricing;
+      container.calcs.ballParkHigh =
+        container.calcs.basePricing +
+        container.lookup.padding * (1 + container.lookup.buffer);
+      container.calcs.ballParkHigh2 =
+        (container.calcs.basePricing + container.lookup.padding) *
+        (1 + container.lookup.buffer);
 
       // Some additions require us to have the basePricing first
       if (document.getElementById("emailsAsNotes").checked) {
-        container.calcs.additions += container.calcs.basePricing * .07
+        container.calcs.additions += container.calcs.basePricing * 0.07;
         container.form.emailsAsNotes = true;
       }
       if (document.getElementById("NoDataMigration").checked) {
-        container.calcs.additions += (container.calcs.basePricing * .15 * -1);
+        container.calcs.additions += container.calcs.basePricing * 0.15 * -1;
         container.form.NoDataMigration = true;
       }
 
       // Set option pricing
-      document.getElementById('onSiteTrainingAmt').value = Math.ceil((container.calcs.basePricing * .07) / 100) * 100;
-      document.getElementById('afterCareAmt').value = Math.ceil((container.calcs.basePricing * .15) / 100) * 100;
+      document.getElementById("onSiteTrainingAmt").value =
+        Math.ceil((container.calcs.basePricing * 0.07) / 100) * 100;
+      document.getElementById("afterCareAmt").value =
+        Math.ceil((container.calcs.basePricing * 0.15) / 100) * 100;
 
       // Calculate Grand Total
-      container.calcs.grandTotal = container.calcs.basePricing + container.calcs.additions;
+      container.calcs.grandTotal =
+        container.calcs.basePricing + container.calcs.additions;
 
       // Show prices
-      document.getElementById("pricing_companyName").innerHTML = container.form.companyName
-      document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
-      document.getElementById("pricing_ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
-      document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 500) * 500);
-      document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions / 500) * 500);
-      document.getElementById("pricing_grandTotal").innerHTML = formatter.format(Math.ceil(container.calcs.grandTotal / 500) * 500);
+      document.getElementById("pricing_companyName").innerHTML =
+        container.form.companyName;
+      document.getElementById("pricing_ballpark").innerHTML =
+        formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) +
+        "-" +
+        formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
+      document.getElementById("pricing_ballpark2").innerHTML =
+        formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) +
+        "-" +
+        formatter.format(
+          Math.ceil(container.calcs.ballParkHigh2 / 500) * 500
+        );
+      document.getElementById(
+        "pricing_basePricing"
+      ).innerHTML = formatter.format(
+        Math.ceil(container.calcs.basePricing / 500) * 500
+      );
+      document.getElementById(
+        "pricing_additions"
+      ).innerHTML = formatter.format(
+        Math.ceil(container.calcs.additions / 500) * 500
+      );
+      document.getElementById(
+        "pricing_grandTotal"
+      ).innerHTML = formatter.format(
+        Math.ceil(container.calcs.grandTotal / 500) * 500
+      );
 
       // Setup for sending to document creation
       container.data = container.form;
-      if (container.form.overridePriceAmt) container.data.totalAmt = container.form.overridePriceAmt
+      if (container.form.overridePriceAmt)
+        container.data.totalAmt = container.form.overridePriceAmt;
 
       // Number of weeks
-      container.data.timelineWeeks = container.form.timelineLow + " - " + container.form.timelineHigh + " weeks";
+      container.data.timelineWeeks =
+        container.form.timelineLow +
+        " - " +
+        container.form.timelineHigh +
+        " weeks";
       delete container.data.timelineLow;
       delete container.data.timelineHigh;
 
@@ -236,64 +290,68 @@
       container.data[`timeline${container.data.timelineTemplate}`] = true;
 
       // Save to textarea
-      document.getElementById("rawOutput").innerHTML = JSON.stringify(container.data, null, 4);
+      document.getElementById("rawOutput").innerHTML = JSON.stringify(
+        container.data,
+        null,
+        4
+      );
       console.log(JSON.stringify(container, null, 4));
     }
 
     // Form automation
     function funcBackOfficeOptions() {
-      if (document.getElementById('backoffice').value === "") {
-        qbIntegration_div.className = 'form-check form-switch d-none';
-        InvoiceExport_div.className = 'form-check form-switch d-none';
-        PayDataExport_div.className = 'form-check form-switch d-none';
+      if (document.getElementById("backoffice").value === "") {
+        qbIntegration_div.className = "form-check form-switch d-none";
+        InvoiceExport_div.className = "form-check form-switch d-none";
+        PayDataExport_div.className = "form-check form-switch d-none";
       } else {
-        qbIntegration_div.className = 'form-check form-switch';
-        InvoiceExport_div.className = 'form-check form-switch';
-        PayDataExport_div.className = 'form-check form-switch';
+        qbIntegration_div.className = "form-check form-switch";
+        InvoiceExport_div.className = "form-check form-switch";
+        PayDataExport_div.className = "form-check form-switch";
       }
     }
 
     function funcPriceOverride() {
-      if (document.getElementById('overridePrice').checked) {
-        overridePrice_div.className = '';
+      if (document.getElementById("overridePrice").checked) {
+        overridePrice_div.className = "";
       } else {
-        overridePrice_div.className = 'd-none';
+        overridePrice_div.className = "d-none";
       }
     }
 
     function funcOnSiteTraining() {
-      if (document.getElementById('onSiteTraining').checked) {
-        onSiteTraining_div.className = '';
+      if (document.getElementById("onSiteTraining").checked) {
+        onSiteTraining_div.className = "";
       } else {
-        onSiteTraining_div.className = 'd-none';
+        onSiteTraining_div.className = "d-none";
       }
     }
 
     function funcAfterCare() {
-      if (document.getElementById('afterCare').checked) {
-        afterCare_div.className = '';
+      if (document.getElementById("afterCare").checked) {
+        afterCare_div.className = "";
       } else {
-        afterCare_div.className = 'd-none';
+        afterCare_div.className = "d-none";
       }
     }
 
     function funcTimelineTemplate() {
-      switch (document.getElementById('timelineTemplate').value) {
+      switch (document.getElementById("timelineTemplate").value) {
         case "NoDM":
-          document.getElementById('timelineLow').value = "10"
-          document.getElementById('timelineHigh').value = "12"
+          document.getElementById("timelineLow").value = "10";
+          document.getElementById("timelineHigh").value = "12";
           break;
         case "SMB":
-          document.getElementById('timelineLow').value = "11"
-          document.getElementById('timelineHigh').value = "12"
+          document.getElementById("timelineLow").value = "11";
+          document.getElementById("timelineHigh").value = "12";
           break;
         case "Field":
-          document.getElementById('timelineLow').value = "12"
-          document.getElementById('timelineHigh').value = "12"
+          document.getElementById("timelineLow").value = "12";
+          document.getElementById("timelineHigh").value = "12";
           break;
         case "BH1":
-          document.getElementById('timelineLow').value = "13"
-          document.getElementById('timelineHigh').value = "12"
+          document.getElementById("timelineLow").value = "13";
+          document.getElementById("timelineHigh").value = "12";
           break;
         default:
           break;
@@ -310,17 +368,19 @@
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
               <h5>Basic Information</h5>
             </button>
           </h2>
-          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="row mb-3">
                 <div class="col-sm-2">Company Name</div>
                 <div class="col-sm-6">
                   <input type="text" class="form-control" id="companyName" name="companyName" />
-                  <div class="invalid-feedback">Please enter company name</div>
+                  <div class="invalid-feedback">
+                    Please enter company name
+                  </div>
                 </div>
               </div>
 
@@ -328,9 +388,12 @@
                 <div class="col-sm-2">Number of Users</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1" max="150" />
-                  <div class="invalid-feedback">Please enter number of users</div>
+                  <div class="invalid-feedback">
+                    Please enter number of users
+                  </div>
                 </div>
-                <div class="col-auto"><span id="passwordHelpInline" class="form-text"><span id="discount"></span></span>
+                <div class="col-auto">
+                  <span id="passwordHelpInline" class="form-text"><span id="discount"></span></span>
                 </div>
               </div>
               <br />
@@ -338,28 +401,28 @@
                 <div class="col-sm-2">Products</div>
                 <div class="col-sm-auto">
                   <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
-                    <input type="checkbox" class="btn-check" id="ats" value="ATS,65" CHECKED>
+                    <input type="checkbox" class="btn-check" id="ats" value="ATS,65" checked />
                     <label class="btn btn-outline-primary" for="ats">ATS</label>
 
-                    <input type="checkbox" class="btn-check" id="crm" value="CRM,65" CHECKED>
+                    <input type="checkbox" class="btn-check" id="crm" value="CRM,65" checked />
                     <label class="btn btn-outline-primary" for="crm">CRM</label>
 
-                    <input type="checkbox" class="btn-check" id="time_expense" value="Time/Expense,65">
+                    <input type="checkbox" class="btn-check" id="time_expense" value="Time/Expense,65" />
                     <label class="btn btn-outline-primary" for="time_expense">Time/Expense</label>
 
-                    <input type="checkbox" class="btn-check" id="invoicing" value="Invoicing,65">
+                    <input type="checkbox" class="btn-check" id="invoicing" value="Invoicing,65" />
                     <label class="btn btn-outline-primary" for="invoicing">Invoicing</label>
 
-                    <input type="checkbox" class="btn-check" id="onboarding" value="Onboarding,65">
+                    <input type="checkbox" class="btn-check" id="onboarding" value="Onboarding,65" />
                     <label class="btn btn-outline-primary" for="onboarding">Onboarding</label>
 
-                    <input type="checkbox" class="btn-check" id="vms_submittals" value="VMS Submittals,30">
+                    <input type="checkbox" class="btn-check" id="vms_submittals" value="VMS Submittals,30" />
                     <label class="btn btn-outline-primary" for="vms_submittals">VMS Submittals</label>
 
-                    <input type="checkbox" class="btn-check" id="vms_sync" value="VMS Sync,30">
+                    <input type="checkbox" class="btn-check" id="vms_sync" value="VMS Sync,30" />
                     <label class="btn btn-outline-primary" for="vms_sync">VMS Sync</label>
 
-                    <input type="checkbox" class="btn-check" id="canvas" value="Canvas,65">
+                    <input type="checkbox" class="btn-check" id="canvas" value="Canvas,65" />
                     <label class="btn btn-outline-primary" for="canvas">Canvas</label>
                   </div>
                 </div>
@@ -367,7 +430,7 @@
 
               <div class="row mb-3">
                 <div class="col-sm-2">Back Office</div>
-                <div class="col-sm-3">
+                <div class="col-sm-6">
                   <div class="btn-group mb-3" role="group" aria-label="Basic checkbox toggle button group">
                     <select name="backoffice" id="backoffice" class="form-select" aria-label="" onchange="funcBackOfficeOptions();">
                       <option value="">-- Please Select --</option>
@@ -376,9 +439,18 @@
                     </select>
                   </div>
                   <br />
-                  <div id="qbIntegration_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration" value="1" /> Quickbooks Integration</div>
-                  <div id="InvoiceExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="1" /> Invoice Export</div>
-                  <div id="PayDataExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="1" /> Pay Data Export</div>
+                  <div id="qbIntegration_div" class="form-check form-switch d-none">
+                    <input class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration" value="1" />
+                    Quickbooks Integration
+                  </div>
+                  <div id="InvoiceExport_div" class="form-check form-switch d-none">
+                    <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="1" />
+                    Invoice Export
+                  </div>
+                  <div id="PayDataExport_div" class="form-check form-switch d-none">
+                    <input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="1" />
+                    Pay Data Export
+                  </div>
                 </div>
               </div>
             </div>
@@ -395,7 +467,9 @@
               <div class="row mb-3">
                 <div class="col-sm-2">New Hire Export</div>
                 <div class="col-sm">
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="1" /></div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="1" />
+                  </div>
                 </div>
               </div>
 
@@ -403,7 +477,9 @@
                 <div class="col-sm-2">Private Labels</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" />
-                  <div class="invalid-feedback">Please enter number of PLs</div>
+                  <div class="invalid-feedback">
+                    Please enter number of PLs
+                  </div>
                 </div>
               </div>
 
@@ -411,7 +487,9 @@
                 <div class="col-sm-2">Non-Production Environments</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="npeCount" name="npeCount" value="0" min="0" max="5" />
-                  <div class="invalid-feedback">Please enter number of NPEs</div>
+                  <div class="invalid-feedback">
+                    Please enter number of NPEs
+                  </div>
                 </div>
               </div>
 
@@ -419,18 +497,24 @@
                 <div class="col-sm-2">OSCPs</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="oscpCount" name="oscpCount" value="0" min="0" max="5" />
-                  <div class="invalid-feedback">Please enter number of OSCPs</div>
+                  <div class="invalid-feedback">
+                    Please enter number of OSCPs
+                  </div>
                 </div>
               </div>
               <br />
 
-
               <div class="row mb-3">
                 <div class="col-sm-2">Other Options</div>
                 <div class="col-sm-6">
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="1" />Are we importing emails as notes?</div>
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="1" />No data migration?</div>
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="1" />Are we loading historical submissions?
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="1" />Are we importing emails as notes?
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="1" />No data migration?
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="1" />Are we loading historical submissions?
                   </div>
                 </div>
               </div>
@@ -440,7 +524,8 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOptTHQ">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
-              <h5>Optional THQ Offerings</h5>>
+              <h5>Optional THQ Offerings</h5>
+              >
             </button>
           </h2>
           <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ" data-bs-parent="#accordionExample">
@@ -448,19 +533,26 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">On Site Training option?</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="1" onchange="funcOnSiteTraining();" /></div>
-                  <div class="d-none" id="onSiteTraining_div"><input type="text" class="form-control" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" /></div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="1" onchange="funcOnSiteTraining();" />
+                  </div>
+                  <div class="d-none" id="onSiteTraining_div">
+                    <input type="text" class="form-control" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" />
+                  </div>
                 </div>
               </div>
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove option?</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="1" onchange="funcAfterCare();" /></div>
-                  <div class="d-none" id="afterCare_div"><input type="text" class="form-control" id="afterCareAmt" name="afterCareAmt" value="" /></div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="1" onchange="funcAfterCare();" />
+                  </div>
+                  <div class="d-none" id="afterCare_div">
+                    <input type="text" class="form-control" id="afterCareAmt" name="afterCareAmt" value="" />
+                  </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -476,7 +568,9 @@
                 <div class="col-sm-2">Number of Payments</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="numPayments" name="numPayments" value="2" min="2" max="3" />
-                  <div class="invalid-feedback">Please enter number of Payments</div>
+                  <div class="invalid-feedback">
+                    Please enter number of Payments
+                  </div>
                 </div>
               </div>
 
@@ -484,11 +578,15 @@
                 <div class="col-sm-2">Timeline (weeks)</div>
                 <div class="col-sm-2">
                   <div class="row mb-3">
-                    <div class="col-auto"><input type="number" class="form-control" id="timelineLow" name="timelineLow" value="12" min="10" max="52" /></div>
+                    <div class="col-auto">
+                      <input type="number" class="form-control" id="timelineLow" name="timelineLow" value="12" min="10" max="52" />
+                    </div>
                     <div class="col-3">Low</div>
                   </div>
                   <div class="row mb-3">
-                    <div class="col-auto"><input type="number" class="form-control" id="timelineHigh" name="timelineHigh" value="16" min="10" max="52" /></div>
+                    <div class="col-auto">
+                      <input type="number" class="form-control" id="timelineHigh" name="timelineHigh" value="16" min="10" max="52" />
+                    </div>
                     <div class="col-3">High</div>
                   </div>
                 </div>
@@ -500,7 +598,7 @@
                   <select name="timelineTemplate" id="timelineTemplate" class="form-select" aria-label="" onchange="funcTimelineTemplate();">
                     <option value="">-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
-                    <option value="SMB" SELECTED>SMB</option>
+                    <option value="SMB" selected>SMB</option>
                     <option value="Field">Field</option>
                     <option value="BH1">Bullhorn One</option>
                   </select>
@@ -510,21 +608,21 @@
           </div>
         </div>
         <div class="accordion-item">
-          <h2 class="accordion-header" id="headingSigningRecipients">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSigningRecipients" aria-expanded="false" aria-controls="collapseSigningRecipients">
+          <h2 class="accordion-header" id="headingBilling">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
               <h5>Signing Recipients <span class="badge bg-secondary bg-warning text-dark">Do Not Use</span></h5>
             </button>
           </h2>
-          <div id="collapseSigningRecipients" class="accordion-collapse collapse show" aria-labelledby="headingSigningRecipients" data-bs-parent="#accordionExample">
+          <div id="collapseSigningRecipients" class="accordion-collapse collapse" aria-labelledby="headingSigningRecipients" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="row mb-3">
                 <div class="col-sm-2">THQ Rep</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" name="recThqName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" name="recThqName" />
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" name="recThqEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" name="recThqEmail" />
                   </div>
                 </div>
               </div>
@@ -533,10 +631,10 @@
                 <div class="col-sm-2">Client Signer</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" name="recClientName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" name="recClientName" />
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" name="recClientEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" name="recClientEmail" />
                   </div>
                 </div>
               </div>
@@ -545,10 +643,10 @@
                 <div class="col-sm-2">Bullhorn Rep</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" name="recBhName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" name="recBhName" />
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" name="reBhEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" name="reBhEmail" />
                   </div>
                 </div>
               </div>
@@ -557,10 +655,10 @@
                 <div class="col-sm-2">Additional CC</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" name="recCcName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" name="recCcName" />
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" name="reCcEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" name="reCcEmail" />
                   </div>
                 </div>
               </div>
@@ -578,15 +676,18 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Price Override</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="overridePrice" name="overridePrice" value="1" onchange="funcPriceOverride();" /></div>
-                  <div class="d-none" id="overridePrice_div"><input type="number" class="form-control" id="overridePriceAmt" name="oscpCount" value="" /></div>
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="overridePrice" name="overridePrice" value="1" onchange="funcPriceOverride();" />
+                  </div>
+                  <div class="d-none" id="overridePrice_div">
+                    <input type="number" class="form-control" id="overridePriceAmt" name="overridePriceAmt" value="" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </form>
     <br /><br />
     <h1 class="display-6">Pricing Results</h1>
@@ -595,34 +696,34 @@
         <table class="table table-striped table-hover">
           <tbody>
             <tr>
-              <td>Client: </td>
+              <td>Client:</td>
               <td><span id="pricing_companyName"></span></td>
             </tr>
             <tr>
-              <td>Ballpark: </td>
+              <td>Ballpark:</td>
               <td><span id="pricing_ballpark"></span></td>
             </tr>
             <tr>
-              <td>Ballpark2: </td>
+              <td>Ballpark2:</td>
               <td><span id="pricing_ballpark2"></span></td>
             </tr>
             <tr>
-              <td>Base Pricing: </td>
+              <td>Base Pricing:</td>
               <td><span id="pricing_basePricing"></span></td>
             </tr>
             <tr>
-              <td>Additions: </td>
+              <td>Additions:</td>
               <td><span id="pricing_additions"></span></td>
             </tr>
             <tr>
-              <td>Grand Total: </td>
+              <td>Grand Total:</td>
               <td><span id="pricing_grandTotal"></span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-    <br><br><br><br><br>
+    <br /><br /><br /><br /><br />
     <pre><span id="rawOutput"></span></pre>
   </div>
 
