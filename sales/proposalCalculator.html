@@ -23,8 +23,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
   <!--
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -311,13 +310,11 @@
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
               <h5>Basic Information</h5>
             </button>
           </h2>
-          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-            data-bs-parent="#accordionExample">
+          <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="row mb-3">
                 <div class="col-sm-2">Company Name</div>
@@ -330,8 +327,7 @@
               <div class="row mb-3">
                 <div class="col-sm-2">Number of Users</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1"
-                    max="150" />
+                  <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1" max="150" />
                   <div class="invalid-feedback">Please enter number of users</div>
                 </div>
                 <div class="col-auto"><span id="passwordHelpInline" class="form-text"><span id="discount"></span></span>
@@ -373,23 +369,16 @@
                 <div class="col-sm-2">Back Office</div>
                 <div class="col-sm-3">
                   <div class="btn-group mb-3" role="group" aria-label="Basic checkbox toggle button group">
-                    <select name="backoffice" id="backoffice" class="form-select" aria-label=""
-                      onchange="funcBackOfficeOptions();">
+                    <select name="backoffice" id="backoffice" class="form-select" aria-label="" onchange="funcBackOfficeOptions();">
                       <option value="">-- Please Select --</option>
                       <option value="BBO">BBO</option>
                       <option value="BH1">Bullhorn One</option>
                     </select>
                   </div>
                   <br />
-                  <div id="qbIntegration_div" class="form-check form-switch d-none"><input
-                      class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration"
-                      value="1" /> Quickbooks Integration</div>
-                  <div id="InvoiceExport_div" class="form-check form-switch d-none"><input
-                      class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport"
-                      value="1" /> Invoice Export</div>
-                  <div id="PayDataExport_div" class="form-check form-switch d-none"><input
-                      class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport"
-                      value="1" /> Pay Data Export</div>
+                  <div id="qbIntegration_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration" value="1" /> Quickbooks Integration</div>
+                  <div id="InvoiceExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="1" /> Invoice Export</div>
+                  <div id="PayDataExport_div" class="form-check form-switch d-none"><input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="1" /> Pay Data Export</div>
                 </div>
               </div>
             </div>
@@ -397,19 +386,16 @@
         </div>
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingAdditions">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
               <h5>Additions</h5>
             </button>
           </h2>
-          <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions"
-            data-bs-parent="#accordionExample">
+          <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="row mb-3">
                 <div class="col-sm-2">New Hire Export</div>
                 <div class="col-sm">
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox"
-                      id="newHireExport" name="newHireExport" value="1" /></div>
+                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="1" /></div>
                 </div>
               </div>
 
@@ -442,12 +428,9 @@
               <div class="row mb-3">
                 <div class="col-sm-2">Other Options</div>
                 <div class="col-sm-6">
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox"
-                      id="emailsAsNotes" name="emailsAsNotes" value="1" />Are we importing emails as notes?</div>
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox"
-                      id="NoDataMigration" name="NoDataMigration" value="1" />No data migration?</div>
-                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox"
-                      id="histSubmissions" name="histSubmissions" value="1" />Are we loading historical submissions?
+                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="1" />Are we importing emails as notes?</div>
+                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="1" />No data migration?</div>
+                  <div class="form-check form-switch"><input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="1" />Are we loading historical submissions?
                   </div>
                 </div>
               </div>
@@ -456,32 +439,25 @@
         </div>
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingOptTHQ">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
               <h5>Optional THQ Offerings</h5>>
             </button>
           </h2>
-          <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ"
-            data-bs-parent="#accordionExample">
+          <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="form-group row mb-3">
                 <div class="col-sm-2">On Site Training option?</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static"
-                      type="checkbox" id="onSiteTraining" name="onSiteTraining" value="1"
-                      onchange="funcOnSiteTraining();" /></div>
-                  <div class="d-none" id="onSiteTraining_div"><input type="text" class="form-control"
-                      id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" /></div>
+                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="1" onchange="funcOnSiteTraining();" /></div>
+                  <div class="d-none" id="onSiteTraining_div"><input type="text" class="form-control" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" /></div>
                 </div>
               </div>
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove option?</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static"
-                      type="checkbox" id="afterCare" name="afterCare" value="1" onchange="funcAfterCare();" /></div>
-                  <div class="d-none" id="afterCare_div"><input type="text" class="form-control" id="afterCareAmt"
-                      name="afterCareAmt" value="" /></div>
+                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="1" onchange="funcAfterCare();" /></div>
+                  <div class="d-none" id="afterCare_div"><input type="text" class="form-control" id="afterCareAmt" name="afterCareAmt" value="" /></div>
                 </div>
               </div>
 
@@ -490,19 +466,16 @@
         </div>
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingBilling">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
               <h5>Billing and Timeline</h5>
             </button>
           </h2>
-          <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling"
-            data-bs-parent="#accordionExample">
+          <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Number of Payments</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="numPayments" name="numPayments" value="2" min="2"
-                    max="3" />
+                  <input type="number" class="form-control" id="numPayments" name="numPayments" value="2" min="2" max="3" />
                   <div class="invalid-feedback">Please enter number of Payments</div>
                 </div>
               </div>
@@ -511,13 +484,11 @@
                 <div class="col-sm-2">Timeline (weeks)</div>
                 <div class="col-sm-2">
                   <div class="row mb-3">
-                    <div class="col-auto"><input type="number" class="form-control" id="timelineLow" name="timelineLow"
-                        value="12" min="10" max="52" /></div>
+                    <div class="col-auto"><input type="number" class="form-control" id="timelineLow" name="timelineLow" value="12" min="10" max="52" /></div>
                     <div class="col-3">Low</div>
                   </div>
                   <div class="row mb-3">
-                    <div class="col-auto"><input type="number" class="form-control" id="timelineHigh"
-                        name="timelineHigh" value="16" min="10" max="52" /></div>
+                    <div class="col-auto"><input type="number" class="form-control" id="timelineHigh" name="timelineHigh" value="16" min="10" max="52" /></div>
                     <div class="col-3">High</div>
                   </div>
                 </div>
@@ -526,8 +497,7 @@
               <div class="row mb-3">
                 <div class="col-sm-2">Timeline to use</div>
                 <div class="col-sm-3">
-                  <select name="timelineTemplate" id="timelineTemplate" class="form-select" aria-label=""
-                    onchange="funcTimelineTemplate();">
+                  <select name="timelineTemplate" id="timelineTemplate" class="form-select" aria-label="" onchange="funcTimelineTemplate();">
                     <option value="">-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
                     <option value="SMB" SELECTED>SMB</option>
@@ -541,25 +511,20 @@
         </div>
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingSigningRecipients">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseSigningRecipients" aria-expanded="false"
-              aria-controls="collapseSigningRecipients">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSigningRecipients" aria-expanded="false" aria-controls="collapseSigningRecipients">
               <h5>Signing Recipients <span class="badge bg-secondary bg-warning text-dark">Do Not Use</span></h5>
             </button>
           </h2>
-          <div id="collapseSigningRecipients" class="accordion-collapse collapse show"
-            aria-labelledby="headingSigningRecipients" data-bs-parent="#accordionExample">
+          <div id="collapseSigningRecipients" class="accordion-collapse collapse show" aria-labelledby="headingSigningRecipients" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="row mb-3">
                 <div class="col-sm-2">THQ Rep</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName"
-                      name="recThqName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" name="recThqName">
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail"
-                      name="recThqEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" name="recThqEmail">
                   </div>
                 </div>
               </div>
@@ -568,12 +533,10 @@
                 <div class="col-sm-2">Client Signer</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName"
-                      name="recClientName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" name="recClientName">
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail"
-                      name="recClientEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" name="recClientEmail">
                   </div>
                 </div>
               </div>
@@ -582,12 +545,10 @@
                 <div class="col-sm-2">Bullhorn Rep</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName"
-                      name="recBhName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" name="recBhName">
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail"
-                      name="reBhEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" name="reBhEmail">
                   </div>
                 </div>
               </div>
@@ -596,12 +557,10 @@
                 <div class="col-sm-2">Additional CC</div>
                 <div class="col-sm-8">
                   <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName"
-                      name="recCcName">
+                    <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" name="recCcName">
                     &nbsp;&nbsp;&nbsp;
                     <span class="input-group-text">@</span>
-                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail"
-                      name="reCcEmail">
+                    <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" name="reCcEmail">
                   </div>
                 </div>
               </div>
@@ -610,22 +569,17 @@
         </div>
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingMisc">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-              data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
               <h5>Miscellaneous</h5>
             </button>
           </h2>
-          <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc"
-            data-bs-parent="#accordionExample">
+          <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
             <div class="accordion-body">
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Price Override</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static"
-                      type="checkbox" id="overridePrice" name="overridePrice" value="1"
-                      onchange="funcPriceOverride();" /></div>
-                  <div class="d-none" id="overridePrice_div"><input type="number" class="form-control"
-                      id="overridePriceAmt" name="oscpCount" value="" /></div>
+                  <div class="form-check form-switch mb-3"><input class="form-check-input position-static" type="checkbox" id="overridePrice" name="overridePrice" value="1" onchange="funcPriceOverride();" /></div>
+                  <div class="d-none" id="overridePrice_div"><input type="number" class="form-control" id="overridePriceAmt" name="oscpCount" value="" /></div>
                 </div>
               </div>
             </div>
@@ -734,9 +688,7 @@
       );
     })();
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
-    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 </body>
 
 </html>
