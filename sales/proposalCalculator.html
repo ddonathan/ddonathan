@@ -41,7 +41,7 @@
     function loadFile(url, callback) {
       PizZipUtils.getBinaryContent(url, callback);
     }
-    function generate() {
+    function generate(dataToSend) {
       loadFile("template.docx", function (error, content) {
         if (error) { throw error };
 
@@ -79,12 +79,7 @@
           errorHandler(error);
         }
 
-        doc.setData({
-          first_name: 'John',
-          last_name: 'Doe',
-          phone: '0652455478',
-          description: 'New Website'
-        });
+        doc.setData(document.getElementById("rawOutput").innerHTML);
         try {
           // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
           doc.render();
@@ -98,7 +93,7 @@
           type: "blob",
           mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         }) //Output the document using Data-URI
-        saveAs(out, "output.docx")
+        saveAs(out, `${data.companyName} - Tonic HQ Implementation.docx`)
       })
     }
   </script>
