@@ -10,6 +10,7 @@
   TODO Make it one link
   TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it.
   TODO Should we name the existing data source. "We are migrating from StaffSuite"
+  TODO if the company name has spaces or other characters, they come through to the form.
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -97,6 +98,14 @@
         dataToSend.afterCareAmt = formatter.format(dataToSend.afterCareAmt);
         dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
 
+        // Convert private label number to words
+        var dg = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
+        dataToSend.plCount = dg[dataToSend.plCount]
+
+        // Convert numPayments
+        let paymentNumber = dg[dataToSend.numPayments]
+        dataToSend[`payments${paymentNumber}`] = true
+
         // Send to document creation
         doc.setData(dataToSend);
         try {
@@ -158,7 +167,7 @@
         if (document.getElementById(key) && query_string[key]) {
           // If it's a checkbox, check it, otherwise set the value
           if (document.getElementById(key).type === "checkbox") document.getElementById(key).checked = true;
-          else document.getElementById(key).value = query_string[key]
+          else document.getElementById(key).value = query_string[key];
         }
       }
 
@@ -422,14 +431,6 @@
       container.data.timelineWeeks = container.form.timelineLow + " - " + container.form.timelineHigh + " weeks";
       delete container.data.timelineLow;
       delete container.data.timelineHigh;
-
-      // Convert private label number to words
-      var dg = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
-      container.data.plCount = dg[container.data.plCount]
-
-      // Convert numPayments
-      let paymentNumber = dg[container.data.numPayments]
-      container.data[`payments${paymentNumber}`] = true
 
       // Set timeline
       container.data[`timeline${container.data.timelineTemplate}`] = true;
