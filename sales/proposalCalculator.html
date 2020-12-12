@@ -73,7 +73,7 @@
         var zip = new PizZip(content);
         var doc;
         try {
-          doc = new window.docxtemplater(zip);
+          doc = new window.docxtemplater(zip, { paragraphLoop: true })
         } catch (error) {
           // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
           errorHandler(error);
