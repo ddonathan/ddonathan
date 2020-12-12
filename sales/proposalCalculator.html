@@ -562,94 +562,84 @@
     <form action="proposalCalculator.html" id="form" name="form" method="GET" class="needs-validation" novalidate>
       <h1 class="display-6" onclick="window.location='proposalCalculator.html'">Tonic HQ Pricing Calculator</h1>
       <br>
-      <div class="accordion" id="accordionExample">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingOne">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              <h5>Basic Information</h5>
-            </button>
-          </h2>
-          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-            <div class="accordion-body">
-              <div class="row mb-3">
-                <div class="col-sm-2">Company Name</div>
-                <div class="col-sm-6">
-                  <input type="text" class="form-control" id="companyName" name="companyName" required>
-                </div>
-              </div>
 
-              <div class="row mb-3">
-                <div class="col-sm-2">Number of Users</div>
-                <div class="col-sm-2">
-                  <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1" max="150" />
-                  <div class="invalid-feedback">
-                    Please enter number of users
-                  </div>
-                </div>
-              </div>
-              <br />
-              <div class="row mb-3">
-                <div class="col-sm-2">Products</div>
-                <div class="col-sm-auto">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="ats" name="ats" value="true" CHECKED>
-                    <label class="form-check-label" for="ats">
-                      ATS
-                    </label>
-                  </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="crm" name="crm" value="true">
-                    <label class="form-check-label" for="crm">
-                      CRM
-                    </label>
-                  </div>
-                  <div class="form-check form-switch" id="time_expense_div">
-                    <input class="form-check-input" type="checkbox" id="time_expense" name="time_expense" value="true" onchange="funcBackOfficeOptions('BBO');">
-                    <label class="form-check-label" id="time_expense_label" for="time_expense">
-                      Time/Expense
-                    </label>
-                  </div>
-                  <div class="form-check form-switch" id="invoicing_div">
-                    <input class="form-check-input" type="checkbox" id="invoicing" name="invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
-                    <label class="form-check-label" id="invoicing_label" for="invoicing">
-                      Invoicing
-                    </label>
-                  </div>
-                  <div class="form-check form-switch" id="pay_bill_div">
-                    <input class="form-check-input" type="checkbox" id="pay_bill" name="pay_bill" value="true" onchange="funcBackOfficeOptions('BH1');">
-                    <label class="form-check-label" id="pay_bill_label" for="pay_bill">
-                      Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Testing</span>
-                    </label>
-                  </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="onboarding" name="onboarding" value="true">
-                    <label class="form-check-label" for="onboarding">
-                      Onboarding
-                    </label>
-                  </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="vms_submittals" name="vms_submittals" value="true">
-                    <label class="form-check-label" for="vms_submittals">
-                      VMS Submittals
-                    </label>
-                  </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="vms_sync" name="vms_sync" value="true">
-                    <label class="form-check-label" for="vms_sync">
-                      VMS Sync
-                    </label>
-                  </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="canvas" name="canvas" value="true">
-                    <label class="form-check-label" for="canvas">
-                      Canvas
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
+      <h5>Basic Information</h5>
+      <div class="row mb-3">
+        <div class="col-sm-2">Company Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="companyName" name="companyName" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Number of Users</div>
+        <div class="col-sm-2">
+          <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1" max="150" />
+        </div>
+      </div>
+      <br />
+      <div class="row mb-3">
+        <div class="col-sm-2">Products</div>
+        <div class="col-sm-auto">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="ats" name="ats" value="true" CHECKED>
+            <label class="form-check-label" for="ats">
+              ATS
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="crm" name="crm" value="true">
+            <label class="form-check-label" for="crm">
+              CRM
+            </label>
+          </div>
+          <div class="form-check form-switch" id="time_expense_div">
+            <input class="form-check-input" type="checkbox" id="time_expense" name="time_expense" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <label class="form-check-label" id="time_expense_label" for="time_expense">
+              Time/Expense
+            </label>
+          </div>
+          <div class="form-check form-switch" id="invoicing_div">
+            <input class="form-check-input" type="checkbox" id="invoicing" name="invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <label class="form-check-label" id="invoicing_label" for="invoicing">
+              Invoicing
+            </label>
+          </div>
+          <div class="form-check form-switch" id="pay_bill_div">
+            <input class="form-check-input" type="checkbox" id="pay_bill" name="pay_bill" value="true" onchange="funcBackOfficeOptions('BH1');">
+            <label class="form-check-label" id="pay_bill_label" for="pay_bill">
+              Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Testing</span>
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="onboarding" name="onboarding" value="true">
+            <label class="form-check-label" for="onboarding">
+              Onboarding
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="vms_submittals" name="vms_submittals" value="true">
+            <label class="form-check-label" for="vms_submittals">
+              VMS Submittals
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="vms_sync" name="vms_sync" value="true">
+            <label class="form-check-label" for="vms_sync">
+              VMS Sync
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="canvas" name="canvas" value="true">
+            <label class="form-check-label" for="canvas">
+              Canvas
+            </label>
           </div>
         </div>
+      </div>
+
+
+      <div class="accordion" id="accordionExample">
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingAdditions">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
@@ -689,9 +679,6 @@
                 <div class="col-sm-2">Private Labels</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" /> <small><span class="text-black-50" id="plCount_pricing"></span></small>
-                  <div class="invalid-feedback">
-                    Please enter number of PLs
-                  </div>
                 </div>
               </div>
 
@@ -699,9 +686,6 @@
                 <div class="col-sm-2">Non-Production Environments</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="npeCount" name="npeCount" min="0" max="5" /> <small><span class="text-black-50" id="npeCount_pricing"></span></small>
-                  <div class="invalid-feedback">
-                    Please enter number of NPEs
-                  </div>
                 </div>
               </div>
 
@@ -709,9 +693,6 @@
                 <div class="col-sm-2">OSCPs</div>
                 <div class="col-sm-2">
                   <input type="number" class="form-control" id="oscpCount" name="oscpCount" min="0" max="5" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
-                  <div class="invalid-feedback">
-                    Please enter number of OSCPs
-                  </div>
                 </div>
               </div>
               <br />
@@ -782,9 +763,6 @@
                 <div class="col-sm-2">Number of Payments</div>
                 <div class="col-sm-2">
                   <input class="form-control" type="number" id="numPayments" name="numPayments" value="2" min="2" max="3" />
-                  <div class="invalid-feedback">
-                    Please enter number of Payments
-                  </div>
                 </div>
               </div>
 
