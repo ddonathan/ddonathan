@@ -79,7 +79,12 @@
         }
 
         // Convert input to JSON
-        dataToSend = JSON.parse(document.getElementById("rawOutput").innerHTML)
+        dataToSend = JSON.parse(document.getElementById("rawOutput").innerHTML);
+
+        // Format dollar amounts if we have them (and remove dollar sign from template)
+        dataToSend.onSiteTrainingAmt = formatter.format(dataToSend.onSiteTrainingAmt);
+        dataToSend.afterCareAmt = formatter.format(dataToSend.afterCareAmt);
+        dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
 
         // Send to document creation
         doc.setData(dataToSend);
@@ -390,7 +395,7 @@
 
       // Calculate Total Amount
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
-      container.data.totalAmt = formatter.format(Math.ceil(container.data.totalAmt / 10) * 10);
+      container.data.totalAmt = Math.ceil(container.data.totalAmt / 10) * 10;
 
       // Show pricing form
       document.getElementById("pricing_companyName").innerHTML = container.form.companyName;
@@ -403,7 +408,7 @@
       // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
       if (container.form.overridePriceAmt) {
         container.data.totalAmt_original = container.data.totalAmt;
-        container.data.totalAmt = formatter.format(container.form.overridePriceAmt);
+        container.data.totalAmt = container.form.overridePriceAmt;
         delete container.data.overridePriceAmt
 
         // Put in the pricing form
@@ -424,10 +429,6 @@
       // Convert numPayments
       let paymentNumber = dg[container.data.numPayments]
       container.data[`payments${paymentNumber}`] = true
-
-      // Format dollar amounts if we have them (and remove dollar sign from template)
-      container.data.onSiteTrainingAmt = formatter.format(container.data.onSiteTrainingAmt);
-      container.data.afterCareAmt = formatter.format(container.data.afterCareAmt);
 
       // Set timeline
       container.data[`timeline${container.data.timelineTemplate}`] = true;
