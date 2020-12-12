@@ -9,6 +9,7 @@
   TODO Secure the link so not just anyone can get to it.
   TODO Make it one link
   TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it.
+  TODO Should we name the existing data source. "We are migrating from StaffSuite"
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -384,28 +385,30 @@
       document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * 0.07) / 100) * 100;
       document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * 0.15) / 100) * 100;
 
-      // Calculate Grand Total
-      container.calcs.grandTotal = container.calcs.basePricing + container.calcs.additions;
+      // Setup for sending to document creation
+      container.data = container.form;
 
-      // Show prices
+      // Calculate Total Amount
+      container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
+      container.data.totalAmt = formatter.format(Math.ceil(container.data.totalAmt / 10) * 10);
+
+      // Show pricing form
       document.getElementById("pricing_companyName").innerHTML = container.form.companyName;
       document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
       document.getElementById("pricing_ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
       document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 10) * 10);
-      document.getElementById("pricing_additions").innerHTML = Math.ceil(container.calcs.additions);
-      document.getElementById("pricing_grandTotal").innerHTML = formatter.format(Math.ceil(container.calcs.grandTotal / 10) * 10);
+      document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions));
+      document.getElementById("pricing_totalAmt").innerHTML = container.data.totalAmt;
 
-      // Setup for sending to document creation
-      container.data = container.form;
-
-      // Put Grand Total in the data packet
-      container.data.totalAmt = container.calcs.grandTotal;
-
-      // If we have an override price amount, put grandTotal in a separate spot and then set totalAmt to the override price
+      // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
       if (container.form.overridePriceAmt) {
-        container.data.totalAmt = container.calcs.grandTotal;
-        container.data.overridePriceAmt = container.calcs.overridePriceAmt;
-        container.data.totalAmt = container.form.overridePriceAmt;
+        container.data.totalAmt_original = container.data.totalAmt;
+        container.data.totalAmt = formatter.format(container.form.overridePriceAmt);
+
+        // Put in the pricing form
+        document.getElementById("pricing_totalAmt").innerHTML = container.data.totalAmt_original;
+        document.getElementById("pricing_totalAmt").className = "text-decoration-line-through text-muted";
+        document.getElementById("pricing_totalAmt_override").innerHTML = container.data.totalAmt;
       }
 
       // Number of weeks
@@ -424,6 +427,7 @@
       // Format dollar amounts if we have them (and remove dollar sign from template)
       container.data.onSiteTrainingAmt = formatter.format(container.data.onSiteTrainingAmt);
       container.data.afterCareAmt = formatter.format(container.data.afterCareAmt);
+      container.data.totalAmt_original = formatter.format(container.data.totalAmt_original);
       container.data.totalAmt = formatter.format(container.data.totalAmt);
 
       // Set timeline
@@ -443,6 +447,8 @@
         null,
         4
       );
+
+      console.log(JSON.stringify(container, null, 4));
 
       // Run functions
       funcBackOfficeOptions();
@@ -505,14 +511,6 @@
         // If applicable, enable the checkboxes
         if (document.getElementById("invoicing").checked) document.getElementById("InvoiceExport_div").className = "form-check form-switch";
         if (document.getElementById("time_expense").checked) document.getElementById("PayDataExport_div").className = "form-check form-switch";
-      }
-    }
-
-    function funcPriceOverride() {
-      if (document.getElementById("overridePrice").checked) {
-        overridePrice_div.className = "";
-      } else {
-        overridePrice_div.className = "d-none";
       }
     }
 
@@ -810,9 +808,9 @@
                 <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
                 <div class="col-sm-3">
                   <select name="timelineTemplate" id="timelineTemplate" class="form-select" aria-label="" onchange="funcTimelineTemplate();">
-                    <option value="">-- Please Select --</option>
+                    <option value="" SELECTED>-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
-                    <option value="SMB" selected>SMB</option>
+                    <option value="SMB">SMB</option>
                     <option value="Field">Field</option>
                     <option value="BH1">Bullhorn One</option>
                   </select>
@@ -890,69 +888,65 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Price Override</div>
                 <div class="col-sm-2">
-                  <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="overridePrice" name="overridePrice" value="true" onchange="funcPriceOverride();" />
-                  </div>
-                  <div class="d-none" id="overridePrice_div">
-                    <input type="number" class="form-control" id="overridePriceAmt" name="overridePriceAmt" value="" />
-                  </div>
+                  <input type="number" class="form-control" id="overridePriceAmt" name="overridePriceAmt" value="" />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <br>
-        <div class="row">
-          <div class="col-12">
-            <button class="btn btn-secondary" type="button" id="resetForm">Reset Form</button>
-            <button class="btn btn-primary" type="submit">Submit form</button>
-            <button class="btn btn-warning" type="button" onclick="generate()">Generate Proposal</button>
-          </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-12">
+          <button class="btn btn-secondary" type="button" id="resetForm">Reset Form</button>
+          <button class="btn btn-primary" type="submit">Submit form</button>
+          <button class="btn btn-warning" type="button" onclick="generate()">Generate Proposal</button>
         </div>
       </div>
-    </form>
-    <br /><br />
-    <h1 class="display-6">Pricing Results</h1>
-    <div class="row">
-      <div class="col-sm-6">
-        <table class="table table-striped table-hover">
-          <tbody>
-            <tr>
-              <td>Client:</td>
-              <td><span id="pricing_companyName"></span></td>
-            </tr>
-            <tr>
-              <td>Ballpark:</td>
-              <td><span id="pricing_ballpark"></span></td>
-            </tr>
-            <tr>
-              <td>Ballpark2:</td>
-              <td><span id="pricing_ballpark2"></span> <span class="badge bg-secondary bg-warning text-dark">Testing</span></td>
-            </tr>
-            <tr>
-              <td>Base Pricing:</td>
-              <td>
-                <span id="pricing_basePricing"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <small><span class="text-muted" id="discount"></span></small>
-              </td>
-            </tr>
-            <tr>
-              <td>Additions:</td>
-              <td><span id="pricing_additions"></span></td>
-            </tr>
-            <tr>
-              <td>Grand Total:</td>
-              <td><span id="pricing_grandTotal"></span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+  </div>
+  </form>
+  <br /><br />
+  <h1 class="display-6">Pricing Results</h1>
+  <div class="row">
+    <div class="col-sm-6">
+      <table class="table table-striped table-hover">
+        <tbody>
+          <tr>
+            <td>Client:</td>
+            <td><span id="pricing_companyName"></span></td>
+          </tr>
+          <tr>
+            <td>Ballpark:</td>
+            <td><span id="pricing_ballpark"></span></td>
+          </tr>
+          <tr>
+            <td>Ballpark2:</td>
+            <td><span id="pricing_ballpark2"></span> <span class="badge bg-secondary bg-warning text-dark">Testing</span></td>
+          </tr>
+          <tr>
+            <td>Base Pricing:</td>
+            <td>
+              <span id="pricing_basePricing"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <small><span class="text-muted" id="discount"></span></small>
+            </td>
+          </tr>
+          <tr>
+            <td>Additions:</td>
+            <td><span id="pricing_additions"></span></td>
+          </tr>
+          <tr>
+            <td>Total Amount:</td>
+            <td><span id="pricing_totalAmt" class=""></span>&nbsp;&nbsp;&nbsp;<span id="pricing_totalAmt_override" class=""></span></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <br /><br /><br /><br /><br />
-    <pre><span id="rawOutput"></span></pre>
-    <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
-    <br><br><br>
-    <pre><a href="file:///C:/Source/ddonathan/sales/proposalCalculator.html?userCount=50&ats=true&crm=true&pay_bill=true&onboarding=true&canvas=true">Bullhorn One</a></pre>
+  </div>
+  <br /><br /><br /><br /><br />
+  <pre><span id="rawOutput"></span></pre>
+  <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
+  <br><br><br>
+  <pre><a href="file:///C:/Source/ddonathan/sales/proposalCalculator.html?userCount=50&ats=true&crm=true&pay_bill=true&onboarding=true&canvas=true">Bullhorn One</a></pre>
   </div>
 
   <script>
