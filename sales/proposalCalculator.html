@@ -37,6 +37,17 @@
         <script type="text/javascript" src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils-ie.js"></script>
     <![endif]-->
   <script>
+
+    var formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumSignificantDigits: 4,
+    });
+
+    var fmtPct = new Intl.NumberFormat("en-US", {
+      style: "percent",
+    });
+
     function loadFile(url, callback) {
       PizZipUtils.getBinaryContent(url, callback);
     }
@@ -262,16 +273,6 @@
         },
       };
 
-      var formatter = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumSignificantDigits: 4,
-      });
-
-      var fmtPct = new Intl.NumberFormat("en-US", {
-        style: "percent",
-      });
-
       // Get data from the form
       container.form = {};
       container.form.products = [];
@@ -403,7 +404,7 @@
       document.getElementById("pricing_ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
       document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 10) * 10);
       document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions));
-      document.getElementById("pricing_totalAmt").innerHTML = container.data.totalAmt;
+      document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt);
 
       // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
       if (container.form.overridePriceAmt) {
@@ -412,9 +413,9 @@
         delete container.data.overridePriceAmt
 
         // Put in the pricing form
-        document.getElementById("pricing_totalAmt").innerHTML = container.data.totalAmt_original;
+        document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt_original);
         document.getElementById("pricing_totalAmt").className = "text-decoration-line-through text-muted";
-        document.getElementById("pricing_totalAmt_override").innerHTML = container.data.totalAmt;
+        document.getElementById("pricing_totalAmt_override").innerHTML = formatter.format(container.data.totalAmt);
       }
 
       // Number of weeks
