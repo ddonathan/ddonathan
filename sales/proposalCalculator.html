@@ -404,6 +404,7 @@
       if (container.form.overridePriceAmt) {
         container.data.totalAmt_original = container.data.totalAmt;
         container.data.totalAmt = formatter.format(container.form.overridePriceAmt);
+        delete container.data.overridePriceAmt
 
         // Put in the pricing form
         document.getElementById("pricing_totalAmt").innerHTML = container.data.totalAmt_original;
@@ -427,8 +428,6 @@
       // Format dollar amounts if we have them (and remove dollar sign from template)
       container.data.onSiteTrainingAmt = formatter.format(container.data.onSiteTrainingAmt);
       container.data.afterCareAmt = formatter.format(container.data.afterCareAmt);
-      container.data.totalAmt_original = formatter.format(container.data.totalAmt_original);
-      container.data.totalAmt = formatter.format(container.data.totalAmt);
 
       // Set timeline
       container.data[`timeline${container.data.timelineTemplate}`] = true;
