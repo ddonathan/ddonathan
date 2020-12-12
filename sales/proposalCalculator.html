@@ -83,7 +83,6 @@
           if (document.getElementById(key).type === "checkbox") document.getElementById(key).checked = true;
           else document.getElementById(key).value = query_string[key]
         }
-        else console.log(`Key ${key} is not a form field`);
       }
 
       // Set focus to companyName
@@ -122,7 +121,7 @@
             },
             pay_bill: {
               name: "Pay/Bill",
-              pricing: "3750"
+              pricing: "2650"
             },
             onboarding: {
               name: "Onboarding",
@@ -221,7 +220,6 @@
       // Process products
       Object.entries(container.lookup.products).forEach(entry => {
         let [key, value] = entry;
-        console.log(key, value.pricing);
 
         if (document.getElementById(key).checked) {
 
@@ -298,8 +296,6 @@
           if (value.include > 0) count = count - 1;
           if (count > 0) {
 
-            console.log(count)
-
             // Add the first one
             container.calcs.additions += value.pricing;
 
@@ -309,12 +305,18 @@
         }
 
         // If this form field is a checkbox
-        if (document.getElementById(key).checked) {
+        if (document.getElementById(key).type === "checkbox") {
           // If it's a dollar amount, add it
-          if (value.method === "$") container.calcs.additions += value.pricing;
+          if (value.method === "$") {
+            if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(value.pricing);
+            if (document.getElementById(key).checked) container.calcs.additions += value.pricing;
+          }
 
           // If its a percent multiply it
-          if (value.method === "%") container.calcs.basePricing * container.lookup.additions[key].pricing
+          if (value.method === "%") {
+            if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
+            if (document.getElementById(key).checked) container.calcs.additions = container.calcs.basePricing * value.pricing
+          }
         }
       })
 
@@ -329,9 +331,9 @@
       document.getElementById("pricing_companyName").innerHTML = container.form.companyName;
       document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
       document.getElementById("pricing_ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
-      document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 100) * 100);
-      document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions / 100) * 100);
-      document.getElementById("pricing_grandTotal").innerHTML = formatter.format(Math.ceil(container.calcs.grandTotal / 100) * 100);
+      document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 10) * 10);
+      document.getElementById("pricing_additions").innerHTML = Math.ceil(container.calcs.additions);
+      document.getElementById("pricing_grandTotal").innerHTML = formatter.format(Math.ceil(container.calcs.grandTotal / 10) * 10);
 
       // Setup for sending to document creation
       container.data = container.form;
@@ -368,38 +370,68 @@
         null,
         4
       );
-      console.log(JSON.stringify(container, null, 4));
+      // console.log(JSON.stringify(container, null, 4));
+
+      funcBackOfficeOptions();
     }
 
     // Form automation
-    function funcBackOfficeOptions() {
-      if (document.getElementById("time_expense").checked || document.getElementById("invoicing").checked || document.getElementById("pay_bill").checked) {
-        backoffice_options_div.className = "row mb-3";
-        qbIntegration_div.className = "form-check form-switch";
-        InvoiceExport_div.className = "form-check form-switch";
-        PayDataExport_div.className = "form-check form-switch";
-      } else {
-        backoffice_options_div.className = "row mb-3 d-none";
-        qbIntegration_div.className = "form-check form-switch d-none";
-        InvoiceExport_div.className = "form-check form-switch d-none";
-        PayDataExport_div.className = "form-check form-switch d-none";
-      }
-    }
-
-    function funcBackOfficeOptionsChanger(backoffice) {
-      console.log(backoffice)
-      // If we check BBO options, uncheck BH1
-      if (backoffice === "BBO") {
+    function funcBackOfficeOptions(backoffice) {
+      console.log(event)
+      // If it's BBO
+      if (backoffice === "BBO" && event.target.checked) {
         document.getElementById("pay_bill").checked = false;
+
+        // Set labels
+        document.getElementById("pay_bill_label").className = "form-check-label text-black-50";
+        document.getElementById("time_expense_label").className = "form-check-label";
+        document.getElementById("invoicing_label").className = "form-check-label";
       }
 
-      // If we check BH1, uncheck BBO options
-      if (backoffice === "BH1") {
-        {
-          document.getElementById("time_expense").checked = false;
-          document.getElementById("invoicing").checked = false;
-          document.getElementById("timelineTemplate").value = "BH1";
-        }
+      // If it's BH1
+      if (backoffice === "BH1" && event.target.checked) {
+        console.log("two")
+        document.getElementById("time_expense").checked = false;
+        document.getElementById("invoicing").checked = false;
+
+        // Set the timeline template
+        document.getElementById("timelineTemplate").value = "BH1";
+
+        // Set labels
+        document.getElementById("pay_bill_label").className = "form-check-label";
+        document.getElementById("time_expense_label").className = "form-check-label text-black-50";
+        document.getElementById("invoicing_label").className = "form-check-label text-black-50";
+      }
+
+      // If it's either one, unhide the backoffice options. If it's neither, hide them and reset the labels
+      if (document.getElementById("pay_bill").checked || document.getElementById("time_expense").checked || document.getElementById("invoicing").checked) {
+        document.getElementById("backoffice_options_div").className = "row mb-3";
+      }
+      else {
+        document.getElementById("backoffice_options_div").className = "row mb-3 d-none";
+        document.getElementById("time_expense_label").className = "form-check-label";
+        document.getElementById("invoicing_label").className = "form-check-label";
+        document.getElementById("pay_bill_label").className = "form-check-label";
+      }
+
+      // Before we wrap up, test all the checkboxes and show only what's appropriate
+      // If pay/bill is checked we'll show both invoice and pay data export
+      if (document.getElementById("pay_bill").checked) {
+        document.getElementById("backoffice_options_div").className = "row mb-3";
+        document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+        document.getElementById("PayDataExport_div").className = "form-check form-switch";
+      }
+      else {
+        // Uncheck and hide the options
+        document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
+        document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+        document.getElementById("qbIntegration").checked = false;
+        document.getElementById("InvoiceExport").checked = false;
+        document.getElementById("PayDataExport").checked = false;
+
+        // If applicable, enable the checkboxes
+        if (document.getElementById("invoicing").checked) document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+        if (document.getElementById("time_expense").checked) document.getElementById("PayDataExport_div").className = "form-check form-switch";
       }
     }
 
@@ -442,7 +474,7 @@
           document.getElementById("timelineHigh").value = "18";
           break;
         case "BH1":
-          document.getElementById("timelineLow").value = "27";
+          document.getElementById("timelineLow").value = "24";
           document.getElementById("timelineHigh").value = "36";
           break;
         default:
@@ -498,21 +530,21 @@
                       CRM
                     </label>
                   </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="time_expense" name="time_expense" value="true" onchange="funcBackOfficeOptions();funcBackOfficeOptionsChanger('BBO');">
-                    <label class="form-check-label" for="time_expense">
+                  <div class="form-check form-switch" id="time_expense_div">
+                    <input class="form-check-input" type="checkbox" id="time_expense" name="time_expense" value="true" onchange="funcBackOfficeOptions('BBO');">
+                    <label class="form-check-label" id="time_expense_label" for="time_expense">
                       Time/Expense
                     </label>
                   </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="invoicing" name="invoicing" value="true" onchange="funcBackOfficeOptions();funcBackOfficeOptionsChanger('BBO');">
-                    <label class="form-check-label" for="invoicing">
+                  <div class="form-check form-switch" id="invoicing_div">
+                    <input class="form-check-input" type="checkbox" id="invoicing" name="invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
+                    <label class="form-check-label" id="invoicing_label" for="invoicing">
                       Invoicing
                     </label>
                   </div>
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="pay_bill" name="pay_bill" value="true" onchange="funcBackOfficeOptions();funcBackOfficeOptionsChanger('BH1');">
-                    <label class="form-check-label" for="pay_bill">
+                  <div class="form-check form-switch" id="pay_bill_div">
+                    <input class="form-check-input" type="checkbox" id="pay_bill" name="pay_bill" value="true" onchange="funcBackOfficeOptions('BH1');">
+                    <label class="form-check-label" id="pay_bill_label" for="pay_bill">
                       Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Testing</span>
                     </label>
                   </div>
@@ -557,7 +589,7 @@
                 <div class="col-sm-2">New Hire Export</div>
                 <div class="col-sm">
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="true" />
+                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="true" /> <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -565,17 +597,17 @@
               <div class="row mb-3 d-none" id="backoffice_options_div">
                 <div class="col-sm-2">Back Office Options</div>
                 <div class="col-sm-6">
-                  <div id="qbIntegration_div" class="form-check form-switch d-none">
+                  <div id="qbIntegration_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="qbIntegration" name="qbIntegration" value="true" />
-                    Quickbooks Integration
+                    Quickbooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
                   </div>
-                  <div id="InvoiceExport_div" class="form-check form-switch d-none">
+                  <div id="InvoiceExport_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="true" />
-                    Invoice Export
+                    Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
                   </div>
-                  <div id="PayDataExport_div" class="form-check form-switch d-none">
+                  <div id="PayDataExport_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="true" />
-                    Pay Data Export
+                    Pay Data Export <small><span class="text-black-50" id="PayDataExport_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -583,7 +615,7 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Private Labels</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" />
+                  <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" /> <small><span class="text-black-50" id="plCount_pricing"></span></small>
                   <div class="invalid-feedback">
                     Please enter number of PLs
                   </div>
@@ -593,7 +625,7 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Non-Production Environments</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="npeCount" name="npeCount" min="0" max="5" />
+                  <input type="number" class="form-control" id="npeCount" name="npeCount" min="0" max="5" /> <small><span class="text-black-50" id="npeCount_pricing"></span></small>
                   <div class="invalid-feedback">
                     Please enter number of NPEs
                   </div>
@@ -603,7 +635,7 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">OSCPs</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="oscpCount" name="oscpCount" min="0" max="5" />
+                  <input type="number" class="form-control" id="oscpCount" name="oscpCount" min="0" max="5" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
                   <div class="invalid-feedback">
                     Please enter number of OSCPs
                   </div>
@@ -615,13 +647,13 @@
                 <div class="col-sm-2">Other Options</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="true" />Are we importing emails as notes?
+                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="true" />Are we importing emails as notes? <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="true" />No data migration?
+                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="true" />No data migration? <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="true" />Are we loading historical submissions?
+                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="true" />Are we loading historical submissions? <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -796,9 +828,12 @@
             </div>
           </div>
         </div>
-        <div class="col-12">
-          <button type="button" id="resetForm" class="btn btn-secondary">Reset Form</button>
-          <button class="btn btn-primary" type="submit">Submit form</button>
+        <br>
+        <div class="row">
+          <div class="col-12">
+            <button type="button" id="resetForm" class="btn btn-secondary">Reset Form</button>
+            <button class="btn btn-primary" type="submit">Submit form</button>
+          </div>
         </div>
       </div>
     </form>
@@ -824,7 +859,7 @@
               <td>Base Pricing:</td>
               <td>
                 <span id="pricing_basePricing"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span id="passwordHelpInline" class="form-text"><span id="discount"></span>
+                <small><span class="text-muted" id="discount"></span></small>
               </td>
             </tr>
             <tr>
@@ -843,7 +878,7 @@
     <pre><span id="rawOutput"></span></pre>
     <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
     <br><br><br>
-    <pre><a href="file:///C:/Source/ddonathan/sales/proposalCalculator.html?userCount=30&ats=true&crm=true&pay_bill=true&onboarding=true&canvas=true">Bullhorn One</a></pre>
+    <pre><a href="file:///C:/Source/ddonathan/sales/proposalCalculator.html?userCount=50&ats=true&crm=true&pay_bill=true&onboarding=true&canvas=true">Bullhorn One</a></pre>
   </div>
 
   <script>
