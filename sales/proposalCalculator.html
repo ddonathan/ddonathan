@@ -79,8 +79,10 @@
           errorHandler(error);
         }
 
+        // Convert input to JSON
         dataToSend = JSON.parse(document.getElementById("rawOutput").innerHTML)
 
+        // Send to document creation
         doc.setData(dataToSend);
         try {
           // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
@@ -98,9 +100,7 @@
         saveAs(out, `${dataToSend.companyName} - Tonic HQ Implementation.docx`)
       })
     }
-  </script>
 
-  <script>
     function QueryStringToJSON() {
       var pairs = location.search.slice(1).split("&");
 
@@ -415,6 +415,19 @@
       delete container.data.timelineLow;
       delete container.data.timelineHigh;
 
+      // Convert private label number to words
+      var dg = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
+      container.data.plCount = dg[container.data.plCount]
+
+      // Convert numPayments
+      let paymentNumber = dg[container.data.numPayments]
+      container.data[`payments${paymentNumber}`] = true
+
+      // Format dollar amounts if we have them (and remove dollar sign from template)
+      container.data.onSiteTrainingAmt = formatter.format(container.data.onSiteTrainingAmt);
+      container.data.afterCareAmt = formatter.format(container.data.afterCareAmt);
+      container.data.totalAmt = formatter.format(container.data.totalAmt);
+
       // Set timeline
       container.data[`timeline${container.data.timelineTemplate}`] = true;
 
@@ -432,8 +445,8 @@
         null,
         4
       );
-      // console.log(JSON.stringify(container, null, 4));
 
+      // Run functions
       funcBackOfficeOptions();
     }
 
