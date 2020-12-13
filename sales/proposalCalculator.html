@@ -433,7 +433,9 @@
       delete container.data.timelineHigh;
 
       // Set timeline
-      // container.data[`timeline${container.data.timelineTable}`] = true;
+      // TODO Switch the template to use conditions (https://docxtemplater.com/demo/#conditions), but I think we can only do that server side. 
+      //   - Then won't need this.
+      if (container.data.timelineTable) container.data[`timeline${container.data.timelineTable}`] = true;
 
       // Build URL to link to
       let baseURL = window.location.href + "?";
