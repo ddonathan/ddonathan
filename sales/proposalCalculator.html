@@ -433,7 +433,7 @@
       delete container.data.timelineHigh;
 
       // Set timeline
-      container.data[`timeline${container.data.timelineTemplate}`] = true;
+      // container.data[`timeline${container.data.timelineTable}`] = true;
 
       // Build URL to link to
       let baseURL = window.location.href + "?";
@@ -476,7 +476,7 @@
         document.getElementById("invoicing").checked = false;
 
         // Set the timeline template
-        document.getElementById("timelineTemplate").value = "BH1";
+        document.getElementById("timelineTable").value = "BH1";
 
         // Set labels
         document.getElementById("pay_bill_label").className = "form-check-label";
@@ -532,8 +532,8 @@
       }
     }
 
-    function funcTimelineTemplate() {
-      switch (document.getElementById("timelineTemplate").value) {
+    function functimelineTable() {
+      switch (document.getElementById("timelineTable").value) {
         case "NoDM":
           document.getElementById("timelineLow").value = "9";
           document.getElementById("timelineHigh").value = "12";
@@ -787,7 +787,7 @@
               <div class="row mb-3">
                 <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
                 <div class="col-sm-3">
-                  <select name="timelineTemplate" id="timelineTemplate" class="form-select" aria-label="" onchange="funcTimelineTemplate();">
+                  <select name="timelineTable" id="timelineTable" class="form-select" aria-label="" onchange="functimelineTable();" REQUIRED>
                     <option value="" SELECTED>-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
                     <option value="SMB">SMB</option>
