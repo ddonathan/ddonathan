@@ -27,6 +27,7 @@
     - If it's less than 10, use SMB timeline and number of weeks
     - If it's more than 10, use Field
   TODO: If an item fails validation, can we open the accordian it's in?
+  TODO: Add OSCP as an Optional THQ Offering. If we are including one or more, then remove it as an option.
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -382,8 +383,11 @@
       Object.entries(container.lookup.additions).forEach(entry => {
         let [key, value] = entry;
 
-        // TODO If ANY additions are marked, then mark that we have additions, so we will show that section in the template.
+        // If ANY additions are marked that affect pricing, then mark that we have additions. We will show that section in the template.
         let paidAdditions = ["newHireExport", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
+
+        if (container.form.npeCount === 0) delete container.form.npeCount
+        if (container.form.oscpCount === 0) delete container.form.oscpCount
 
         // Test to see if this key is included in the list
         if (paidAdditions.indexOf(key) !== -1) {
