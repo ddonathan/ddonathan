@@ -4,13 +4,28 @@
   TODO Form Validation
     - Start some fields without any value so it forces a choice
       - Timeline to use
+    - If it fails validation
+      - Disable the Preview Proposal
+      - Don't show additions
+      - Don't show Total Amount
   TODO Allow additional data sources
   TODO 12 users is 19.5k, 13 is 15.5k. Look at discount percentages to smooth out the line
   TODO Secure the link so not just anyone can get to it.
   TODO Make it one link
-  TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it.
+  TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it for testing and troubleshooting
   TODO Should we name the existing data source. "We are migrating from StaffSuite"
   TODO if the company name has spaces or other characters, they come through to the form.
+  TODO Show additional, but included items in the scope, but don't show pricing e.g.:
+    - Additional items included in scope:
+      - New Hire Export
+      - Non-Production Environment: 1
+  NOTE: For testing locally: docxtemplater template.docx testdata.json output.docx
+  TODO: Prevent Generate Proposal from appearing if the inputs aren't correct. Maybe rename it to Preview Proposal.
+  TODO: Set some items by number of users, but this should only happen when number of users is the field that's being changed, not every time it's calculated.
+    - Can we show a modal popup that asks the user "Do you want to update the timeline and number of weeks?"
+    - If it's less than 10, use SMB timeline and number of weeks
+    - If it's more than 10, use Field
+  TODO: If an item fails validation, can we open the accordian it's in?
  -->
 <!DOCTYPE html>
 <html lang="en">
@@ -268,7 +283,7 @@
               method: "%"
             },
             NoDataMigration: {
-              pricing: .15,
+              pricing: -.15,
               method: "%"
             },
           }
@@ -364,6 +379,8 @@
       Object.entries(container.lookup.additions).forEach(entry => {
         let [key, value] = entry;
 
+        // TODO If ANY additions are marked, then mark that we have additions, so we will show that section in the template.
+
         // If this form field is an input, we can expect a number
         if (document.getElementById(key).value > 0) {
           let count = document.getElementById(key).value;
@@ -391,14 +408,14 @@
           // If its a percent multiply it
           if (value.method === "%") {
             if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
-            if (document.getElementById(key).checked) container.calcs.additions = container.calcs.basePricing * value.pricing
+            if (document.getElementById(key).checked) container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
           }
         }
       })
 
       // Set option pricing
-      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * 0.07) / 100) * 100;
-      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * 0.15) / 100) * 100;
+      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * 0.07) / 10) * 10;
+      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * 0.15) / 10) * 10;
 
       // Setup for sending to document creation
       container.data = container.form;
@@ -409,8 +426,7 @@
 
       // Show pricing form
       document.getElementById("pricing_companyName").innerHTML = container.form.companyName;
-      document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh / 500) * 500);
-      document.getElementById("pricing_ballpark2").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
+      document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
       document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 10) * 10);
       document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions));
       document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt);
@@ -456,6 +472,7 @@
 
       // Run functions
       funcBackOfficeOptions();
+      formValidate();
     }
 
     // Form automation
@@ -518,11 +535,26 @@
       }
     }
 
+    // Form validation
+    function formValidate() {
+      let formIsValid = false
+      if (document.getElementById("timelineTable").value) formIsValid = true;
+
+
+      if (!formIsValid) {
+        document.getElementById("pricing_additions").className = "invisible";
+        document.getElementById("pricing_totalAmt").className = "invisible";
+        document.getElementById("pricing_totalAmt_override").className = "invisible";
+        document.getElementById("generateProposal").className = "invisible";
+      }
+    }
+
     function funcOnSiteTraining() {
       if (document.getElementById("onSiteTraining").checked) {
         onSiteTraining_div.className = "";
       } else {
-        onSiteTraining_div.className = "d-none";
+        -
+          onSiteTraining_div.className = "d-none";
       }
     }
 
@@ -903,10 +935,6 @@
               <td><span id="pricing_ballpark"></span></td>
             </tr>
             <tr>
-              <td>Ballpark2:</td>
-              <td><span id="pricing_ballpark2"></span> <span class="badge bg-secondary bg-warning text-dark">Testing</span></td>
-            </tr>
-            <tr>
               <td>Base Pricing:</td>
               <td>
                 <span id="pricing_basePricing"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -925,7 +953,7 @@
         </table>
       </div>
     </div>
-    <button class="btn btn-warning" type="button" onclick="generate()">Generate Proposal</button>
+    <button id="generateProposal" class="btn btn-outline-secondary" type="button" onclick="generate()">Preview Proposal</button>
     <br>
     <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
     <br /><br /><br /><br />
