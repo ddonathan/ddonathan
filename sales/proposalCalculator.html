@@ -8,6 +8,7 @@
       - Disable the Preview Proposal
       - Don't show additions
       - Don't show Total Amount
+      - Need to show a message as to why, so it's not confusing
   TODO Allow additional data sources
   TODO 12 users is 19.5k, 13 is 15.5k. Look at discount percentages to smooth out the line
   TODO Secure the link so not just anyone can get to it.
@@ -300,6 +301,9 @@
       container.form = {};
       container.form.products = [];
 
+      // Setup for sending to document creation
+      container.data = container.form;
+
       // Loop through the form data
       var form = document.getElementById("form");
       var data = new FormData(form);
@@ -379,6 +383,12 @@
         let [key, value] = entry;
 
         // TODO If ANY additions are marked, then mark that we have additions, so we will show that section in the template.
+        let paidAdditions = ["newHireExport", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
+
+        // Test to see if this key is included in the list
+        if (paidAdditions.indexOf(key) !== -1) {
+          container.data.paidAdditions = true;
+        }
 
         // If this form field is an input, we can expect a number
         if (document.getElementById(key).value > 0) {
@@ -415,9 +425,6 @@
       // Set option pricing
       document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * 0.07) / 10) * 10;
       document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * 0.15) / 10) * 10;
-
-      // Setup for sending to document creation
-      container.data = container.form;
 
       // Calculate Total Amount
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
@@ -516,14 +523,16 @@
         document.getElementById("pay_bill_label").className = "form-check-label";
       }
 
+      console.log(event)
+
       // Before we wrap up, test all the checkboxes and show only what's appropriate
       // If pay/bill is checked we'll show both invoice and pay data export
-      if (document.getElementById("pay_bill").checked) {
+      if (event.target.name === "pay_bill" && document.getElementById("pay_bill").checked === true) {
         document.getElementById("backoffice_options_div").className = "row mb-3";
         document.getElementById("InvoiceExport_div").className = "form-check form-switch";
         document.getElementById("PayDataExport_div").className = "form-check form-switch";
       }
-      else {
+      if (event.target.name === "pay_bill" && document.getElementById("pay_bill").checked === false) {
         // Uncheck and hide the options
         document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
         document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
@@ -575,8 +584,8 @@
     // Form validation
     function formValidate() {
       let formIsValid = true
-      if (!document.getElementById("companyName").value) formIsValid = true;
-      if (!document.getElementById("timelineTable").value) formIsValid = true;
+      if (!document.getElementById("companyName").value) formIsValid = false;
+      if (!document.getElementById("timelineTable").value) formIsValid = false;
 
 
       if (!formIsValid) {
@@ -607,6 +616,21 @@
           <input type="text" class="form-control" id="companyName" name="companyName" required>
         </div>
       </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Existing System</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="existingSystem" name="existingSystem">
+        </div>
+      </div>
+
+      <!-- TODO
+      <div class="row mb-3">
+        <div class="col-sm-2">Company Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="addtlDatasources" name="addtlDatasources" required>
+        </div>
+      </div> -->
 
       <div class="row mb-3">
         <div class="col-sm-2">Number of Users</div>
@@ -957,7 +981,7 @@
       </div>
     </div>
     <button id="generateProposal" class="btn btn-outline-secondary" type="button" onclick="generate()">Preview Proposal</button>
-    <br>
+    <br><br />
     <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
     <br /><br /><br /><br />
     <pre><span id="rawOutput" class="d-none"></span></pre>
