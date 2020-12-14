@@ -578,15 +578,15 @@
 
 
       if (!formIsValid) {
-        document.getElementById("pricing_additions").className = "invisible";
-        document.getElementById("pricing_totalAmt").className = "invisible";
-        document.getElementById("pricing_totalAmt_override").className = "invisible";
-        document.getElementById("generateProposal").className = "invisible";
+        document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className + " invisible";
+        document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className + " invisible";
+        document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className + " invisible";
+        document.getElementById("generateProposal").className = document.getElementById("generateProposal").className + " invisible";
       } else {
-        document.getElementById("pricing_additions").className = "";
-        document.getElementById("pricing_totalAmt").className = "";
-        document.getElementById("pricing_totalAmt_override").className = "";
-        document.getElementById("generateProposal").className = "btn btn-outline-secondary";
+        document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className.replace("invisible", "");
+        document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className.replace("invisible", "");
+        document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className.replace("invisible", "");
+        document.getElementById("generateProposal").className = document.getElementById("generateProposal").className.replace("invisible", "");
       }
     }
   </script>
