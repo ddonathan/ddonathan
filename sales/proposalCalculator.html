@@ -12,7 +12,7 @@
   TODO Allow additional data sources
   TODO 12 users is 19.5k, 13 is 15.5k. Look at discount percentages to smooth out the line
   TODO Secure the link so not just anyone can get to it.
-  TODO Make it one link
+  TODO Make it one link for calc or pricing
   TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it for testing and troubleshooting
   TODO Should we name the existing data source. "We are migrating from StaffSuite"
   TODO if the company name has spaces or other characters, they come through to the form.
@@ -161,6 +161,7 @@
 
       var form = document.querySelector("form");
       form.addEventListener("change", function () {
+        calculatePricing();
         funcBackOfficeOptions();
         formValidate();
         funcOnSiteTraining();
@@ -446,7 +447,7 @@
       document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt);
 
       // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
-      if (container.form.overridePriceAmt) {
+      if (container.form.overridePriceAmt && container.form.overridePriceAmt !== "0") {
         container.data.totalAmt_original = container.data.totalAmt;
         container.data.totalAmt = container.form.overridePriceAmt;
         delete container.data.overridePriceAmt
@@ -455,6 +456,10 @@
         document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt_original);
         document.getElementById("pricing_totalAmt").className = "text-decoration-line-through text-muted";
         document.getElementById("pricing_totalAmt_override").innerHTML = formatter.format(container.data.totalAmt);
+      } else {
+        delete container.data.overridePriceAmt
+        document.getElementById("pricing_totalAmt").className = "";
+        document.getElementById("pricing_totalAmt_override").innerHTML = "";
       }
 
       // Number of weeks
@@ -507,7 +512,6 @@
 
       // If it's BH1
       if (backoffice === "BH1" && event.target.checked) {
-        console.log("two")
         document.getElementById("time_expense").checked = false;
         document.getElementById("invoicing").checked = false;
 
@@ -540,6 +544,7 @@
         document.getElementById("InvoiceExport_div").className = "form-check form-switch";
         document.getElementById("PayDataExport_div").className = "form-check form-switch";
       }
+
       if (event.target.name === "pay_bill" && document.getElementById("pay_bill").checked === false) {
         // Uncheck and hide the options
         document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
@@ -594,13 +599,11 @@
       let formIsValid = true
 
       if (!formIsValid) {
-        console.log("Form is not valid");
         document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className + " invisible";
         document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className + " invisible";
         document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className + " invisible";
         document.getElementById("generateProposal").className = document.getElementById("generateProposal").className + " invisible";
       } else {
-        console.log("Form is not valid");
         document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className.replace("invisible", "");
         document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className.replace("invisible", "");
         document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className.replace("invisible", "");
