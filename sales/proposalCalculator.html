@@ -113,9 +113,8 @@
         dataToSend.afterCareAmt = formatter.format(dataToSend.afterCareAmt);
         dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
 
-        // Convert private label number to words
+        // If needed to convert number to word
         var dg = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
-        dataToSend.plCount = dg[dataToSend.plCount]
 
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
