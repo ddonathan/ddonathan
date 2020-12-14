@@ -161,7 +161,11 @@
 
       var form = document.querySelector("form");
       form.addEventListener("change", function () {
-        calculatePricing();
+        funcBackOfficeOptions();
+        formValidate();
+        funcOnSiteTraining();
+        funcAfterCare();
+        functimelineTable();
       });
 
       // Set reset form url to the url they came in with
@@ -588,16 +592,15 @@
     // Form validation
     function formValidate() {
       let formIsValid = true
-      if (!document.getElementById("companyName").value) formIsValid = false;
-      if (!document.getElementById("timelineTable").value) formIsValid = false;
-
 
       if (!formIsValid) {
+        console.log("Form is not valid");
         document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className + " invisible";
         document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className + " invisible";
         document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className + " invisible";
         document.getElementById("generateProposal").className = document.getElementById("generateProposal").className + " invisible";
       } else {
+        console.log("Form is not valid");
         document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className.replace("invisible", "");
         document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className.replace("invisible", "");
         document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className.replace("invisible", "");
