@@ -559,10 +559,12 @@
           document.getElementById("timelineHigh").value = "16";
           break;
         case "Field":
+          document.getElementById("numPayments").value = "3";
           document.getElementById("timelineLow").value = "13";
           document.getElementById("timelineHigh").value = "18";
           break;
         case "BH1":
+          document.getElementById("numPayments").value = "3";
           document.getElementById("timelineLow").value = "24";
           document.getElementById("timelineHigh").value = "36";
           break;
@@ -573,8 +575,9 @@
 
     // Form validation
     function formValidate() {
-      let formIsValid = false
-      if (document.getElementById("timelineTable").value) formIsValid = true;
+      let formIsValid = true
+      if (!document.getElementById("companyName").value) formIsValid = true;
+      if (!document.getElementById("timelineTable").value) formIsValid = true;
 
 
       if (!formIsValid) {
