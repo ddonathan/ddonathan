@@ -239,8 +239,7 @@
               method: "$"
             },
             plCount: {
-              pricing: 2500,
-              addtlPricing: 1250,
+              pricing: 1250,
               include: 1,
               method: "$"
             },
@@ -267,15 +266,17 @@
               method: "%"
             },
             oscpOption: {
-              pricing: "500",
+              pricing: 500,
+              addtlPricing: 250,
               method: "$"
             },
             onSiteTraining: {
-              pricing: ".07",
+              pricing: .07,
+              addtlPricing: .02,
               method: "%"
             },
             afterCare: {
-              pricing: ".15",
+              pricing: .15,
               method: "%"
             }
           }
@@ -374,43 +375,74 @@
       Object.entries(container.lookup.additions).forEach(entry => {
         let [key, value] = entry;
 
+        // Set pricing info label
+        if (document.getElementById(`${key}_pricing`)) {
+          let descToUse, addtlPricing
+
+          // If method is dollars, set description and additional pricing
+          if (value.method === "$") {
+            descToUse = formatter.format(value.pricing);
+            addtlPricing = formatter.format(value.addtlPricing)
+          }
+
+          // If method is percent, set description and calculate out additional pricing
+          if (value.method === "%") {
+            descToUse = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
+            if (value.addtlPricing) addtlPricing = formatter.format(Math.ceil(container.calcs.basePricing * value.addtlPricing / 10) * 10) + " (" + fmtPct.format(value.addtlPricing) + ")";
+          }
+
+          // if it's addtional pricing, add
+          if (value.addtlPricing) descToUse += " first instance, " + addtlPricing + " each additional"
+
+          // Set label
+          document.getElementById(`${key}_pricing`).innerHTML = descToUse
+        }
+
+        // If they are zero, remove from the data packet
         if (container.form.npeCount === 0) delete container.form.npeCount
         if (container.form.oscpCount === 0) delete container.form.oscpCount
+        if (container.form.plCount === 0) delete container.form.plCount
 
-        // If ANY additions are marked that affect pricing, then mark that we have additions. We will show that section in the template.
-        let paidAdditions = ["newHireExport", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
+        // If ANY additions are marked that affect pricing
+        let paidAdditions = ["newHireExport", "plCount", "npeCount", "oscpCount", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
+
+        // If this key is included in the list of paid additions, then add it
         if (paidAdditions.indexOf(key) !== -1) {
+
+          // Mark that we have paid additions. We will show that section in the template.
           container.data.paidAdditions = true;
 
           // If this form field is an input, we can expect a number
+          document.getElementById(key).value
           if (document.getElementById(key).value > 0) {
             let count = document.getElementById(key).value;
 
             // If we include some, then factor that in.
-            if (value.include > 0) count = count - 1;
+            if (value.include > 0) count = count - value.include;
             if (count > 0) {
 
               // Add the first one
               container.calcs.additions += value.pricing;
 
-              // If we charge less for addditional ones, do that work first
-              if (count > 1 && value.addtlPricing) container.calcs.additions += (count - 1) * value.addtlPricing;
+              // If we have more than one
+              if (count > 1) {
+                // If we charge less for addditional ones, do that work first
+                if (value.addtlPricing) container.calcs.additions += (count - 1) * value.addtlPricing;
+
+                // otherwise just add in the rest
+                else container.calcs.additions += (count - 1) * value.pricing;
+              }
             }
           }
 
           // If this form field is a checkbox
-          if (document.getElementById(key).type === "checkbox") {
+          if (document.getElementById(key).type === "checkbox" && document.getElementById(key).checked) {
+
             // If it's a dollar amount, add it
-            if (value.method === "$") {
-              if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(value.pricing);
-              if (document.getElementById(key).checked) container.calcs.additions += value.pricing;
-            }
+            if (value.method === "$") container.calcs.additions += value.pricing;
 
             // If its a percent multiply it
-            if (value.method === "%") {
-              if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
-              if (document.getElementById(key).checked) container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
-            }
+            if (value.method === "%") container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
           }
         }
       })
@@ -420,6 +452,7 @@
       document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
 
       // Calculate Total Amount
+      console.log(container.calcs.basePricing, container.calcs.additions);
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
       container.data.totalAmt = Math.ceil(container.data.totalAmt / 10) * 10;
 
@@ -731,21 +764,30 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Private Labels</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" /> <small><span class="text-black-50" id="plCount_pricing"></span></small>
+                  <input type="number" class="form-control" id="plCount" name="plCount" value="1" min="1" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="plCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
                 </div>
               </div>
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Non-Production Environments</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="npeCount" name="npeCount" min="0" max="5" /> <small><span class="text-black-50" id="npeCount_pricing"></span></small>
+                  <input type="number" class="form-control" id="npeCount" name="npeCount" min="0" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="npeCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
                 </div>
               </div>
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">OSCPs</div>
                 <div class="col-sm-2">
-                  <input type="number" class="form-control" id="oscpCount" name="oscpCount" min="0" max="5" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
+                  <input type="number" class="form-control" id="oscpCount" name="oscpCount" min="0" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="oscpCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
                 </div>
               </div>
               <br />
@@ -782,14 +824,14 @@
                 <div class="col-sm-2">OSCP</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" name="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpOption_pricing"></span> <span class="text-black-50">for the first instance. Additional instances billed at 50%.</span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" name="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpOption_pricing"></span></small>
                   </div>
                 </div>
               </div>
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">On Site Training</div>
-                <div class="col-sm-2">
+                <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="true" onchange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
@@ -801,7 +843,7 @@
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove</div>
-                <div class="col-sm-2">
+                <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="true" onchange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
