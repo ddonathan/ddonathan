@@ -297,6 +297,18 @@
               pricing: -.15,
               method: "%"
             },
+            oscpOption: {
+              pricing: "500",
+              method: "$"
+            },
+            onSiteTraining: {
+              pricing: ".07",
+              method: "%"
+            },
+            afterCare: {
+              pricing: ".15",
+              method: "%"
+            }
           }
         },
         form: {},
@@ -437,8 +449,8 @@
       })
 
       // Set option pricing
-      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * 0.07) / 10) * 10;
-      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * 0.15) / 10) * 10;
+      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * container.additions.onSiteTraining.pricing) / 10) * 10;
+      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.additions.afterCare.pricing) / 10) * 10;
 
       // Calculate Total Amount
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
@@ -802,10 +814,19 @@
                 Enabling will show the item on the proposal, it does not include it in the price. You can alter the price that's shown on the proposal.
               </div>
               <div class="form-group row mb-3">
-                <div class="col-sm-2">On Site Training option?</div>
+                <div class="col-sm-2">OSCP</div>
+                <div class="col-sm-6">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" name="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpOption_pricing"></span> <span class="text-black-50">for the first instance. Additional instances billed at 50%.</span></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">On Site Training</div>
                 <div class="col-sm-2">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="true" onchange="funcOnSiteTraining();" />
+                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="true" onchange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
                   <div class="d-none" id="onSiteTraining_div">
                     <input class="form-control" type="text" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" />
@@ -814,10 +835,10 @@
               </div>
 
               <div class="form-group row mb-3">
-                <div class="col-sm-2">White Glove option?</div>
+                <div class="col-sm-2">White Glove</div>
                 <div class="col-sm-2">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="true" onchange="funcAfterCare();" />
+                    <input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="true" onchange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
                   <div class="d-none" id="afterCare_div">
                     <input class="form-control" type="text" id="afterCareAmt" name="afterCareAmt" value="" />
