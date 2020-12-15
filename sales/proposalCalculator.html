@@ -94,7 +94,7 @@
 
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
-        dataToSend[`payments${paymentNumber}`] = true
+        dataToSend[`payments_${paymentNumber}`] = true
 
         // Send to document creation
         doc.setData(dataToSend);
