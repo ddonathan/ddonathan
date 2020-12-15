@@ -116,7 +116,12 @@
         dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
 
         // If needed to convert number to word
-        var dg = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"]
+        var dg = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+        // Convert numbers to words
+        data.plCount = dg[data.plCount]
+        data.npeCount = dg[data.npeCount]
+        data.oscpCount = dg[data.oscpCount]
 
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
