@@ -152,7 +152,7 @@
       var result = {};
       pairs.forEach(function (pair) {
         pair = pair.split("=");
-        result[pair[0]] = decodeURIComponent(pair[1] || "").replace("+", "");
+        result[pair[0]] = decodeURIComponent(pair[1] || "").replace("+", " ");
       });
 
       return JSON.parse(JSON.stringify(result));
@@ -856,10 +856,16 @@
           </h2>
           <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling" data-bs-parent="#accordionExample">
             <div class="accordion-body">
-              <div class="form-group row mb-3">
-                <div class="col-sm-2">Number of Payments</div>
-                <div class="col-sm-2">
-                  <input class="form-control" type="number" id="numPayments" name="numPayments" value="2" min="2" max="3" />
+              <div class="row mb-3">
+                <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
+                <div class="col-sm-3">
+                  <select name="timelineTable" id="timelineTable" class="form-select" aria-label="" onchange="functimelineTable();" REQUIRED>
+                    <option value="" SELECTED>-- Please Select --</option>
+                    <option value="NoDM">No Data Migration</option>
+                    <option value="SMB">SMB</option>
+                    <option value="Field">Field</option>
+                    <option value="BH1">Bullhorn One</option>
+                  </select>
                 </div>
               </div>
 
@@ -881,16 +887,10 @@
                 </div>
               </div>
 
-              <div class="row mb-3">
-                <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
-                <div class="col-sm-3">
-                  <select name="timelineTable" id="timelineTable" class="form-select" aria-label="" onchange="functimelineTable();" REQUIRED>
-                    <option value="" SELECTED>-- Please Select --</option>
-                    <option value="NoDM">No Data Migration</option>
-                    <option value="SMB">SMB</option>
-                    <option value="Field">Field</option>
-                    <option value="BH1">Bullhorn One</option>
-                  </select>
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">Number of Payments</div>
+                <div class="col-sm-2">
+                  <input class="form-control" type="number" id="numPayments" name="numPayments" value="2" min="2" max="3" />
                 </div>
               </div>
             </div>
