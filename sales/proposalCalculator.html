@@ -1,34 +1,3 @@
-<!-- 
-	TODO Should we set the buffer based on what the possible options are? Currently we do this with BBO vs NonBBO, but could we go further? If they haven't chosen invoicing, then building an invoice export isn't possible. 
-	TODO Should we have presets like (Enterprise Only, Growth, Healthcare, BH1, etc.)
-  TODO Form Validation
-    - Start some fields without any value so it forces a choice
-      - Timeline to use
-    - If it fails validation
-      - Disable the Preview Proposal
-      - Don't show additions
-      - Don't show Total Amount
-      - Need to show a message as to why, so it's not confusing
-  TODO Allow additional data sources
-  TODO 12 users is 19.5k, 13 is 15.5k. Look at discount percentages to smooth out the line
-  TODO Secure the link so not just anyone can get to it.
-  TODO Make it one link for calc or pricing
-  TODO Save baseprice, additions, discount to the link so even if the calculations change, we have it for testing and troubleshooting
-  TODO Should we name the existing data source. "We are migrating from StaffSuite"
-  TODO if the company name has spaces or other characters, they come through to the form.
-  TODO Show additional, but included items in the scope, but don't show pricing e.g.:
-    - Additional items included in scope:
-      - New Hire Export
-      - Non-Production Environment: 1
-  NOTE: For testing locally: docxtemplater template.docx testdata.json output.docx
-  TODO: Prevent Generate Proposal from appearing if the inputs aren't correct. Maybe rename it to Preview Proposal.
-  TODO: Set some items by number of users, but this should only happen when number of users is the field that's being changed, not every time it's calculated.
-    - Can we show a modal popup that asks the user "Do you want to update the timeline and number of weeks?"
-    - If it's less than 10, use SMB timeline and number of weeks
-    - If it's more than 10, use Field
-  TODO: If an item fails validation, can we open the accordian it's in?
-  TODO: Add OSCP as an Optional THQ Offering. If we are including one or more, then remove it as an option.
- -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -405,45 +374,43 @@
       Object.entries(container.lookup.additions).forEach(entry => {
         let [key, value] = entry;
 
-        // If ANY additions are marked that affect pricing, then mark that we have additions. We will show that section in the template.
-        let paidAdditions = ["newHireExport", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
-
         if (container.form.npeCount === 0) delete container.form.npeCount
         if (container.form.oscpCount === 0) delete container.form.oscpCount
 
-        // Test to see if this key is included in the list
+        // If ANY additions are marked that affect pricing, then mark that we have additions. We will show that section in the template.
+        let paidAdditions = ["newHireExport", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
         if (paidAdditions.indexOf(key) !== -1) {
           container.data.paidAdditions = true;
-        }
 
-        // If this form field is an input, we can expect a number
-        if (document.getElementById(key).value > 0) {
-          let count = document.getElementById(key).value;
+          // If this form field is an input, we can expect a number
+          if (document.getElementById(key).value > 0) {
+            let count = document.getElementById(key).value;
 
-          // If we include some, then factor that in.
-          if (value.include > 0) count = count - 1;
-          if (count > 0) {
+            // If we include some, then factor that in.
+            if (value.include > 0) count = count - 1;
+            if (count > 0) {
 
-            // Add the first one
-            container.calcs.additions += value.pricing;
+              // Add the first one
+              container.calcs.additions += value.pricing;
 
-            // If we charge less for addditional ones, do that work first
-            if (count > 1 && value.addtlPricing) container.calcs.additions += (count - 1) * value.addtlPricing;
-          }
-        }
-
-        // If this form field is a checkbox
-        if (document.getElementById(key).type === "checkbox") {
-          // If it's a dollar amount, add it
-          if (value.method === "$") {
-            if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(value.pricing);
-            if (document.getElementById(key).checked) container.calcs.additions += value.pricing;
+              // If we charge less for addditional ones, do that work first
+              if (count > 1 && value.addtlPricing) container.calcs.additions += (count - 1) * value.addtlPricing;
+            }
           }
 
-          // If its a percent multiply it
-          if (value.method === "%") {
-            if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
-            if (document.getElementById(key).checked) container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
+          // If this form field is a checkbox
+          if (document.getElementById(key).type === "checkbox") {
+            // If it's a dollar amount, add it
+            if (value.method === "$") {
+              if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(value.pricing);
+              if (document.getElementById(key).checked) container.calcs.additions += value.pricing;
+            }
+
+            // If its a percent multiply it
+            if (value.method === "%") {
+              if (document.getElementById(`${key}_pricing`)) document.getElementById(`${key}_pricing`).innerHTML = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
+              if (document.getElementById(key).checked) container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
+            }
           }
         }
       })
@@ -485,8 +452,6 @@
       delete container.data.timelineHigh;
 
       // Set timeline
-      // TODO Switch the template to use conditions (https://docxtemplater.com/demo/#conditions), but I think we can only do that server side. 
-      //   - Then won't need this.
       if (container.data.timelineTable) container.data[`timeline${container.data.timelineTable}`] = true;
 
       // Build URL to link to
@@ -653,7 +618,7 @@
 
       <!-- TODO
       <div class="row mb-3">
-        <div class="col-sm-2">Company Name</div>
+        <div class="col-sm-2">Additional Datasources</div>
         <div class="col-sm-6">
           <input type="text" class="form-control" id="addtlDatasources" name="addtlDatasources" required>
         </div>
