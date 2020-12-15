@@ -449,8 +449,8 @@
       })
 
       // Set option pricing
-      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * container.additions.onSiteTraining.pricing) / 10) * 10;
-      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.additions.afterCare.pricing) / 10) * 10;
+      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.onSiteTraining.pricing) / 10) * 10;
+      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
 
       // Calculate Total Amount
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
