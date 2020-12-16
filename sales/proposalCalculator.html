@@ -446,8 +446,9 @@
       })
 
       // Set option pricing
-      document.getElementById("onSiteTrainingAmt").value = container.lookup.additions.onSiteTraining.pricing;
-      document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
+      console.log(event)
+      if (event.target.name === "onSiteTraining" && event.target.checked) document.getElementById("onSiteTrainingAmt").value = container.lookup.additions.onSiteTraining.pricing;
+      if (event.target.name === "afterCare" && event.target.checked) document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
 
       // Calculate Total Amount
       console.log(container.calcs.basePricing, container.calcs.additions);
