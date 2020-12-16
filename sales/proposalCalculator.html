@@ -24,7 +24,6 @@
         <script type="text/javascript" src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils-ie.js"></script>
     <![endif]-->
   <script>
-
     var formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -130,17 +129,17 @@
     // save query_string
     var query_string = QueryStringToJSON();
 
+    // 
     // OnLoad
+    // 
     window.onload = function () {
 
       var form = document.querySelector("form");
       form.addEventListener("change", function () {
         calculatePricing();
-        funcBackOfficeOptions();
         formValidate();
         funcOnSiteTraining();
         funcAfterCare();
-        functimelineTable();
       });
 
       // Set reset form url to the url they came in with
@@ -271,9 +270,8 @@
               method: "$"
             },
             onSiteTraining: {
-              pricing: .07,
-              addtlPricing: .02,
-              method: "%"
+              pricing: 2500,
+              method: "$"
             },
             afterCare: {
               pricing: .15,
@@ -509,7 +507,7 @@
       formValidate();
       funcOnSiteTraining();
       funcAfterCare();
-      functimelineTable();
+      // functimelineTable();
     }
 
     // Form automation
@@ -597,12 +595,12 @@
     }
 
     function funcOnSiteTraining() {
-      if (document.getElementById("onSiteTraining").checked) document.getElementById("onSiteTraining_div").className = "";
+      if (document.getElementById("onSiteTraining").checked) document.getElementById("onSiteTraining_div").className = "col-sm-2";
       else document.getElementById("onSiteTraining_div").className = "d-none";
     }
 
     function funcAfterCare() {
-      if (document.getElementById("afterCare").checked) document.getElementById("afterCare_div").className = "";
+      if (document.getElementById("afterCare").checked) document.getElementById("afterCare_div").className = "col-sm-2";
       else document.getElementById("afterCare_div").className = "d-none";
     }
 
