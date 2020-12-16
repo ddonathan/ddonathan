@@ -550,7 +550,29 @@
         document.getElementById("pay_bill_label").className = "form-check-label";
       }
 
-      console.log(event)
+      // If time/expense then show pay data export is checked then hide invoicing as an option
+      if (document.getElementById("time_expense").checked) {
+        document.getElementById("PayDataExport_div").className = "form-check form-switch";
+      }
+      else {
+        document.getElementById("PayDataExport").checked = false;
+        document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
+      }
+      // If invoicing then show invoice export as an option
+      if (document.getElementById("invoicing").checked) {
+        // If quickbooks is checked then hide invoicing as an option
+        if (document.getElementById("qbIntegration").checked) {
+          document.getElementById("InvoiceExport").checked = false;
+          document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+        }
+        else {
+          document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+        }
+      }
+      else {
+        document.getElementById("InvoiceExport").checked = false;
+        document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+      }
 
       // Before we wrap up, test all the checkboxes and show only what's appropriate
       // If pay/bill is checked we'll show both invoice and pay data export
@@ -734,15 +756,6 @@
           </h2>
           <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions" data-bs-parent="#accordionExample">
             <div class="accordion-body">
-              <div class="row mb-3">
-                <div class="col-sm-2">New Hire Export</div>
-                <div class="col-sm">
-                  <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="true" /> <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
-                  </div>
-                </div>
-              </div>
-
               <div class="row mb-3 d-none" id="backoffice_options_div">
                 <div class="col-sm-2">Back Office Options</div>
                 <div class="col-sm-6">
@@ -753,6 +766,14 @@
                   <div id="InvoiceExport_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" name="InvoiceExport" value="true" />
                     Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-sm-2">Payroll Reports</div>
+                <div class="col-sm">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" name="newHireExport" value="true" /> New Hire Export <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
                   </div>
                   <div id="PayDataExport_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="PayDataExport" name="PayDataExport" value="true" />
