@@ -446,7 +446,7 @@
       })
 
       // Set option pricing
-      document.getElementById("onSiteTrainingAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.onSiteTraining.pricing) / 10) * 10;
+      document.getElementById("onSiteTrainingAmt").value = container.lookup.additions.onSiteTraining.pricing;
       document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
 
       // Calculate Total Amount
@@ -465,22 +465,22 @@
       if (container.form.overridePriceAmt && container.form.overridePriceAmt !== "0") {
         container.data.totalAmt_original = container.data.totalAmt;
         container.data.totalAmt = container.form.overridePriceAmt;
-        delete container.data.overridePriceAmt
+        // delete container.data.overridePriceAmt
 
         // Put in the pricing form
         document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt_original);
         document.getElementById("pricing_totalAmt").className = "text-decoration-line-through text-muted";
         document.getElementById("pricing_totalAmt_override").innerHTML = formatter.format(container.data.totalAmt);
       } else {
-        delete container.data.overridePriceAmt
+        // delete container.data.overridePriceAmt
         document.getElementById("pricing_totalAmt").className = "";
         document.getElementById("pricing_totalAmt_override").innerHTML = "";
       }
 
       // Number of weeks
       container.data.timelineWeeks = container.form.timelineLow + " - " + container.form.timelineHigh + " weeks";
-      delete container.data.timelineLow;
-      delete container.data.timelineHigh;
+      // delete container.data.timelineLow;
+      // delete container.data.timelineHigh;
 
       // Set timeline
       if (container.data.timelineTable) container.data[`timeline${container.data.timelineTable}`] = true;
