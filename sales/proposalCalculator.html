@@ -856,8 +856,8 @@
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" name="onSiteTraining" value="true" onchange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
-                  <div class="d-none" id="onSiteTraining_div">
-                    <input class="form-control" type="text" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" />
+                  <div class="col-sm-3 d-none" id="onSiteTraining_div">
+                    <input class="form-control" type="number" id="onSiteTrainingAmt" name="onSiteTrainingAmt" value="" />
                   </div>
                 </div>
               </div>
@@ -868,8 +868,8 @@
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="afterCare" name="afterCare" value="true" onchange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
-                  <div class="d-none" id="afterCare_div">
-                    <input class="form-control" type="text" id="afterCareAmt" name="afterCareAmt" value="" />
+                  <div class="col-sm-3 d-none" id="afterCare_div">
+                    <input class="form-control" type="number" id="afterCareAmt" name="afterCareAmt" value="" />
                   </div>
                 </div>
               </div>
@@ -1052,7 +1052,9 @@
   </div>
 
   <script>
+    // 
     // Form Validation
+    // 
     (function () {
       "use strict";
       window.addEventListener(
