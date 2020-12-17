@@ -34,9 +34,52 @@
       style: "percent",
     });
 
+    //
+    // Save Draft, get shortURL
+    //
+    function saveDraft() {
+      let linkURL = document.getElementById("linkURL").href
+      linkURL = linkURL.replace("file:///C:/Source/", "https://ddonathan.github.io/")
+      console.log(linkURL)
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      var raw = JSON.stringify({
+        "long_url": linkURL,
+        "domain": "https://thq.li/",
+        "api_token": "VOBpwXojb2qnELypxb1XwiGaYnH07Cy3oAX6SnRSQA4qbM09Sj3CP7EHbaKz"
+      });
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+
+      fetch("https://t.ly/api/v1/link/shorten", requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          document.getElementById("shortUrl_tr").className = ""
+          document.getElementById("shortUrl").innerHTML = result.short_url
+          document.getElementById("shortUrl2").innerHTML = result.short_url
+        })
+        .catch(error => console.log('error', error));
+    }
+
+
+    // 
+    // Load File
+    // 
     function loadFile(url, callback) {
       PizZipUtils.getBinaryContent(url, callback);
     }
+
+    // 
+    // Generate
+    // 
     function generate() {
       loadFile("template.docx", function (error, content) {
         if (error) { throw error };
@@ -137,7 +180,6 @@
       var form = document.querySelector("form");
       form.addEventListener("change", function () {
         calculatePricing();
-        formValidate();
         funcOnSiteTraining();
         funcAfterCare();
       });
@@ -173,17 +215,46 @@
     };
 
     function checkValid() {
-      let isValid = false;
+      let alertLevel = "none";
       let validationMsg = [];
 
-      if (document.getElementById("companyName").value) isValid = true;
-      else validationMsg.push("Company Name not provided")
+      if (document.getElementById("companyName").value) alertLevel = "none";
+      else {
+        alertLevel = "error";
+        validationMsg.push(" - Company Name not provided")
+      }
 
-      if (document.getElementById("timelineTable").value) isValid = true;
-      else validationMsg.push("Timeline table not selected")
+      if (document.getElementById("timelineTable").value) alertLevel = "none";
+      else {
+        alertLevel = "error";
+        validationMsg.push("  - Timeline table not selected")
+      }
 
-      console.log("Validation Message: ", validationMsg.join(", "));
+      //  if the form isn't valid, show the message and 
+      switch (alertLevel) {
+        case "error":
+          document.getElementById("validationMsg_div").className = "";
+          document.getElementById("validationMsg").innerHTML = "<strong>Alerts:</strong> <br>" + validationMsg.join("<br>");
+          document.getElementById("validationMsg").innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="checkValidOverride();"></button>';
+          document.getElementById("generateProposal").className = "btn btn-primary d-none";
+          break;
 
+        case "warning":
+          document.getElementById("validationMsg_div").className = "";
+          document.getElementById("validationMsg").innerHTML = "<strong>Alerts:</strong> <br>" + validationMsg.join("<br>");
+          document.getElementById("validationMsg").innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="checkValidOverride();"></button>';
+          document.getElementById("generateProposal").className = "btn btn-primary d-none";
+          break;
+
+        default:
+          document.getElementById("validationMsg_div").className = "d-none";
+          document.getElementById("validationMsg").innerHTML = "";
+          document.getElementById("generateProposal").className = "btn btn-primary";
+      }
+    }
+
+    function checkValidOverride() {
+      document.getElementById("generateProposal").className = "btn btn-primary";
     }
 
     function calculatePricing() {
@@ -527,7 +598,6 @@
 
       // Run functions
       funcBackOfficeOptions();
-      formValidate();
       funcOnSiteTraining();
       funcAfterCare();
       // functimelineTable();
@@ -679,58 +749,6 @@
         default:
           break;
       }
-    }
-
-    // Form validation
-    function formValidate() {
-      let formIsValid = true
-
-      if (!formIsValid) {
-        document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className + " invisible";
-        document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className + " invisible";
-        document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className + " invisible";
-        document.getElementById("generateProposal").className = document.getElementById("generateProposal").className + " invisible";
-      } else {
-        document.getElementById("pricing_additions").className = document.getElementById("pricing_additions").className.replace("invisible", "");
-        document.getElementById("pricing_totalAmt").className = document.getElementById("pricing_totalAmt").className.replace("invisible", "");
-        document.getElementById("pricing_totalAmt_override").className = document.getElementById("pricing_totalAmt_override").className.replace("invisible", "");
-        document.getElementById("generateProposal").className = document.getElementById("generateProposal").className.replace("invisible", "");
-      }
-    }
-
-    // 
-    // Save Draft, get shortURL
-    // 
-    function saveDraft() {
-      let linkURL = document.getElementById("linkURL").href
-      linkURL = linkURL.replace("file:///C:/Source/", "https://ddonathan.github.io/")
-      console.log(linkURL)
-
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-      myHeaders.append("Accept", "application/json");
-
-      var raw = JSON.stringify({
-        "long_url": linkURL,
-        "domain": "https://thq.li/",
-        "api_token": "VOBpwXojb2qnELypxb1XwiGaYnH07Cy3oAX6SnRSQA4qbM09Sj3CP7EHbaKz"
-      });
-
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-      };
-
-      fetch("https://t.ly/api/v1/link/shorten", requestOptions)
-        .then(response => response.json())
-        .then(result => {
-          document.getElementById("shortUrl_tr").className = ""
-          document.getElementById("shortUrl").innerHTML = result.short_url
-          document.getElementById("shortUrl2").innerHTML = result.short_url
-        })
-        .catch(error => console.log('error', error));
     }
   </script>
 </head>
@@ -1089,13 +1107,22 @@
         </div>
       </div>
       <br>
-      <div class="row">
-        <div class="col-12">
-          <button class="btn btn-secondary" type="button" id="resetForm">Reset Form</button>
-          <button class="btn btn-primary" type="submit">Submit form</button>
+      <div class="row" id="validationMsg_div" class="d-none">
+        <div class="col-sm-4">
+          <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
         </div>
       </div>
     </form>
+
+    <div class="row">
+      <div class="col-12">
+        <button class="btn btn-outline-secondary" type="button" id="resetForm" data-bs-toggle="tooltip" data-bs-placement="right" title="Clears all data out of the form and resets to a 10 user ATS only imp">Reset Form</button>
+        <!-- <button class="btn btn-primary" type="submit">Submit form</button> -->
+        <button id="saveDraft" class="btn btn-secondary" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button>
+        <button id="generateProposal" class="btn btn-primary" type="button" onclick="generate();">Generate Proposal</button>
+      </div>
+    </div>
+
     <br /><br />
     <h1 class="display-6">Pricing Results</h1>
     <div class="row">
@@ -1133,14 +1160,6 @@
         </table>
       </div>
     </div>
-    <div class="row">
-      <div class="col-sm-6">
-        <button id="saveDraft" class="btn btn-outline-secondary" type="button" onclick="saveDraft()">Save Draft</button>
-        <button id="generateProposal" class="btn btn-outline-secondary" type="button" onclick="generate()">Preview Proposal</button>
-        <br><br>
-
-      </div>
-    </div>
     <br>
     <div class="accordion" id="accordionExample">
       <div class="accordion-item">
@@ -1159,16 +1178,15 @@
       </div>
     </div>
 
-    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
-
     <!-- This stores the data to be sent to the generating document -->
-    <pre><span id="rawOutput" class=""></span></pre>
+    <pre><span id="rawOutput" class="d-none"></span></pre>
+    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
   </div>
 
   <script>
-    // 
+    //
     // Form Validation
-    // 
+    //
     (function () {
       "use strict";
       window.addEventListener(
