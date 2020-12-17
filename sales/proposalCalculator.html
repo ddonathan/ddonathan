@@ -541,7 +541,7 @@
       delete container.data.timelineLow
       delete container.data.timelineHigh
       console.log(JSON.stringify(container, null, 4));
-      document.getElementById("rawOutput").innerHTML = JSON.stringify({
+      document.getElementById("dataOutput").innerHTML = JSON.stringify({
         calcs: container.calcs,
         data: container.data
       }, null, 4)
@@ -1146,13 +1146,14 @@
         <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
           <div class="accordion-body">
             <a href="" id="shortUrl2" class=""></a>
-            <pre><span id="rawOutput" class=""></span></pre>
+            <pre><span id="dataOutput" class=""></span></pre>
           </div>
         </div>
       </div>
     </div>
 
     <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
+    <pre><span id="rawOutput" class=""></span></pre>
   </div>
 
   <script>
