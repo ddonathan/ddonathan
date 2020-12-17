@@ -230,14 +230,17 @@
       let alertLevel = "none";
       let validationMsg = [];
 
-      if (document.getElementById("companyName").value) alertLevel = "none";
-      else {
+      if (!document.getElementById("companyName").value) {
         alertLevel = "error";
         validationMsg.push(" - Company Name not provided")
       }
 
-      if (document.getElementById("timelineTable").value) alertLevel = "none";
-      else {
+      if (!document.getElementById("existingSystem").value) {
+        alertLevel = "error";
+        validationMsg.push("  - Existing System not provided")
+      }
+
+      if (!document.getElementById("timelineTable").value) {
         alertLevel = "error";
         validationMsg.push("  - Timeline table not selected")
       }
