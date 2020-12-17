@@ -194,6 +194,8 @@
       // Remove and hide the link
       document.getElementById("shortUrl_tr").className = "d-none"
       document.getElementById("shortUrl").innerHTML = ""
+      document.getElementById("shortUrl2").innerHTML = ""
+
 
       // lookup
       var container = {
@@ -301,7 +303,7 @@
             }
           }
         },
-        form: {},
+        data: {},
         calcs: {
           isBBO: false,
           productsPrice: 0,
@@ -310,18 +312,18 @@
         },
       };
 
-      // Get data from the form
-      container.form = {};
-      container.form.products = [];
+      // // Get data from the form
+      // container.data = {};
+      container.data.products = [];
 
-      // Setup for sending to document creation
-      container.data = container.form;
+      // // Setup for sending to document creation
+      // container.data = container.data;
 
       // Loop through the form data
       var form = document.getElementById("form");
       var data = new FormData(form);
       for (var [key, value] of data) {
-        container.form[key] = value;
+        container.data[key] = value;
       }
 
       // Process products
@@ -331,39 +333,40 @@
         if (document.getElementById(key).checked) {
 
           // Put the name into the products array
-          container.form.products.push(value.name);
+          container.data.products.push(value.name);
 
           // Add to pricing
           container.calcs.productsPrice += Number(value.pricing);
 
           // Set backoffice based on the product choices
           if (key === "time_expense" || key === "invoicing") {
-            container.form.backoffice = "BBO";
-            container.form.isBBO = true;
+            container.data.backoffice = "BBO";
+            container.data.isBBO = true;
           }
           if (key === "pay_bill") {
-            container.form.isBH1 = true;
-            container.form.backoffice = "BH1"
+            container.data.isBH1 = true;
+            container.data.backoffice = "BH1"
           }
         }
+        delete container.data[key];
       })
 
       // Find Volume container.lookup.discount
-      container.form.userCount = Number(container.form.userCount);
+      container.data.userCount = Number(container.data.userCount);
       switch (true) {
-        case container.form.userCount >= 100:
+        case container.data.userCount >= 100:
           container.lookup.discount = .5;
           break;
-        case container.form.userCount >= 60:
+        case container.data.userCount >= 60:
           container.lookup.discount = .4;
           break;
-        case container.form.userCount >= 40:
+        case container.data.userCount >= 40:
           container.lookup.discount = .4;
           break;
-        case container.form.userCount >= 20:
+        case container.data.userCount >= 20:
           container.lookup.discount = .35;
           break;
-        case container.form.userCount >= 15:
+        case container.data.userCount >= 15:
           container.lookup.discount = .3;
           break;
         default:
@@ -376,20 +379,19 @@
         );
 
       // If number of users is less than 3 then calculate based on 3
-      container.calcs.userCountCalculated = container.form.userCount;
+      container.calcs.userCountCalculated = container.data.userCount;
       if (container.calcs.userCountCalculated < 3)
         container.calcs.userCountCalculated = 3;
 
       // Figure out padding
-      if (container.form.isBBO) container.lookup.padding = container.lookup.paddingBBO;
-      if (container.form.isBH1) container.lookup.padding = container.lookup.paddingBH1;
+      if (container.data.isBBO) container.lookup.padding = container.lookup.paddingBBO;
+      if (container.data.isBH1) container.lookup.padding = container.lookup.paddingBH1;
 
-      // Perform Calculations
-      container.calcs.pricePerUser = (container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount);
-      container.calcs.basePricing = container.calcs.pricePerUser * container.calcs.userCountCalculated;
-      container.calcs.ballParkLow = container.calcs.basePricing;
-      container.calcs.ballParkHigh = container.calcs.basePricing + container.lookup.padding * (1 + container.lookup.buffer);
-      container.calcs.ballParkHigh2 = (container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer);
+      // Perform Calculations (round to nearest integer)
+      container.calcs.pricePerUser = Math.round((container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount));
+      container.calcs.basePricing = Math.round(container.calcs.pricePerUser * container.calcs.userCountCalculated);
+      container.calcs.ballparkLow = Math.ceil(container.calcs.basePricing / 100) * 100;
+      container.calcs.ballparkHigh = Math.ceil((container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer) / 100) * 100;
 
       // Process additions
       Object.entries(container.lookup.additions).forEach(entry => {
@@ -405,7 +407,7 @@
             addtlPricing = formatter.format(value.addtlPricing)
           }
 
-          // If method is percent, set description and calculate out additional pricing
+          // If method is percent, set description and calculate out additional pricing (round up to the tens)
           if (value.method === "%") {
             descToUse = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
             if (value.addtlPricing) addtlPricing = formatter.format(Math.ceil(container.calcs.basePricing * value.addtlPricing / 10) * 10) + " (" + fmtPct.format(value.addtlPricing) + ")";
@@ -419,12 +421,12 @@
         }
 
         // If they are zero, remove from the data packet
-        if (container.form.npeCount === 0) delete container.form.npeCount
-        if (container.form.oscpCount === 0) delete container.form.oscpCount
-        if (container.form.plCount === 0) delete container.form.plCount
+        if (container.data.npeCount === 0) delete container.data.npeCount
+        if (container.data.oscpCount === 0) delete container.data.oscpCount
+        if (container.data.plCount === 0) delete container.data.plCount
 
         // If ANY additions are marked that affect pricing
-        let paidAdditions = ["newHireExport", "plCount", "npeCount", "oscpCount", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
+        let paidAdditions = ["newHireExport", "NoDataMigration", "plCount", "npeCount", "oscpCount", "qbIntegration", "InvoiceExport", "PayDataExport", "emailsAsNotes", "histSubmissions"]
 
         // If this key is included in the list of paid additions, then add it
         if (paidAdditions.indexOf(key) !== -1) {
@@ -478,16 +480,16 @@
       container.data.totalAmt = Math.ceil(container.data.totalAmt / 10) * 10;
 
       // Show pricing form
-      document.getElementById("pricing_companyName").innerHTML = container.form.companyName;
-      document.getElementById("pricing_ballpark").innerHTML = formatter.format(Math.ceil(container.calcs.ballParkLow / 500) * 500) + "-" + formatter.format(Math.ceil(container.calcs.ballParkHigh2 / 500) * 500);
-      document.getElementById("pricing_basePricing").innerHTML = formatter.format(Math.ceil(container.calcs.basePricing / 10) * 10);
+      document.getElementById("pricing_companyName").innerHTML = container.data.companyName;
+      document.getElementById("pricing_ballpark").innerHTML = formatter.format(container.calcs.ballparkLow) + "-" + formatter.format(container.calcs.ballparkHigh);
+      document.getElementById("pricing_basePricing").innerHTML = formatter.format(container.calcs.basePricing);
       document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions));
       document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt);
 
       // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
-      if (container.form.overridePriceAmt && container.form.overridePriceAmt !== "0") {
+      if (container.data.overridePriceAmt && container.data.overridePriceAmt !== "0") {
         container.data.totalAmt_original = container.data.totalAmt;
-        container.data.totalAmt = container.form.overridePriceAmt;
+        container.data.totalAmt = container.data.overridePriceAmt;
         // delete container.data.overridePriceAmt
 
         // Put in the pricing form
@@ -501,7 +503,7 @@
       }
 
       // Number of weeks
-      container.data.timelineWeeks = container.form.timelineLow + " - " + container.form.timelineHigh + " weeks";
+      container.data.timelineWeeks = container.data.timelineLow + " - " + container.data.timelineHigh + " weeks";
       // delete container.data.timelineLow;
       // delete container.data.timelineHigh;
 
@@ -511,8 +513,8 @@
       // Build URL to link to
       let baseURL = window.location.href + "?";
       let linkURL = "";
-      for (const key in container.form) {
-        if (container.form[key]) linkURL += "&" + `${key}=${container.form[key]}`;
+      for (const key in container.data) {
+        if (container.data[key]) linkURL += "&" + `${key}=${container.data[key]}`;
       }
       document.getElementById('linkURL').setAttribute('href', baseURL + encodeURI(linkURL));
 
@@ -523,15 +525,36 @@
         4
       );
 
-      console.log(JSON.stringify(container, null, 4));
-
       // Run functions
       funcBackOfficeOptions();
       formValidate();
       funcOnSiteTraining();
       funcAfterCare();
       // functimelineTable();
+
+      // Cleanup before logging
+      container.data = removeFalsy(container.data);
+      container.data = removeFalsy(container.data);
+      delete container.calcs.isBBO
+      delete container.data.isBBO
+      delete container.data.paidAdditions
+      delete container.data.timelineLow
+      delete container.data.timelineHigh
+      console.log(JSON.stringify(container, null, 4));
+      document.getElementById("rawOutput").innerHTML = JSON.stringify({
+        calcs: container.calcs,
+        data: container.data
+      }, null, 4)
     }
+
+    // Remove Falsy Function
+    const removeFalsy = (obj) => {
+      let newObj = {};
+      Object.keys(obj).forEach((prop) => {
+        if (obj[prop]) { newObj[prop] = obj[prop]; }
+      });
+      return newObj;
+    };
 
     // Form automation
     function funcBackOfficeOptions(backoffice) {
@@ -683,7 +706,7 @@
 
       var raw = JSON.stringify({
         "long_url": linkURL,
-        "domain": "https://t.ly/",
+        "domain": "https://thq.li/",
         "api_token": "VOBpwXojb2qnELypxb1XwiGaYnH07Cy3oAX6SnRSQA4qbM09Sj3CP7EHbaKz"
       });
 
@@ -699,6 +722,7 @@
         .then(result => {
           document.getElementById("shortUrl_tr").className = ""
           document.getElementById("shortUrl").innerHTML = result.short_url
+          document.getElementById("shortUrl2").innerHTML = result.short_url
         })
         .catch(error => console.log('error', error));
     }
@@ -872,13 +896,13 @@
                 <div class="col-sm-2">Other Options</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="true" />Are we importing emails as notes? <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" name="emailsAsNotes" value="true" />Importing emails as notes <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="true" />No data migration? <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" name="NoDataMigration" value="true" />Do not perform data migration <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="true" />Are we loading historical submissions? <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" name="histSubmissions" value="true" />Load historical submissions <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -1077,7 +1101,7 @@
               <td><span id="pricing_companyName"></span></td>
             </tr>
             <tr>
-              <td>Ballpark:</td>
+              <td>ballpark:</td>
               <td><span id="pricing_ballpark"></span></td>
             </tr>
             <tr>
@@ -1111,10 +1135,24 @@
 
       </div>
     </div>
-    <br><br />
-    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
+    <br>
+    <div class="accordion" id="accordionExample">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+            Pricing Details
+          </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+            <a href="" id="shortUrl2" class=""></a>
+            <pre><span id="rawOutput" class=""></span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <pre><span id="rawOutput" class="d-none"></span></pre>
+    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
   </div>
 
   <script>
