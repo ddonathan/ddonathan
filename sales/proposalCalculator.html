@@ -390,8 +390,8 @@
       // Perform Calculations (round to nearest integer)
       container.calcs.pricePerUser = Math.round((container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount));
       container.calcs.basePricing = Math.round(container.calcs.pricePerUser * container.calcs.userCountCalculated);
-      container.calcs.ballparkLow = Math.ceil(container.calcs.basePricing / 100) * 100;
-      container.calcs.ballparkHigh = Math.ceil((container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer) / 100) * 100;
+      container.calcs.ballparkLow = Math.ceil(container.calcs.basePricing / 500) * 500;
+      container.calcs.ballparkHigh = Math.ceil((container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer) / 500) * 500;
 
       // Process additions
       Object.entries(container.lookup.additions).forEach(entry => {
@@ -1146,6 +1146,7 @@
         <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
           <div class="accordion-body">
             <a href="" id="shortUrl2" class=""></a>
+            <!-- This stores the data that will be shown so we can save for later. It's a sanitized version of rawOutput -->
             <pre><span id="dataOutput" class=""></span></pre>
           </div>
         </div>
@@ -1153,6 +1154,8 @@
     </div>
 
     <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
+
+    <!-- This stores the data to be sent to the generating document -->
     <pre><span id="rawOutput" class=""></span></pre>
   </div>
 
