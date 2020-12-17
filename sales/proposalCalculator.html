@@ -172,7 +172,29 @@
       calculatePricing();
     };
 
+    function checkValid() {
+      let isValid = false;
+      let validationMsg = [];
+
+      if (document.getElementById("companyName").value) isValid = true;
+      else validationMsg.push("Company Name not provided")
+
+      if (document.getElementById("timelineTable").value) isValid = true;
+      else validationMsg.push("Timeline table not selected")
+
+      console.log("Validation Message: ", validationMsg.join(", "));
+
+    }
+
     function calculatePricing() {
+
+      // Test that the form is valid first
+      checkValid();
+
+      // Remove and hide the link
+      document.getElementById("shortUrl_tr").className = "d-none"
+      document.getElementById("shortUrl").innerHTML = ""
+
       // lookup
       var container = {
         query_string: query_string,
@@ -646,6 +668,40 @@
         document.getElementById("generateProposal").className = document.getElementById("generateProposal").className.replace("invisible", "");
       }
     }
+
+    // 
+    // Save Draft, get shortURL
+    // 
+    function saveDraft() {
+      let linkURL = document.getElementById("linkURL").href
+      linkURL = linkURL.replace("file:///C:/Source/", "https://ddonathan.github.io/")
+      console.log(linkURL)
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      var raw = JSON.stringify({
+        "long_url": linkURL,
+        "domain": "https://t.ly/",
+        "api_token": "VOBpwXojb2qnELypxb1XwiGaYnH07Cy3oAX6SnRSQA4qbM09Sj3CP7EHbaKz"
+      });
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+
+      fetch("https://t.ly/api/v1/link/shorten", requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          document.getElementById("shortUrl_tr").className = ""
+          document.getElementById("shortUrl").innerHTML = result.short_url
+        })
+        .catch(error => console.log('error', error));
+    }
   </script>
 </head>
 
@@ -1039,14 +1095,25 @@
               <td>Total Amount:</td>
               <td><span id="pricing_totalAmt" class=""></span>&nbsp;&nbsp;&nbsp;<span id="pricing_totalAmt_override" class=""></span></td>
             </tr>
+            <tr id="shortUrl_tr" class="d-none">
+              <td>Link:</td>
+              <td><span id="shortUrl" class=""></span></td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
-    <button id="generateProposal" class="btn btn-outline-secondary" type="button" onclick="generate()">Preview Proposal</button>
+    <div class="row">
+      <div class="col-sm-6">
+        <button id="saveDraft" class="btn btn-outline-secondary" type="button" onclick="saveDraft()">Save Draft</button>
+        <button id="generateProposal" class="btn btn-outline-secondary" type="button" onclick="generate()">Preview Proposal</button>
+        <br><br>
+
+      </div>
+    </div>
     <br><br />
-    <pre><a href="" id="linkURL">Link to this Pricing</a></pre>
-    <br /><br /><br /><br />
+    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
+
     <pre><span id="rawOutput" class="d-none"></span></pre>
   </div>
 
