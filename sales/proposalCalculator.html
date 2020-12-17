@@ -199,12 +199,24 @@
       })
 
       // Set values from the querystring
-      for (const key in query_string) {
-        if (document.getElementById(key) && query_string[key]) {
-          // If it's a checkbox, check it, otherwise set the value
-          if (document.getElementById(key).type === "checkbox") document.getElementById(key).checked = true;
-          else document.getElementById(key).value = query_string[key];
+      for (let key in query_string) {
+
+        // used to hold the value through this loop
+        fieldId = key
+
+        // If we have a products list, then split it out
+        if (fieldId === "products") {
+          products = query_string[fieldId].split(",")
+
+          // Loop through them and set the keyValue so we can use it to set the values in the form
+          for (let product of products) {
+            if (document.getElementsByName(product)) fieldId = document.getElementsByName(product)[0].id
+          }
         }
+
+        // If it's a checkbox, check it, otherwise set the value
+        if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") document.getElementById(fieldId).checked = true;
+        if (document.getElementById(fieldId) && document.getElementById(fieldId).type !== "checkbox") document.getElementById(fieldId).value = query_string[fieldId];
       }
 
       // Set focus to companyName
@@ -390,7 +402,7 @@
       // // Setup for sending to document creation
       // container.data = container.data;
 
-      // Loop through the form data
+      // Loop through the form data to get into the container
       var form = document.getElementById("form");
       var data = new FormData(form);
       for (var [key, value] of data) {
@@ -400,7 +412,6 @@
       // Process products
       Object.entries(container.lookup.products).forEach(entry => {
         let [key, value] = entry;
-
         if (document.getElementById(key).checked) {
 
           // Put the name into the products array
@@ -419,7 +430,8 @@
             container.data.backoffice = "BH1"
           }
         }
-        delete container.data[key];
+        // Commenting this out until we have a way to loop through the products list and set the checkboxes
+        // delete container.data[key];
       })
 
       // Find Volume container.lookup.discount
@@ -793,55 +805,55 @@
         <div class="col-sm-2">Products</div>
         <div class="col-sm-auto">
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="ats" name="ats" value="true" CHECKED>
+            <input class="form-check-input" type="checkbox" id="ats" name="ATS" value="true" CHECKED>
             <label class="form-check-label" for="ats">
               ATS
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="crm" name="crm" value="true">
+            <input class="form-check-input" type="checkbox" id="crm" name="CRM" value="true">
             <label class="form-check-label" for="crm">
               CRM
             </label>
           </div>
           <div class="form-check form-switch" id="time_expense_div">
-            <input class="form-check-input" type="checkbox" id="time_expense" name="time_expense" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <input class="form-check-input" type="checkbox" id="time_expense" name="Time/Expense" value="true" onchange="funcBackOfficeOptions('BBO');">
             <label class="form-check-label" id="time_expense_label" for="time_expense">
               Time/Expense
             </label>
           </div>
           <div class="form-check form-switch" id="invoicing_div">
-            <input class="form-check-input" type="checkbox" id="invoicing" name="invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <input class="form-check-input" type="checkbox" id="invoicing" name="Invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
             <label class="form-check-label" id="invoicing_label" for="invoicing">
               Invoicing
             </label>
           </div>
           <div class="form-check form-switch" id="pay_bill_div">
-            <input class="form-check-input" type="checkbox" id="pay_bill" name="pay_bill" value="true" onchange="funcBackOfficeOptions('BH1');">
+            <input class="form-check-input" type="checkbox" id="pay_bill" name="Pay/Bill" value="true" onchange="funcBackOfficeOptions('BH1');">
             <label class="form-check-label" id="pay_bill_label" for="pay_bill">
               Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Testing</span>
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="onboarding" name="onboarding" value="true">
+            <input class="form-check-input" type="checkbox" id="onboarding" name="Onboarding" value="true">
             <label class="form-check-label" for="onboarding">
               Onboarding
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="vms_submittals" name="vms_submittals" value="true">
+            <input class="form-check-input" type="checkbox" id="vms_submittals" name="VMS Submittals" value="true">
             <label class="form-check-label" for="vms_submittals">
               VMS Submittals
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="vms_sync" name="vms_sync" value="true">
+            <input class="form-check-input" type="checkbox" id="vms_sync" name="VMS Sync" value="true">
             <label class="form-check-label" for="vms_sync">
               VMS Sync
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="canvas" name="canvas" value="true">
+            <input class="form-check-input" type="checkbox" id="canvas" name="Canvas" value="true">
             <label class="form-check-label" for="canvas">
               Canvas
             </label>
@@ -1180,7 +1192,7 @@
 
     <!-- This stores the data to be sent to the generating document -->
     <pre><span id="rawOutput" class="d-none"></span></pre>
-    <pre><a href="" id="linkURL" class="d-none">Link to this Pricing</a></pre>
+    <pre><a href="" id="linkURL" class="">Link to this Pricing</a></pre>
   </div>
 
   <script>
