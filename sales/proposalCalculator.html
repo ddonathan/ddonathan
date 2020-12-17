@@ -390,8 +390,8 @@
       // Perform Calculations (round to nearest integer)
       container.calcs.pricePerUser = Math.round((container.lookup.baseUserPrice + container.calcs.productsPrice) * (1 - container.lookup.discount));
       container.calcs.basePricing = Math.round(container.calcs.pricePerUser * container.calcs.userCountCalculated);
-      container.calcs.ballparkLow = Math.ceil(container.calcs.basePricing / 500) * 500;
-      container.calcs.ballparkHigh = Math.ceil((container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer) / 500) * 500;
+      container.calcs.ballparkLow = roundTo(container.calcs.basePricing, 500);
+      container.calcs.ballparkHigh = roundTo((container.calcs.basePricing + container.lookup.padding) * (1 + container.lookup.buffer), 500);
 
       // Process additions
       Object.entries(container.lookup.additions).forEach(entry => {
@@ -409,8 +409,8 @@
 
           // If method is percent, set description and calculate out additional pricing (round up to the tens)
           if (value.method === "%") {
-            descToUse = formatter.format(Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10) + " (" + fmtPct.format(value.pricing) + ")";
-            if (value.addtlPricing) addtlPricing = formatter.format(Math.ceil(container.calcs.basePricing * value.addtlPricing / 10) * 10) + " (" + fmtPct.format(value.addtlPricing) + ")";
+            descToUse = formatter.format(roundTo(container.calcs.basePricing * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")";
+            if (value.addtlPricing) addtlPricing = formatter.format(roundTo(container.calcs.basePricing * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
           }
 
           // if it's addtional pricing, add
@@ -464,7 +464,7 @@
             if (value.method === "$") container.calcs.additions += value.pricing;
 
             // If its a percent multiply it
-            if (value.method === "%") container.calcs.additions += Math.ceil(container.calcs.basePricing * value.pricing / 10) * 10
+            if (value.method === "%") container.calcs.additions += roundTo(container.calcs.basePricing * value.pricing, 10);
           }
         }
       })
@@ -472,18 +472,18 @@
       // Set option pricing
       console.log(event)
       if (event.target.name === "onSiteTraining" && event.target.checked) document.getElementById("onSiteTrainingAmt").value = container.lookup.additions.onSiteTraining.pricing;
-      if (event.target.name === "afterCare" && event.target.checked) document.getElementById("afterCareAmt").value = Math.ceil((container.calcs.basePricing * container.lookup.additions.afterCare.pricing) / 10) * 10;
+      if (event.target.name === "afterCare" && event.target.checked) document.getElementById("afterCareAmt").value = roundTo((container.calcs.basePricing * container.lookup.additions.afterCare.pricing), 10);
 
       // Calculate Total Amount
       console.log(container.calcs.basePricing, container.calcs.additions);
       container.data.totalAmt = container.calcs.basePricing + container.calcs.additions;
-      container.data.totalAmt = Math.ceil(container.data.totalAmt / 10) * 10;
+      container.data.totalAmt = roundTo(container.data.totalAmt, 10);
 
       // Show pricing form
       document.getElementById("pricing_companyName").innerHTML = container.data.companyName;
       document.getElementById("pricing_ballpark").innerHTML = formatter.format(container.calcs.ballparkLow) + "-" + formatter.format(container.calcs.ballparkHigh);
       document.getElementById("pricing_basePricing").innerHTML = formatter.format(container.calcs.basePricing);
-      document.getElementById("pricing_additions").innerHTML = formatter.format(Math.ceil(container.calcs.additions));
+      document.getElementById("pricing_additions").innerHTML = formatter.format(container.calcs.additions);
       document.getElementById("pricing_totalAmt").innerHTML = formatter.format(container.data.totalAmt);
 
       // If we have an override price amount, put totalAmt in a separate spot and then set totalAmt to the override price
@@ -555,6 +555,12 @@
       });
       return newObj;
     };
+
+    // Round to the nearest 10, 100, 500, etc.
+    function roundTo(amount, roundTo) {
+      amount = Math.ceil(amount / roundTo) * roundTo;
+      return amount
+    }
 
     // Form automation
     function funcBackOfficeOptions(backoffice) {
