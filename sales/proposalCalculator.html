@@ -226,56 +226,7 @@
       calculatePricing();
     };
 
-    function checkValid() {
-      let alertLevel = "none";
-      let validationMsg = [];
-
-      if (!document.getElementById("companyName").value) {
-        alertLevel = "error";
-        validationMsg.push(" - Company Name not provided")
-      }
-
-      if (!document.getElementById("existingSystem").value) {
-        alertLevel = "error";
-        validationMsg.push("  - Existing System not provided")
-      }
-
-      if (!document.getElementById("timelineTable").value) {
-        alertLevel = "error";
-        validationMsg.push("  - Timeline table not selected")
-      }
-
-      //  if the form isn't valid, show the message and 
-      switch (alertLevel) {
-        case "error":
-          document.getElementById("validationMsg_div").className = "";
-          document.getElementById("validationMsg").innerHTML = "<strong>Alerts:</strong> <br>" + validationMsg.join("<br>");
-          document.getElementById("validationMsg").innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="checkValidOverride();"></button>';
-          document.getElementById("generateProposal").className = "btn btn-primary d-none";
-          break;
-
-        case "warning":
-          document.getElementById("validationMsg_div").className = "";
-          document.getElementById("validationMsg").innerHTML = "<strong>Alerts:</strong> <br>" + validationMsg.join("<br>");
-          document.getElementById("validationMsg").innerHTML += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" onclick="checkValidOverride();"></button>';
-          document.getElementById("generateProposal").className = "btn btn-primary d-none";
-          break;
-
-        default:
-          document.getElementById("validationMsg_div").className = "d-none";
-          document.getElementById("validationMsg").innerHTML = "";
-          document.getElementById("generateProposal").className = "btn btn-primary";
-      }
-    }
-
-    function checkValidOverride() {
-      document.getElementById("generateProposal").className = "btn btn-primary";
-    }
-
     function calculatePricing() {
-
-      // Test that the form is valid first
-      checkValid();
 
       // Remove and hide the link
       document.getElementById("shortUrl_tr").className = "d-none"
@@ -617,6 +568,11 @@
       funcAfterCare();
       // functimelineTable();
 
+      // Test that the form is valid first
+      checkValid(container);
+
+
+
       // Cleanup before logging
       container.data = removeFalsy(container.data);
       container.data = removeFalsy(container.data);
@@ -630,6 +586,56 @@
         calcs: container.calcs,
         data: container.data
       }, null, 4)
+    }
+
+    // 
+    // Check that a form is valid and show alerts
+    // 
+    function checkValid(container) {
+      let alertText = "";
+      let validationErrors = []
+      let validationWarnings = [];
+
+      if (!document.getElementById("companyName").value) validationErrors.push(" - Company Name not provided")
+
+      if (!document.getElementById("existingSystem").value) validationErrors.push("  - Existing System not provided")
+
+      if (!document.getElementById("timelineTable").value) validationErrors.push("  - Timeline table not selected")
+
+      if (container.data.totalAmt > 15000 && document.getElementById("numPayments").value === "2") validationWarnings.push(`  - Price is ${formatter.format(container.data.totalAmt)} and it's set to just two payments`)
+
+      if (container.data.userCount > 15 && document.getElementById("timelineLow").value <= "13") validationWarnings.push(`  - User count is ${container.data.userCount} and timeline is ${container.data.timelineWeeks}`)
+
+      //  if the form isn't valid, show the message and 
+      if (validationErrors.length === 0 && validationWarnings.length === 0) {
+        document.getElementById("validationMsg_div").className = "d-none";
+        document.getElementById("validationMsg").innerHTML = "";
+        document.getElementById("generateProposal").className = "btn btn-primary";
+      } else {
+        // SHow the alert box
+        document.getElementById("validationMsg_div").className = "";
+
+        // If it's an error, show them
+        if (validationErrors.length > 0) alertText = "<strong>Alerts:</strong> <br>" + validationErrors.join("<br>") + "<br>";
+
+        // If it's a warning, show them
+        if (validationWarnings.length > 0) {
+          alertText += "<strong>Warnings:</strong> <br>" + validationWarnings.join("<br>");
+          document.getElementById("validationMsg").className = "alert alert-warning alert-dismissible fade show";
+        }
+        if (validationErrors.length > 0) document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+
+        // Hide Generate Proposal
+        document.getElementById("generateProposal").className = "btn btn-primary d-none";
+
+        // Finish up alertText and set it
+        alertText += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"  data-bs-toggle="tooltip" data-bs-placement="right" title="Closing this alert will allow you to generate the proposal" onclick="checkValidOverride();"></button>';
+        document.getElementById("validationMsg").innerHTML = alertText
+      }
+    }
+
+    function checkValidOverride() {
+      document.getElementById("generateProposal").className = "btn btn-primary";
     }
 
     // Remove Falsy Function
@@ -1123,7 +1129,7 @@
       </div>
       <br>
       <div class="row" id="validationMsg_div" class="d-none">
-        <div class="col-sm-4">
+        <div class="col-sm-5">
           <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
         </div>
       </div>
