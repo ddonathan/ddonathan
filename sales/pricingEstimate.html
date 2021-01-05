@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>THQ Proposal Pricing</title>
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  <!-- Bootstrap -->
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    let container = {
+      data: {}
+    }
+
+    // Formatting functions
+    var formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumSignificantDigits: 4,
+    });
+
+    var fmtPct = new Intl.NumberFormat("en-US", {
+      style: "percent",
+    });
+
+    // Get pricing
+    function getPricing() {
+
+      // Get form data
+      var form = document.getElementById("form");
+      var data = new FormData(form);
+      console.log(data)
+      for (var [key, value] of data) {
+        console.log(key, value)
+        container.data[key] = value;
+      }
+
+
+      // Make call to get pricing
+      if (container.data.name && container.data.clientName) {
+        // Build form data
+        let data = {
+          name: container.data.name,
+          clientName: container.data.clientName,
+          numUsers: container.data.numUsers
+        };
+
+        let config = {
+          method: 'post',
+          url: 'https://apps.tonichq.io/pricing',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 15000,
+          data: data
+        };
+
+        // Make call to Lambda function
+        axios(config)
+          .then(response => {
+            console.log(`response`, response.data);
+          })
+          .catch(error => console.error(error))
+          .then(() => {
+            console.log(container)
+
+            // Now we have the pricing. Set the value
+            container.data.totalAmt_original = 2280
+            document.getElementById("pricing_ballpark").innerHTML = formatter.format(container.data.totalAmt_original);
+          });
+      }
+    }
+
+    // OnLoad
+    window.onload = function () {
+
+      var form = document.querySelector("form");
+      form.addEventListener("change", function () {
+        getPricing();
+      });
+
+      // Set focus to companyName
+      document.getElementById("name").focus();
+    };
+
+    // Check that a form is valid and show alerts
+    function checkValid(container) {
+      let alertText = "";
+      let validationErrors = []
+      let validationWarnings = [];
+
+      if (!document.getElementById("name").value) validationErrors.push(" - Your Name not provided")
+
+      if (!document.getElementById("clientName").value) validationErrors.push(" - Client Name not provided")
+
+      //  if the form isn't valid, show the message and 
+      if (validationErrors.length === 0 && validationWarnings.length === 0) {
+        document.getElementById("validationMsg_div").className = "d-none";
+        document.getElementById("validationMsg").innerHTML = "";
+        document.getElementById("generateProposal").className = "btn btn-primary";
+      } else {
+        // SHow the alert box
+        document.getElementById("validationMsg_div").className = "";
+
+        // If it's an error, show them
+        if (validationErrors.length > 0) alertText = "<strong>Alerts:</strong> <br>" + validationErrors.join("<br>") + "<br>";
+
+        // If it's a warning, show them
+        if (validationWarnings.length > 0) {
+          alertText += "<strong>Warnings:</strong> <br>" + validationWarnings.join("<br>");
+          document.getElementById("validationMsg").className = "alert alert-warning alert-dismissible fade show";
+        }
+        if (validationErrors.length > 0) document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container-md">
+    <form action="proposalCalculator.html" id="form" name="form" method="GET" class="needs-validation" novalidate>
+      <h1 class="display-6" onclick="window.location='proposalCalculator.html'">Tonic HQ Pricing Calculator</h1>
+      <br>
+
+      <h5>Basic Information</h5>
+      <div class="row mb-3">
+        <div class="col-sm-2">Your Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Client Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="clientName" name="clientName" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Existing System</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="existingSystem" name="existingSystem">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Number of Users</div>
+        <div class="col-sm-2">
+          <input type="number" class="form-control" id="userCount" name="userCount" value="10" min="1" max="150" />
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Products</div>
+        <div class="col-sm-auto">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="ats" name="ATS" value="true" CHECKED>
+            <label class="form-check-label" for="ats">
+              ATS
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="crm" name="CRM" value="true">
+            <label class="form-check-label" for="crm">
+              CRM
+            </label>
+          </div>
+          <div class="form-check form-switch" id="time_expense_div">
+            <input class="form-check-input" type="checkbox" id="time_expense" name="Time/Expense" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <label class="form-check-label" id="time_expense_label" for="time_expense">
+              Time/Expense
+            </label>
+          </div>
+          <div class="form-check form-switch" id="invoicing_div">
+            <input class="form-check-input" type="checkbox" id="invoicing" name="Invoicing" value="true" onchange="funcBackOfficeOptions('BBO');">
+            <label class="form-check-label" id="invoicing_label" for="invoicing">
+              Invoicing
+            </label>
+          </div>
+          <div class="form-check form-switch" id="pay_bill_div">
+            <input class="form-check-input" type="checkbox" id="pay_bill" name="Pay/Bill" value="true" onchange="funcBackOfficeOptions('BH1');">
+            <label class="form-check-label" id="pay_bill_label" for="pay_bill">
+              Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Testing</span>
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="onboarding" name="Onboarding" value="true">
+            <label class="form-check-label" for="onboarding">
+              Onboarding
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="vms_submittals" name="VMS Submittals" value="true">
+            <label class="form-check-label" for="vms_submittals">
+              VMS Submittals
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="vms_sync" name="VMS Sync" value="true">
+            <label class="form-check-label" for="vms_sync">
+              VMS Sync
+            </label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="canvas" name="Canvas" value="true">
+            <label class="form-check-label" for="canvas">
+              Canvas
+            </label>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- <div class="row">
+      <div class="col-2">&nbsp;</div>
+      <div class="col-2">
+        <button id="getPricing" class="btn btn-primary" type="button" onclick="getPricing();">Get Pricing</button>
+      </div>
+    </div> -->
+
+    <br /><br />
+    <!-- <h1 class="display-6">Pricing Results</h1> -->
+    <div class="row">
+      <div class="col-sm-6">
+        <table class="table table-striped table-hover">
+          <tbody>
+            <tr>
+              <td>Ballpark Pricing:</td>
+              <td><span id="pricing_ballpark"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    //
+    // Form Validation
+    //
+    (function () {
+      "use strict";
+      window.addEventListener(
+        "load",
+        function () {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName("needs-validation");
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(
+            forms,
+            function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            }
+          );
+        },
+        false
+      );
+    })();
+  </script>
+
+  <!-- Bootstrap bundle-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</body>
+
+</html>
