@@ -73,9 +73,9 @@
 <body>
 
   <div class="container">
-    <form action="https://apps.tonichq.io/thqVerifyCredentials" method="POST" class="needs-validation" novalidate>
-      <div class="form-group">
-        <label for="username">User Name</label>
+    <form action="https://apps.tonichq.io/RunFieldMaps" method="POST" class="needs-validation" novalidate>
+      <!-- <div class="form-group"> -->
+        <!-- <label for="username">User Name</label>
         <input type="text" class="form-control" id="username" name="username" aria-describedby="">
         <div class="invalid-feedback">
           Please enter a username.
@@ -87,70 +87,14 @@
         <div class="invalid-feedback">
           Please enter a password.
         </div>
-      </div>
+      </div> -->
       <div class="form-group">
         <label for="client_id">REST: Client ID</label>
         <input type="text" class="form-control" id="client_id" name="client_id" aria-describedby="">
       </div>
       <div class="form-group">
-        <label for="client_secret">REST: Client Secret</label>
-        <input type="text" class="form-control" id="client_secret" name="client_secret" aria-describedby=""
-         >
-      </div>
-      <div class="form-group">
-        <label for="SOAP_apiKey">SOAP: Key</label>
-        <input type="text" class="form-control" id="SOAP_apiKey" name="SOAP_apiKey" aria-describedby="">
-      </div>
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="useSOAPcredsCheck" name="useSOAPcredsCheck" onclick="useSOAPcreds()">
-        <label class="form-check-label" for="useSOAPcredsCheck">Use distinct SOAP credentials</label>
-      </div>
-      <div id="SOAP_username_div" class="form-group d-none">
-        <label for="SOAP_username">SOAP: User Name</label>
-        <input type="text" class="form-control" id="SOAP_username" name="SOAP_username"
-          aria-describedby="SOAP_usernameHelp">
-      </div>
-      <div id="SOAP_password_div" class="form-group d-none">
-        <label for="SOAP_password">SOAP: Password</label>
-        <input type="text" class="form-control" id="SOAP_password" name="SOAP_password"
-          aria-describedby="SOAP_passwordHelp">
-      </div>
-      <div class="form-group">
-        <label for="BBO_vanityName">BBO: Vanity Name</label>
-        <input type="text" class="form-control" id="BBO_vanityName" name="BBO_vanityName" aria-describedby="">
-      </div>
-      <div class="form-group">
-        <label for="BBO_username">BBO: User Name</label>
-        <input type="text" class="form-control" id="BBO_username" name="BBO_username" aria-describedby="">
-      </div>
-      <div class="form-group">
-        <label for="BBO_password">BBO: Password</label>
-        <input type="text" class="form-control" id="BBO_password" name="BBO_password">
-      </div>
-      <div class="form-group">
-        <label for="ia_subscriptionKey">IntelAgree: Subscription Key</label>
-        <input type="text" class="form-control" id="ia_subscriptionKey" name="ia_subscriptionKey">
-      </div>
-      <div class="form-group">
-        <label for="ia_accountKey">IntelAgree: Account Key</label>
-        <input type="text" class="form-control" id="ia_accountKey" name="ia_accountKey">
-      </div>
-      <div class="form-group">
-        <label for="ia_encryptionSecret">IntelAgree: Encryption Secret</label>
-        <input type="text" class="form-control" id="ia_encryptionSecret" name="ia_encryptionSecret" placeholder="leave blank to generate">
-      </div>
-      <div class="form-group">
-        <label for="ia_appCode">IntelAgree: AppCode</label>
-        <input type="text" class="form-control" id="ia_appCode" name="ia_appCode" placeholder="leave blank to generate">
-      </div>
-      <div class="form-group">
-        <label for="ia_env">IntelAgree: Environment</label><br>
-        <select name="ia_env" id="ia_env">
-          <option value="Dev">Dev</option>
-          <option value="Preview">Preview</option>
-          <option value="Demo">Demo</option>
-          <option value="Production">Production</option>
-        </select>
+        <label for="client_secret">File Upload</label>
+        <input type="file" class="form-control" id="client_secret" name="client_secret" aria-describedby="">
       </div>
       <br>
       <button type="submit" class="btn btn-primary">Submit</button>
