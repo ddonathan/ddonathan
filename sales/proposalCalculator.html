@@ -233,7 +233,6 @@
       document.getElementById("shortUrl").innerHTML = ""
       document.getElementById("shortUrl2").innerHTML = ""
 
-
       // lookup
       var container = {
         query_string: query_string,
@@ -417,8 +416,8 @@
 
       // If number of users is less than 3 then calculate based on 3
       container.calcs.userCountCalculated = container.data.userCount;
-      if (container.calcs.userCountCalculated < 3)
-        container.calcs.userCountCalculated = 3;
+      if (container.calcs.userCountCalculated < 4)
+        container.calcs.userCountCalculated = 4;
 
       // Figure out padding
       if (container.data.isBBO) container.lookup.padding = container.lookup.paddingBBO;
