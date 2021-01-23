@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lola's MadLibs</title>
+</head>
+
+<script>
+    function makeMadLib() {
+
+        let adjective1 = document.getElementById("adjective1").value;
+        let noun1 = document.getElementById("noun1").value;
+        let verb1 = document.getElementById("verb1").value;
+        let adverb1 = document.getElementById("adverb1").value;
+        let adjective2 = document.getElementById("adjective2").value;
+        let noun2 = document.getElementById("noun2").value;
+        let noun3 = document.getElementById("noun3").value;
+        let adjective3 = document.getElementById("adjective3").value;
+        let verb2 = document.getElementById("verb2").value;
+        let adverb2 = document.getElementById("adverb2").value;
+        let verb3 = document.getElementById("verb3").value;
+        let adjective4 = document.getElementById("adjective4").value;
+
+        let paragraph = `Today I went to the zoo. I saw a ${adjective1} ${noun1} jumping up and down in its tree. He ${verb1} ${adverb1} through the large tunnel that led to its ${adjective2} ${noun2}. I got some peanuts and passed them through the cage to a gigantic gray ${noun3} towering above my head. Feeding that animal made me hungry. I went to get a ${adjective3} scoop of ice cream. It filled my stomach. Afterwards I had to ${verb2} ${adverb2} to catch our bus. When I got home I ${verb3} my mom for a ${adjective4} day at the zoo.`
+
+        document.getElementById("output").textContent = paragraph;
+        // console.log(paragraph);
+    } 
+</script>
+
+<body>
+
+
+    <form>
+        Adjective: <input id="adjective1"><br>
+        Noun: <input id="noun1"><br>
+        Verb (Past Tense): <input id="verb1"><br>
+        Adveb: <input id="adverb1"><br>
+        Adjective: <input id="adjective2"><br>
+        Noun: <input id="noun2"><br>
+        Noun: <input id="noun3"><br>
+        Adjective: <input id="adjective3"><br>
+        Verb: <input id="verb2"><br>
+        Adverb: <input id="adverb2"><br>
+        Verb: <input id="verb3"><br>
+        Adjective: <input id="adjective4"><br>
+
+
+    </form>
+    <button onClick="makeMadLib();">Go!</button>
+
+    <p id="output"></p>
+
+
+</body>
+
+</html>
