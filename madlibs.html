@@ -25,27 +25,43 @@
 
         document.getElementById("output").textContent = paragraph;
         // console.log(paragraph);
-    } 
+    }
+
+
+    function pickForMe(formField, type) {
+        let wordToReturn = "";
+        let adjectives = ['big', 'cool', 'strong', 'sweet']
+        let nouns = ['monkey', 'building', 'anteater', 'cup']
+        let verbs = ['run', 'sit', 'stand', 'lay down']
+        let verbPastTense = ['put', 'talked', 'walked', 'swam']
+        let adverbs = ['vainly', 'tightly', 'afterwards', 'simply', 'less', 'energetically', 'clearly', 'excitedly', 'wisely', 'painfully', 'greatly', 'elegantly']
+
+        if (type === 'adjective') wordToReturn = adjectives[Math.floor(Math.random() * adjectives.length)];
+        if (type === 'noun') wordToReturn = nouns[Math.floor(Math.random() * nouns.length)];
+        if (type === 'verb') wordToReturn = verbs[Math.floor(Math.random() * verbs.length)];
+        if (type === 'verbPastTense') wordToReturn = verbPastTense[Math.floor(Math.random() * verbPastTense.length)];
+        if (type === 'adverb') wordToReturn = adverbs[Math.floor(Math.random() * adverbs.length)];
+
+        document.getElementById(formField).value = wordToReturn;
+    }
 </script>
 
 <body>
 
 
     <form>
-        Adjective: <input id="adjective1"><br>
-        Noun: <input id="noun1"><br>
-        Verb (Past Tense): <input id="verb1"><br>
-        Adverb: <input id="adverb1"><br>
-        Adjective: <input id="adjective2"><br>
-        Noun: <input id="noun2"><br>
-        Noun: <input id="noun3"><br>
-        Adjective: <input id="adjective3"><br>
-        Verb: <input id="verb2"><br>
-        Adverb: <input id="adverb2"><br>
-        Verb: <input id="verb3"><br>
-        Adjective: <input id="adjective4"><br>
-
-
+        <span title="Something that describes a noun">Adjective:</span><input id="adjective1"><button type="button" onClick="pickForMe('adjective1', 'adjective');">Pick one for me</button><br>
+        <span title="person,place or thing">Noun:</span> <input id="noun1"><button type="button" onClick="pickForMe('noun1', 'noun');">Pick one for me</button><br>
+        <span title="Something that describes an action">Verb (Past Tense):</span> <input id="verb1"><button type="button" onClick="pickForMe('verb1', 'verbPastTense');">Pick one for me</button><br>
+        <span title="Something that describes a verb">Adverb:</span> <input id="adverb1"><button type="button" onClick="pickForMe('adverb1', 'adverb');">Pick one for me</button><br>
+        <span title="Something that describes a noun">Adjective:</span> <input id="adjective2"><button type="button" onClick="pickForMe('adjective2', 'adjective');">Pick one for me</button><br>
+        <span title="person,place or thing">Noun:</span> <input id="noun2"><button type="button" onClick="pickForMe('noun2', 'noun');">Pick one for me</button><br>
+        <span title="person,place or thing">Noun:</span> <input id="noun3"><button type="button" onClick="pickForMe('noun3', 'noun');">Pick one for me</button><br>
+        <span title="Something that describes a noun">Adjective:</span> <input id="adjective3"><button type="button" onClick="pickForMe('adjective3', 'adjective');">Pick one for me</button><br>
+        <span title="Something that describes an action">Verb:</span> <input id="verb2"><button type="button" onClick="pickForMe('verb2', 'verb');">Pick one for me</button><br>
+        <span title="Something that describes a verb">Adverb:</span> <input id="adverb2"><button type="button" onClick="pickForMe('adverb2', 'adverb');">Pick one for me</button><br>
+        <span title="Something that describes an action">Verb (Past Tense):</span> <input id="verb3"><button type="button" onClick="pickForMe('verb3', 'verbPastTense');">Pick one for me</button><br>
+        <span title="Something that describes a noun">Adjective:</span> <input id="adjective4"><button type="button" onClick="pickForMe('adjective4', 'adjective');">Pick one for me</button><br>
     </form>
     <button onClick="makeMadLib();">Go!</button>
 
