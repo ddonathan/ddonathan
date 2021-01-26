@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>THQ View Layout</title>
+  <link rel="shortcut icon" type="image/x-icon" href="https://images.squarespace-cdn.com/content/v1/5955b6c54f14bcb9ad902500/1502996898802-EUVGT7D6AX1Q39434MVQ/ke17ZwdGBToddI8pDm48kCE1k0t51nZnEs80cWylL42oCXeSvxnTEQmG4uwOsdIceAoHiyRoc52GMN5_2H8WpwK4Jxvekhwn8vLxb6w9I3TQ-U2z4I1wnXu_JqA6ZhKrBcIwq6dVHrdmYcJqIrjrEQ/favicon.ico">
+  <!-- Bootstrap -->
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+
+    // TODO Save form fields for as long as the session is open so we can refresh for changes and not have to reinput out credentials.
+    // TODO Get private label list
+
+    let container = {
+      data: {}
+    }
+
+    // 
+    // OnLoad
+    // 
+    window.onload = function () {
+      var form = document.querySelector("form");
+
+      let config = {
+        method: 'get',
+        url: 'https://apim.intelagree.com/api/Contracts/party?partyKey=11525&partyKeyType=Bullhorn&userKey=144640&userKeyType=Bullhorn',
+        headers: {
+          'Ocp-Apim-Subscription-Key': 'f7a038759b2f455897f7ed76b17db7e6',
+          'Authorization': 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL2lkZW50aXR5L2NsYWltcy9vYmplY3RpZGVudGlmaWVyIjoiMzRlZmNiMTMtMzYwMy00OGRkLWJiMDMtNTg4ZTM1Nzc5YjAyIiwic3ViZG9tYWluIjoic2Fsb2xsYyIsImV4cCI6MTYxMTY4ODg3OCwiaXNzIjoiaHR0cHM6Ly9hcGkuaW50ZWxhZ3JlZS5jb20vIiwiYXVkIjoiaW50ZWxhZ3JlZS1hcGkifQ.MhDDxyLe7uxAYPzzF8ZGwk0EMG7ni1txddjl7q9oSpQ',
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      };
+
+      axios(config)
+        .then((response) => {
+          console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+          if (error.response) {
+            // Request made and server responded
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+          } else if (error.request) {
+            // The request was made but no response was received
+            console.log(error.request);
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.log('Error', error.message);
+          }
+
+        });
+
+
+    };
+
+    // 
+    // Load Data
+    // 
+    function loadData() {
+      // Clear the messages
+      document.getElementById("output").innerHTML = null;
+
+      // Disable button while it's processing
+      document.getElementById("loadData_button").className = "btn btn-primary btn-lg disabled"
+
+      // Get form data
+      var form = document.getElementById("form");
+      var data = new FormData(form);
+      for (var [key, value] of data) {
+        container.data[key] = value.trim();
+      }
+
+      // If we have data in templateData, parse it out
+      if (document.getElementById('templateData') && document.getElementById('templateData').value) {
+        // Trim to remove emply lines
+        let columns = document.getElementById('templateData').value.trim();
+        columns = columns.split(/\n/)
+        container.data.templateData = columns
+
+        // Parse out the columnName values
+        let csv = [];
+        for (let column of columns) {
+
+          // Extract the column name
+          column = column.split('(');
+
+          // If we don't have a second item then we don't have parentheses
+          if (!column[1]) {
+            document.getElementById("output").innerHTML = `The item '${column}' does not have parentheses.`
+            document.getElementById("loadData_button").className = "btn btn-primary"
+            return (null);
+          }
+
+          // Get the column name by itself and add it to the csv list we need
+          let match = ""
+          for (var i = 1; i < column.length; i++) {
+            match = column[i].split(')')[0];
+            csv.push(match)
+          }
+        }
+
+        // Create a csv out of the array created above and put it into the data to send
+        csv = csv.join(",")
+        console.log(`${container.data.entity}.${container.data.sectionName}`, csv);
+        container.data.columns = csv;
+      }
+
+      // Make call to lambda
+      if (container.data.apikey && container.data.username && container.data.password) {
+
+        let config = {
+          method: 'post',
+          url: 'https://apps.tonichq.io/viewlayout',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 15000,
+          data: container.data
+        };
+        console.log(config);
+
+        // Make call to Lambda function
+        axios(config)
+          .then(response => {
+            console.log(`response`, JSON.stringify(response.data, null, 4));
+            document.getElementById("output").innerHTML = JSON.stringify(response.data, null, 4)
+          })
+          .catch(error => console.error(error))
+          .then(() => {
+            // Reset button
+            document.getElementById("loadData_button").className = "btn btn-primary"
+          });
+      }
+
+      // Reset button
+      document.getElementById("loadData_button").className = "btn btn-primary"
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container-md">
+    <form action="" id="form" name="form" method="GET" class="needs-validation" novalidate>
+      <h1 class="display-6" onclick="window.location='proposalCalculator.html'">Add New Contract</h1>
+      <br>
+
+      <div id="entity_div">
+        <div class="row mb-3">
+          <div class="col-sm-2">Organization</div>
+          <div class="col-sm-6">
+            <select class="form-select" id="organization" name="organization" aria-label="organization" onChange="changesectionNameOptions(this);document.getElementById('templateData').value = '';">
+              <option value=""></option>
+              <option value="1">Bullhorn Demo</option>
+              <option value="2">Colabs</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+
+      <div id="entity_div">
+        <div class="row mb-3">
+          <div class="col-sm-2">Contract Template</div>
+          <div class="col-sm-6">
+            <select class="form-select" id="templates" name="templates" aria-label="templates" onChange="changesectionNameOptions(this);document.getElementById('templateData').value = '';">
+              <option value=""></option>
+              <option value="1">Example 1</option>
+              <option value="2">Example 2</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Contract Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="username" name="username" onkeyup='saveValue(this);' required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Effective Date</div>
+        <div class="col-sm-3">
+          <input type="date" class="form-control" id="date_start" name="date_start" value="" onChange="" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Expiration Date</div>
+        <div class="col-sm-3">
+          <input type="date" class="form-control" id="date_end" name="date_end" value="" required>
+        </div>
+      </div>
+    </form>
+
+    <div class="row">
+      <div class="col-2">&nbsp;</div>
+      <div class="col-2">
+        <button id="loadData_button" class="btn btn-primary" type="button" onclick="loadData()">Save</button>
+        <button id="loadData_button" class="btn btn-secondary" type="button" onclick="cancel()">Cancel</button>
+      </div>
+    </div>
+
+    <br /><br />
+    <!-- <h1 class="display-6">Pricing Results</h1> -->
+    <div class="row">
+      <div class="col-sm-8">
+        <span id="output"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    //
+    // Form Validation
+    //
+    (function () {
+      "use strict";
+      window.addEventListener(
+        "load",
+        function () {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName("needs-validation");
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(
+            forms,
+            function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            }
+          );
+        },
+        false
+      );
+    })();
+  </script>
+
+  <!-- Bootstrap bundle-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</body>
+
+</html>
