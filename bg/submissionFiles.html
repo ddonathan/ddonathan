@@ -1,0 +1,61 @@
+<!-- https://ddonathan.github.io/ddonathan/bg/placementEnd.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contract Termination Details</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.2/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+  <script>
+    function QueryStringToJSON() {
+      var pairs = location.search.slice(1).split('&');
+
+      var result = {};
+      pairs.forEach(function (pair) {
+        pair = pair.split('=');
+        result[pair[0]] = decodeURIComponent(pair[1] || '');
+      });
+
+      return JSON.parse(JSON.stringify(result));
+    }
+
+    function setFormValues() {
+      var query_string = QueryStringToJSON();
+      console.log(query_string)
+
+      // document.getElementById("receivedData").value = JSON.stringify(query_string, null, 4);
+      document.getElementById("submissionId").value = query_string.submissionId;
+      document.getElementById("candidateId").value = query_string.candidateId;
+    }
+  </script>
+</head>
+
+<body onLoad="setFormValues()">
+  <div class="container">
+    <h1 class="title">Add Submission Files</h1>
+    <form action="https://1djn5g0jik.execute-api.us-east-1.amazonaws.com/addSubmissionFiles">
+      <div class="field">
+        <label class="label">Placement Status</label>
+        <div class="control">
+          <input type="file" name="img" multiple>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Last Day Worked at B&G</label>
+        <input type="text" class="input" id="submissionId" name="submissionId" value="">
+      </div>
+      <div class="field">
+        <label class="label">Last Day Worked at B&G</label>
+        <input type="text" class="input" id="candidateId" name="candidateId" value="">
+      </div>
+      <!-- <input type="hidden" id="submissionId" name="submissionId" value=""> -->
+      <!-- <input type="hidden" id="candidateId" name="candidateId" value=""> -->
+      <button type="submit" class="button is-link">Submit</button>
+    </form>
+  </div>
+  </div>
+</body>
+
+</html>
