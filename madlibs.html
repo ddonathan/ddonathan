@@ -2,72 +2,213 @@
 <html>
 
 <head>
+    <!-- Bootstrap -->
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <title>Lola's MadLibs</title>
+
+    <script>
+        function makeMadLib() {
+
+            let adjective1 = document.getElementById("adjective1").value;
+            let noun1 = document.getElementById("noun1").value;
+            let verb1 = document.getElementById("verb1").value;
+            let adverb1 = document.getElementById("adverb1").value;
+            let adjective2 = document.getElementById("adjective2").value;
+            let noun2 = document.getElementById("noun2").value;
+            let noun3 = document.getElementById("noun3").value;
+            let adjective3 = document.getElementById("adjective3").value;
+            let verb2 = document.getElementById("verb2").value;
+            let adverb2 = document.getElementById("adverb2").value;
+            let verb3 = document.getElementById("verb3").value;
+            let adjective4 = document.getElementById("adjective4").value;
+
+            let paragraph = `Today I went to the zoo. I saw a ${adjective1} ${noun1} jumping up and down in its tree. He ${verb1} ${adverb1} through the large tunnel that led to its ${adjective2} ${noun2}. I got some peanuts and passed them through the cage to a gigantic gray ${noun3} towering above my head. Feeding that animal made me hungry. I went to get a ${adjective3} scoop of ice cream. It filled my stomach. Afterwards I had to ${verb2} ${adverb2} to catch our bus. When I got home I ${verb3} my mom for a ${adjective4} day at the zoo.`
+
+            document.getElementById("output").textContent = paragraph;
+        }
+
+
+        function pickForMe(formField, type) {
+            // let wordToReturn = "";
+            // let adjectives = ['big', 'cool', 'strong', 'sweet']
+            // let nouns = ['monkey', 'building', 'anteater', 'cup']
+            // let verbs = ['run', 'sit', 'stand', 'lay down']
+            // let verbPastTense = ['put', 'talked', 'walked', 'swam']
+            // let adverbs = ['vainly', 'tightly', 'afterwards', 'simply', 'less', 'energetically', 'clearly', 'excitedly', 'wisely', 'painfully', 'greatly', 'elegantly']
+
+            // if (type === 'adjective') wordToReturn = adjectives[Math.floor(Math.random() * adjectives.length)];
+            // if (type === 'noun') wordToReturn = nouns[Math.floor(Math.random() * nouns.length)];
+            // if (type === 'verb') wordToReturn = verbs[Math.floor(Math.random() * verbs.length)];
+            // if (type === 'verbPastTense') wordToReturn = verbPastTense[Math.floor(Math.random() * verbPastTense.length)];
+            // if (type === 'adverb') wordToReturn = adverbs[Math.floor(Math.random() * adverbs.length)];
+
+            let words = ""
+            switch (type) {
+                case "adverb":
+                    words = ['boldly', 'brightly', 'anxiously', 'boastfully', 'eventually', 'hourly', 'promptly', 'rapidly']
+                    break;
+                case "adjective":
+                    words = ['big', 'cool', 'strong', 'sweet']
+                    break;
+                case "noun":
+                    words = ['monkey', 'building', 'anteater', 'cup']
+                    break;
+                case "verb":
+                    words = ['run', 'sit', 'stand', 'lay down']
+                    break;
+                case "verbPastTense":
+                    words = ['put', 'talked', 'walked', 'swam']
+                    break;
+                case "adjective":
+                    wordToReturn = ['vainly', 'tightly', 'afterwards', 'simply', 'less', 'energetically', 'clearly', 'excitedly', 'wisely', 'painfully', 'greatly', 'elegantly']
+                    break;
+            }
+            let wordToReturn = words[Math.floor(Math.random() * words.length)];
+
+            document.getElementById(formField).value = wordToReturn;
+        }
+    </script>
 </head>
 
-<script>
-    function makeMadLib() {
-
-        let adjective1 = document.getElementById("adjective1").value;
-        let noun1 = document.getElementById("noun1").value;
-        let verb1 = document.getElementById("verb1").value;
-        let adverb1 = document.getElementById("adverb1").value;
-        let adjective2 = document.getElementById("adjective2").value;
-        let noun2 = document.getElementById("noun2").value;
-        let noun3 = document.getElementById("noun3").value;
-        let adjective3 = document.getElementById("adjective3").value;
-        let verb2 = document.getElementById("verb2").value;
-        let adverb2 = document.getElementById("adverb2").value;
-        let verb3 = document.getElementById("verb3").value;
-        let adjective4 = document.getElementById("adjective4").value;
-
-        let paragraph = `Today I went to the zoo. I saw a ${adjective1} ${noun1} jumping up and down in its tree. He ${verb1} ${adverb1} through the large tunnel that led to its ${adjective2} ${noun2}. I got some peanuts and passed them through the cage to a gigantic gray ${noun3} towering above my head. Feeding that animal made me hungry. I went to get a ${adjective3} scoop of ice cream. It filled my stomach. Afterwards I had to ${verb2} ${adverb2} to catch our bus. When I got home I ${verb3} my mom for a ${adjective4} day at the zoo.`
-
-        document.getElementById("output").textContent = paragraph;
-        // console.log(paragraph);
-    }
-
-
-    function pickForMe(formField, type) {
-        let wordToReturn = "";
-        let adjectives = ['big', 'cool', 'strong', 'sweet']
-        let nouns = ['monkey', 'building', 'anteater', 'cup']
-        let verbs = ['run', 'sit', 'stand', 'lay down']
-        let verbPastTense = ['put', 'talked', 'walked', 'swam']
-        let adverbs = ['vainly', 'tightly', 'afterwards', 'simply', 'less', 'energetically', 'clearly', 'excitedly', 'wisely', 'painfully', 'greatly', 'elegantly']
-
-        if (type === 'adjective') wordToReturn = adjectives[Math.floor(Math.random() * adjectives.length)];
-        if (type === 'noun') wordToReturn = nouns[Math.floor(Math.random() * nouns.length)];
-        if (type === 'verb') wordToReturn = verbs[Math.floor(Math.random() * verbs.length)];
-        if (type === 'verbPastTense') wordToReturn = verbPastTense[Math.floor(Math.random() * verbPastTense.length)];
-        if (type === 'adverb') wordToReturn = adverbs[Math.floor(Math.random() * adverbs.length)];
-
-        document.getElementById(formField).value = wordToReturn;
-    }
-</script>
-
 <body>
+    <div class="container-md">
 
+        <h1 class="display-6">Lola's MadLibs</h1>
 
-    <form>
-        <span title="Something that describes a noun">Adjective:</span><input id="adjective1"><button type="button" onClick="pickForMe('adjective1', 'adjective');">Pick one for me</button><br>
-        <span title="person,place or thing">Noun:</span> <input id="noun1"><button type="button" onClick="pickForMe('noun1', 'noun');">Pick one for me</button><br>
-        <span title="Something that describes an action">Verb (Past Tense):</span> <input id="verb1"><button type="button" onClick="pickForMe('verb1', 'verbPastTense');">Pick one for me</button><br>
-        <span title="Something that describes a verb">Adverb:</span> <input id="adverb1"><button type="button" onClick="pickForMe('adverb1', 'adverb');">Pick one for me</button><br>
-        <span title="Something that describes a noun">Adjective:</span> <input id="adjective2"><button type="button" onClick="pickForMe('adjective2', 'adjective');">Pick one for me</button><br>
-        <span title="person,place or thing">Noun:</span> <input id="noun2"><button type="button" onClick="pickForMe('noun2', 'noun');">Pick one for me</button><br>
-        <span title="person,place or thing">Noun:</span> <input id="noun3"><button type="button" onClick="pickForMe('noun3', 'noun');">Pick one for me</button><br>
-        <span title="Something that describes a noun">Adjective:</span> <input id="adjective3"><button type="button" onClick="pickForMe('adjective3', 'adjective');">Pick one for me</button><br>
-        <span title="Something that describes an action">Verb:</span> <input id="verb2"><button type="button" onClick="pickForMe('verb2', 'verb');">Pick one for me</button><br>
-        <span title="Something that describes a verb">Adverb:</span> <input id="adverb2"><button type="button" onClick="pickForMe('adverb2', 'adverb');">Pick one for me</button><br>
-        <span title="Something that describes an action">Verb (Past Tense):</span> <input id="verb3"><button type="button" onClick="pickForMe('verb3', 'verbPastTense');">Pick one for me</button><br>
-        <span title="Something that describes a noun">Adjective:</span> <input id="adjective4"><button type="button" onClick="pickForMe('adjective4', 'adjective');">Pick one for me</button><br>
-    </form>
-    <button onClick="makeMadLib();">Go!</button>
+        <form>
+            <div class="row mb-3" title="Something that describes a noun">
+                <div class="col-sm-2">Adjective</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adjective1" name="adjective1" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adjective1', 'adjective');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="person,place or thing">
+                <div class="col-sm-2">Noun</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="noun1" name="noun1" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('noun1', 'noun');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes an action">
+                <div class="col-sm-2">Verb (Past Tense):</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="verb1" name="verb1" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('verb1', 'verbPastTense');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes a verb">
+                <div class="col-sm-2">Adverb</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adverb1" name="adverb1" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adverb1', 'adverb');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes a noun">
+                <div class="col-sm-2">Adjective</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adjective2" name="adjective2" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adjective2', 'adjective');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="person,place or thing">
+                <div class="col-sm-2">Noun</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="noun2" name="noun2" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('noun2', 'noun');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="person,place or thing">
+                <div class="col-sm-2">Noun</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="noun3" name="noun3" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('noun3', 'noun');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes a noun">
+                <div class="col-sm-2">Adjective</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adjective3" name="adjective3" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adjective3', 'adjective');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes an action">
+                <div class="col-sm-2">Verb</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="verb2" name="verb2" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('verb2', 'verb');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes a verb">
+                <div class="col-sm-2">Adverb</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adverb2" name="adverb2" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adverb2', 'adverb');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes an action">
+                <div class="col-sm-2">Verb (Past Tense)</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="verb3" name="verb3" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('verb3', 'verbPastTense');">Pick for me</button>
+                </div>
+            </div>
+            <div class="row mb-3" title="Something that describes a noun">
+                <div class="col-sm-2">Adjective</div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" id="adjective4" name="adjective4" required>
+                </div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-outline-secondary" onClick="pickForMe('adjective4', 'adjective');">Pick for me</button>
+                </div>
+            </div>
 
-    <p id="output"></p>
+            <div class="row mb-3">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-2">
+                    <button type="button" class="btn btn-primary" onClick="makeMadLib();">GO!</button>
+                </div>
+            </div>
 
+            <div class="row mb-3" title="Something that describes a noun">
+                <div class="col-sm-6">
+                    <p id="output"></p>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
 
+    <!-- Bootstrap bundle-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 </body>
 
 </html>
