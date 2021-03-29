@@ -52,7 +52,7 @@
       </div>
       <!-- <input type="hidden" id="submissionId" name="submissionId" value=""> -->
       <!-- <input type="hidden" id="candidateId" name="candidateId" value=""> -->
-      <button type="submit" class="button is-link">Submit</button>
+      <button type="submit" class="button is-link" onclick="this.disabled=true;this.innerHTML='Sending, please wait...';this.form.submit();">Submit</button>
     </form>
   </div>
   </div>
