@@ -143,7 +143,7 @@
       <input type="hidden" id="UserID" name="UserID" value="">
       <input type="hidden" id="authCode" name="authCode" value="">
       <input type="hidden" id="receivedData" name="receivedData" value="">
-      <button type="submit" class="button is-link">Submit</button>
+      <button type="submit" class="button is-link" onclick="this.disabled=true;this.innerHTML='Sending, please wait...';this.form.submit();">Submit</button>
     </form>
   </div>
   </div>
