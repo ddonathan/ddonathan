@@ -200,6 +200,7 @@
 
       // Set values from the querystring
       for (let key in query_string) {
+        console.log("key", key)
 
         // used to hold the value through this loop
         fieldId = key
@@ -207,10 +208,15 @@
         // If we have a products list, then split it out
         if (fieldId === "products") {
           products = query_string[fieldId].split(",")
+          console.log("products", products)
 
           // Loop through them and set the keyValue so we can use it to set the values in the form
           for (let product of products) {
-            if (document.getElementsByName(product)) fieldId = document.getElementsByName(product)[0].id
+            console.log("product", product)
+            if (document.getElementsByName(product)) {
+              fieldId = document.getElementsByName(product)[0].id
+              console.log("fieldId", fieldId)
+            }
           }
         }
 
