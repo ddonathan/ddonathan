@@ -216,6 +216,12 @@
             if (document.getElementsByName(product)) {
               fieldId = document.getElementsByName(product)[0].id
               console.log("fieldId", fieldId)
+
+              // Check the box for this product
+              if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
+                console.log("Checkbox, checking", fieldId);
+                document.getElementById(fieldId).checked = true;
+              }
             }
           }
         }
