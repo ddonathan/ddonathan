@@ -70,16 +70,16 @@
     }
 
 
-    //
+    // 
     // Load File
-    //
+    // 
     function loadFile(url, callback) {
       PizZipUtils.getBinaryContent(url, callback);
     }
 
-    //
+    // 
     // Generate
-    //
+    // 
     function generate() {
       loadFile("template.docx", function (error, content) {
         if (error) { throw error };
@@ -172,9 +172,9 @@
     // save query_string
     var query_string = QueryStringToJSON();
 
-    //
+    // 
     // OnLoad
-    //
+    // 
     window.onload = function () {
 
       var form = document.querySelector("form");
@@ -282,7 +282,7 @@
               pricing: "2650"
             },
             onboarding: {
-              name: "onboarding",
+              name: "Onboarding",
               pricing: "65"
             },
             vms_submittals: {
@@ -299,16 +299,6 @@
             }
           },
           additions: {
-            onboardingAble: {
-              name: "onboardingAble",
-              pricing: "6000",
-              method: "$"
-            },
-            onboarding365: {
-              name: "onboarding365",
-              pricing: "6000",
-              method: "$"
-            },
             newHireExport: {
               pricing: 500,
               method: "$"
@@ -615,9 +605,9 @@
       }, null, 4)
     }
 
-    //
+    // 
     // Check that a form is valid and show alerts
-    //
+    // 
     function checkValid(container) {
       let alertText = "";
       let validationErrors = []
@@ -633,7 +623,7 @@
 
       if (container.data.userCount > 15 && document.getElementById("timelineLow").value <= "13") validationWarnings.push(`  - User count is ${container.data.userCount} and timeline is ${container.data.timelineWeeks}`)
 
-      //  if the form isn't valid, show the message and
+      //  if the form isn't valid, show the message and 
       if (validationErrors.length === 0 && validationWarnings.length === 0) {
         document.getElementById("validationMsg_div").className = "d-none";
         document.getElementById("validationMsg").innerHTML = "";
@@ -782,11 +772,12 @@
           break;
         case "SMB":
           document.getElementById("timelineLow").value = "10";
-          document.getElementById("timelineHigh").value = "14";
+          document.getElementById("timelineHigh").value = "16";
           break;
         case "Field":
-          document.getElementById("timelineLow").value = "10";
-          document.getElementById("timelineHigh").value = "14";
+          document.getElementById("numPayments").value = "3";
+          document.getElementById("timelineLow").value = "13";
+          document.getElementById("timelineHigh").value = "18";
           break;
         case "BH1":
           document.getElementById("numPayments").value = "3";
@@ -870,21 +861,9 @@
             </label>
           </div>
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="onboarding" name="Onboarding - BBO Onboarding" value="true">
+            <input class="form-check-input" type="checkbox" id="onboarding" name="Onboarding" value="true">
             <label class="form-check-label" for="onboarding">
-              Onboarding (BBO)
-            </label>
-          </div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="onboardingAble" name="Onboarding - Able Onboarding" value="true">
-            <label class="form-check-label" for="onboardingAble">
-              Onboarding (Able) <span class="badge bg-secondary bg-warning text-dark">Coming Soon</span>
-            </label>
-          </div>
-          <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="onboarding365" name="Onboarding - Onboarding 365" value="true">
-            <label class="form-check-label" for="onboarding365">
-              Onboarding (365) <span class="badge bg-secondary bg-warning text-dark">Coming Soon</span>
+              Onboarding
             </label>
           </div>
           <div class="form-check form-switch">
