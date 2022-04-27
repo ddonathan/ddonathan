@@ -70,16 +70,16 @@
     }
 
 
-    // 
+    //
     // Load File
-    // 
+    //
     function loadFile(url, callback) {
       PizZipUtils.getBinaryContent(url, callback);
     }
 
-    // 
+    //
     // Generate
-    // 
+    //
     function generate() {
       loadFile("template.docx", function (error, content) {
         if (error) { throw error };
@@ -141,7 +141,7 @@
         // Send to document creation
         doc.setData(dataToSend);
         try {
-          // render the document (replace all occurences of {first_name} by John, {last_name} by Doe, ...)
+          // render the document (replace all occurrences of {first_name} by John, {last_name} by Doe, ...)
           doc.render();
         }
         catch (error) {
@@ -172,9 +172,9 @@
     // save query_string
     var query_string = QueryStringToJSON();
 
-    // 
+    //
     // OnLoad
-    // 
+    //
     window.onload = function () {
 
       var form = document.querySelector("form");
@@ -202,6 +202,11 @@
       for (let key in query_string) {
         console.log("key", key)
 
+        // Fix for issue caused 04/2022
+        if (key === "Onboarding%20-%20BBO%20Onboarding") {
+          key = "Onboarding"
+        }
+
         // used to hold the value through this loop
         fieldId = key
 
@@ -213,6 +218,12 @@
           // Loop through them and set the keyValue so we can use it to set the values in the form
           for (let product of products) {
             console.log("product", product)
+
+            // Fix for issue caused 04/2022
+            if (product === "onboarding") {
+              product = "Onboarding"
+            }
+
             if (document.getElementsByName(product)) {
               fieldId = document.getElementsByName(product)[0].id
               console.log("fieldId", fieldId)
@@ -502,7 +513,7 @@
 
               // If we have more than one
               if (count > 1) {
-                // If we charge less for addditional ones, do that work first
+                // If we charge less for additional ones, do that work first
                 if (value.addtlPricing) container.calcs.additions += (count - 1) * value.addtlPricing;
 
                 // otherwise just add in the rest
@@ -605,9 +616,9 @@
       }, null, 4)
     }
 
-    // 
+    //
     // Check that a form is valid and show alerts
-    // 
+    //
     function checkValid(container) {
       let alertText = "";
       let validationErrors = []
@@ -623,7 +634,7 @@
 
       if (container.data.userCount > 15 && document.getElementById("timelineLow").value <= "13") validationWarnings.push(`  - User count is ${container.data.userCount} and timeline is ${container.data.timelineWeeks}`)
 
-      //  if the form isn't valid, show the message and 
+      //  if the form isn't valid, show the message and
       if (validationErrors.length === 0 && validationWarnings.length === 0) {
         document.getElementById("validationMsg_div").className = "d-none";
         document.getElementById("validationMsg").innerHTML = "";
