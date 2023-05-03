@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>THQ Proposal Generator</title>
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
+  <!-- Bootstrap -->
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+
+  <!-- Docx Templater -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.19.7/docxtemplater.js"></script>
+  <script src="https://unpkg.com/pizzip@3.0.6/dist/pizzip.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+  <script src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils.js"></script>
+  <!--
+    Mandatory in IE 6, 7, 8 and 9.
+    -->
+  <!--[if IE]>
+        <script type="text/javascript" src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils-ie.js"></script>
+    <![endif]-->
+  <script>
+    //
+    //  ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
+    //  ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
+    //  █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
+    //  ██╔══╝  ██║   ██║██║╚██╗██║██║        ██║   ██║██║   ██║██║╚██╗██║╚════██║
+    //  ██║     ╚██████╔╝██║ ╚████║╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║███████║
+    //  ╚═╝      ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚══════╝
+    //
+
+    // Set options based on Package
+    function setPackageItems() {
+      let package = document.getElementById("package").value;
+      let market = document.getElementById("market").value;
+      let userCount = document.getElementById("userCount").value;
+
+      // Set selections based on Package and Market
+      switch (true) {
+        case package == "smbGrowth" && market === "NOAM":
+          document.getElementById("ats").value = "ats_enterprise";
+          document.getElementById("time_expense").checked = true;
+          document.getElementById("invoicing").checked = true;
+          document.getElementById("analytics").value = "analyticsGrowth";
+          document.getElementById("automation").value = "autoEss";
+          document.getElementById("onboarding").value = "onbClassic";
+          break;
+        case package == "smbGrowth" && market !== "NOAM":
+          document.getElementById("ats").value = "analyticsGrowth";
+          document.getElementById("time_expense").checked = false;
+          document.getElementById("invoicing").checked = false;
+          document.getElementById("analytics").value = "analyticsGrowth";
+          document.getElementById("automation").value = "autoEss";
+          document.getElementById("onboarding").value = "onbClassic";
+          break;
+        case package == "fieldGrowth" && market === "NOAM":
+          document.getElementById("ats").value = "ats_enterprise";
+          document.getElementById("time_expense").checked = true;
+          document.getElementById("invoicing").checked = true;
+          document.getElementById("analytics").value = "analyticsEnterprise";
+
+          // Depending on user count, set essentials or intermediate
+          if (userCount < 25) {
+            document.getElementById("automation").value = "autoEss";
+            document.getElementById("onboarding").value = "onbTalentEss";
+          } else {
+            document.getElementById("automation").value = "autoInt";
+            document.getElementById("onboarding").value = "onbTalentInt";
+          }
+          break;
+        case package == "fieldGrowth" && market !== "NOAM":
+          document.getElementById("ats").value = "ats_enterprise";
+          document.getElementById("time_expense").checked = false;
+          document.getElementById("invoicing").checked = false;
+          document.getElementById("analytics").value = "";
+
+          // Depending on user count, set essentials or intermediate
+          if (userCount < 25) {
+            document.getElementById("automation").value = "autoEss";
+          } else {
+            document.getElementById("automation").value = "autoInt";
+          }
+          document.getElementById("onboarding").value = "onb365";
+          break;
+        default:
+          document.getElementById("ats").checked = false;
+          document.getElementById("time_expense").checked = false;
+          document.getElementById("invoicing").checked = false;
+          document.getElementById("analytics").value = "";
+          document.getElementById("automation").value = "";
+          document.getElementById("onboarding").value = "";
+          break;
+      }
+    }
+
+    // Get Value of Package and update products
+    function getTalentPlatform(e) {
+      let package = document.getElementById("talentPlatform").value;
+
+      // If Talent Platform, select Talent Edition for Onboarding and Essentials or Intermediate for Automation
+      if (package == "talentPlatformEss") {
+        document.getElementById("onboarding").value = "onbTalentEss";
+        document.getElementById("onboarding").disabled = true;
+        document.getElementById("automation").value = "autoEss";
+        document.getElementById("automation").disabled = true;
+      } else if (package == "talentPlatformInt") {
+        document.getElementById("onboarding").value = "onbTalentInt";
+        document.getElementById("onboarding").disabled = true;
+        document.getElementById("automation").value = "autoInt";
+        document.getElementById("automation").disabled = true;
+      } else if (package == "") {
+        document.getElementById("onboarding").value = "";
+        document.getElementById("automation").value = "";
+        document.getElementById("onboarding").disabled = false;
+        document.getElementById("automation").disabled = false;
+      }
+    }
+
+    function generate() {
+      loadFile("template.docx", function (error, content) {
+        if (error) { throw error };
+
+        // The error object contains additional information when logged with JSON.stringify (it contains a properties object containing all suberrors).
+        function replaceErrors(key, value) {
+          if (value instanceof Error) {
+            return Object.getOwnPropertyNames(value).reduce(function (error, key) {
+              error[key] = value[key];
+              return error;
+            }, {});
+          }
+          return value;
+        }
+
+        function errorHandler(error) {
+          console.log(JSON.stringify({ error: error }, replaceErrors));
+
+          if (error.properties && error.properties.errors instanceof Array) {
+            const errorMessages = error.properties.errors.map(function (error) {
+              return error.properties.explanation;
+            }).join("\n");
+            console.log('errorMessages', errorMessages);
+            // errorMessages is a humanly readable message looking like this :
+            // 'The tag beginning with "foobar" is unopened'
+          }
+          throw error;
+        }
+
+        var zip = new PizZip(content);
+        var doc;
+        try {
+          doc = new window.docxtemplater(zip, { paragraphLoop: true })
+        } catch (error) {
+          // Catch compilation errors (errors caused by the compilation of the template : misplaced tags)
+          errorHandler(error);
+        }
+
+        // Retrieve the data from sessionStorage
+        const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
+        const dataToSend = pricingData.data;
+
+        // Copy down relevant data to dataToSend
+        dataToSend.totalAmt = pricingData.calcs.total.low;
+        dataToSend[`timeline${pricingData.data.timelineTable}`] = true;
+        dataToSend.timelineWeeks = `${dataToSend.timelineLow} - ${dataToSend.timelineHigh} weeks`;
+
+        // Loop through pricingData.calcs.itemized and push to dataToSend.products
+        dataToSend.products = [];
+        pricingData.calcs.itemized.forEach((item) => {
+          if (item.type === "product") {
+
+            let name = item.name;
+
+            // if there's a quantity, add to name
+            if (item.quantity) {
+              name = `${name} (${item.quantity})`
+            }
+
+            dataToSend.products.push(name);
+          }
+        })
+
+
+
+
+        // Format dollar amounts if we have them (and remove dollar sign from template)
+        dataToSend.onSiteTrainingAmt = formatter.format(dataToSend.onSiteTrainingAmt);
+        dataToSend.afterCareAmt = formatter.format(dataToSend.afterCareAmt);
+        dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
+
+        // If needed to convert number to word
+        var dg = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+
+        // Convert numbers to words
+        dataToSend.plCount = dg[dataToSend.plCount]
+        dataToSend.npeCount = dg[dataToSend.npeCount]
+        dataToSend.oscpCount = dg[dataToSend.oscpCount]
+
+        // Convert numPayments
+        let paymentNumber = dg[dataToSend.numPayments]
+        dataToSend[`payments_${paymentNumber}`] = true
+
+        console.log("generate-dataToSend", dataToSend)
+
+        // Send to document creation
+        doc.setData(dataToSend);
+        try {
+          // render the document (replace all occurrences of {first_name} by John, {last_name} by Doe, ...)
+          doc.render();
+        }
+        catch (error) {
+          // Catch rendering errors (errors relating to the rendering of the template : angularParser throws an error)
+          errorHandler(error);
+        }
+
+        var out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }) //Output the document using Data-URI
+        saveAs(out, `${dataToSend.clientName} - Tonic HQ Implementation.docx`)
+      })
+    }
+
+    //
+    // Check that a form is valid and show alerts
+    //
+    function checkValid() {
+      let alertText = "";
+      let validationErrors = []
+      let validationWarnings = [];
+
+      if (!document.getElementById("clientName").value) {
+        validationErrors.push(" - Company Name not provided")
+      }
+
+      if (!document.getElementById("existingSystem").value) {
+        validationErrors.push("  - Existing System not provided")
+      }
+
+      if (!document.getElementById("timelineTable").value) {
+        validationErrors.push("  - Timeline table not selected")
+      }
+
+      if (document.getElementById("userCount").value > 15 && document.getElementById("timelineLow").value <= "13") {
+        validationWarnings.push(`  - User count is ${document.getElementById("userCount").value} and timeline low is ${document.getElementById("timelineLow").value}`)
+      }
+
+      // If we've gotten pricing back, use the amounts to validate things
+      const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
+      if (pricingData) {
+        if (pricingData?.body?.calcs?.total?.low > 15000 && document.getElementById("numPayments").value === "2") {
+          validationWarnings.push(`  - Price is ${formatter.format(pricingData.body.calcs.total.low)} and it's set to just two payments`)
+        }
+      }
+
+      //  if the form isn't valid, show the message and
+      if (validationErrors.length === 0 && validationWarnings.length === 0) {
+        document.getElementById("validationMsg_div").className = "d-none";
+        document.getElementById("validationMsg").innerHTML = "";
+        document.getElementById("generateProposal").className = "btn btn-primary";
+      } else {
+        // Show the alert box
+        document.getElementById("validationMsg_div").className = "";
+
+        // If it's an error, show them
+        if (validationErrors.length > 0) {
+          alertText = "<strong>Alerts:</strong> <br>" + validationErrors.join("<br>") + "<br>";
+        }
+
+        // If it's a warning, show them
+        if (validationWarnings.length > 0) {
+          alertText += "<strong>Warnings:</strong> <br>" + validationWarnings.join("<br>");
+          document.getElementById("validationMsg").className = "alert alert-warning alert-dismissible fade show";
+        }
+        if (validationErrors.length > 0) document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+
+        // Hide Generate Proposal
+        document.getElementById("generateProposal").className = "btn btn-primary d-none";
+
+        // Finish up alertText and set it
+        alertText += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"  data-bs-toggle="tooltip" data-bs-placement="right" title="Closing this alert will allow you to generate the proposal" onclick="checkValidOverride();"></button>';
+        document.getElementById("validationMsg").innerHTML = alertText
+
+        return validationErrors
+      }
+    }
+
+    function checkValidOverride() {
+      document.getElementById("generateProposal").className = "btn btn-primary";
+    }
+
+    // Remove Falsy Function
+    const removeFalsy = (obj) => {
+      let newObj = {};
+      Object.keys(obj).forEach((prop) => {
+        if (obj[prop]) { newObj[prop] = obj[prop]; }
+      });
+      return newObj;
+    };
+
+    // Round to the nearest 10, 100, 500, etc.
+    function roundTo(amount, roundTo) {
+      amount = Math.ceil(amount / roundTo) * roundTo;
+      return amount
+    }
+
+    // Set options based on back office
+    function funcBackOfficeOptions(backoffice) {
+      // If ATS or not, show the ATS options or not
+      console.log(document.getElementById("ats").value)
+      if (document.getElementById("ats").value) {
+        if (document.getElementById("ats").value === "ats_enterprise") {
+          document.getElementById("credentialing_div").className = "form-check form-switch";
+        }
+        document.getElementById("newHireExport_div").className = "form-check form-switch";
+        document.getElementById("npe_div").className = "row mb-3";
+        document.getElementById("pl_div").className = "row mb-3";
+        document.getElementById("oscp_div").className = "row mb-3";
+        document.getElementById("otherOptions_div").className = "row mb-3";
+      } else {
+        if (document.getElementById("ats").value === "ats_enterprise") {
+          document.getElementById("credentialing_div").className = "row mb-3 d-none";
+        }
+        document.getElementById("newHireExport_div").className = "row mb-3 d-none";
+        document.getElementById("npe_div").className = "row mb-3 d-none";
+        document.getElementById("pl_div").className = "row mb-3 d-none";
+        document.getElementById("oscp_div").className = "row mb-3 d-none";
+        document.getElementById("otherOptions_div").className = "row mb-3 d-none";
+      }
+
+
+      // If it's either Time/Expense or Invoicing, show the backoffice options. If it's neither, hide them and reset the labels
+      if (document.getElementById("time_expense")?.checked || document.getElementById("invoicing")?.checked) {
+        document.getElementById("backoffice_options_div").className = "row mb-3";
+      } else {
+        document.getElementById("backoffice_options_div").className = "row mb-3 d-none";
+      }
+
+      // If time/expense then show pay data export is checked then hide invoicing as an option
+      if (document.getElementById("time_expense").checked) {
+        document.getElementById("PayDataExport_div").className = "form-check form-switch";
+      }
+      else {
+        document.getElementById("PayDataExport").checked = false;
+        document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
+      }
+
+      // If invoicing then show invoice export as an option
+      if (document.getElementById("invoicing").checked) {
+        document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+
+        // If QuickBooks is checked then hide invoice export as an option
+        if (document.getElementById("qbIntegration").checked) {
+          document.getElementById("InvoiceExport").checked = false;
+          document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+        }
+      }
+      else {
+        document.getElementById("InvoiceExport").checked = false;
+        document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+      }
+
+      // Before we wrap up, test all the checkboxes and show only what's appropriate
+      // If pay/bill is checked we'll show both invoice and pay data export
+      if (event.target.name === "pay_bill" && document.getElementById("pay_bill").checked === true) {
+        // document.getElementById("backoffice_options_div").className = "row mb-3";
+        // document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+        // document.getElementById("PayDataExport_div").className = "form-check form-switch";
+      }
+
+      if (event.target.name === "pay_bill" && document.getElementById("pay_bill").checked === false) {
+        // Uncheck and hide the options
+        // document.getElementById("PayDataExport_div").className = "form-check form-switch d-none";
+        // document.getElementById("InvoiceExport_div").className = "form-check form-switch d-none";
+        // document.getElementById("qbIntegration").checked = false;
+        // document.getElementById("InvoiceExport").checked = false;
+        // document.getElementById("PayDataExport").checked = false;
+
+        // If applicable, enable the checkboxes
+        if (document.getElementById("invoicing").checked) document.getElementById("InvoiceExport_div").className = "form-check form-switch";
+        if (document.getElementById("time_expense").checked) document.getElementById("PayDataExport_div").className = "form-check form-switch";
+      }
+    }
+
+    function funcOnSiteTraining() {
+      if (document.getElementById("onSiteTraining").checked) {
+        document.getElementById("onSiteTraining_div").className = "col-sm-2";
+      } else {
+        document.getElementById("onSiteTraining_div").className = "d-none";
+      }
+    }
+
+    function funcAfterCare() {
+      if (document.getElementById("afterCare").checked) {
+        document.getElementById("afterCare_div").className = "col-sm-2";
+      } else {
+        document.getElementById("afterCare_div").className = "d-none";
+      }
+    }
+
+    function funcTimelineTable() {
+      switch (document.getElementById("timelineTable").value) {
+        case "NoDM":
+          document.getElementById("timelineLow").value = "9";
+          document.getElementById("timelineHigh").value = "12";
+          break;
+        case "SMB":
+          document.getElementById("timelineLow").value = "10";
+          document.getElementById("timelineHigh").value = "14";
+          break;
+        case "Field":
+          document.getElementById("numPayments").value = "3";
+          document.getElementById("timelineLow").value = "12";
+          document.getElementById("timelineHigh").value = "16";
+          break;
+        case "BH1":
+          document.getElementById("numPayments").value = "5";
+          document.getElementById("timelineLow").value = "40";
+          document.getElementById("timelineHigh").value = "52";
+          break;
+        default:
+          break;
+      }
+    }
+
+    // Formatting functions
+    function formatCurrency(amount, currency, exchangeRate) {
+      // Determine language
+      let language = "en-US";
+      switch (currency) {
+        case "CAD":
+          language = "en-CA";
+          break;
+        case "GBP":
+          language = "en-UK";
+          break;
+        case "EUR":
+          language = "de-DE";
+          break;
+        case "AUD":
+          language = "en-AU";
+          break;
+      }
+
+      if (currency === "USD" || currency === "EUR" || currency === "GBP") {
+        const formatterUSD = new Intl.NumberFormat(language, {
+          style: "currency",
+          currency: currency,
+          currencyDisplay: "narrowSymbol",
+          minimumFractionDigits: 0
+        });
+
+        // If the currency isn't USD, then use the exchange rate
+        if (currency != "USD") {
+          amount = roundTo(amount * exchangeRate, 500);
+        }
+
+        // Format the amount
+        amount = formatterUSD.format(amount);
+      } else {
+        const formatterIntl = new Intl.NumberFormat(language, {
+          style: "currency",
+          currency: currency,
+          currencyDisplay: "code",
+          minimumFractionDigits: 0
+        });
+
+        amount = roundTo(amount * exchangeRate, 500);
+        amount = formatterIntl.format(amount);
+      }
+
+      return amount;
+    }
+
+    function QueryStringToJSON() {
+      var pairs = location.search.slice(1).split("&");
+
+      var result = {};
+      pairs.forEach(function (pair) {
+        pair = pair.split("=");
+        result[pair[0]] = decodeURIComponent(pair[1] || "").replace("+", " ");
+      });
+
+      return JSON.parse(JSON.stringify(result));
+    }
+
+    // save query_string
+    var query_string = QueryStringToJSON();
+
+    var formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumSignificantDigits: 4,
+    });
+
+    var fmtPct = new Intl.NumberFormat("en-US", {
+      style: "percent",
+    });
+
+    // Save Draft, get shortURL
+    function saveDraft() {
+      let linkURL = document.getElementById("linkURL").href
+      linkURL = linkURL.replace("file:///C:/Source/", "https://ddonathan.github.io/")
+      console.log(linkURL)
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      var raw = JSON.stringify({
+        "long_url": linkURL,
+        "domain": "https://thq.li/",
+        "api_token": "VOBpwXojb2qnELypxb1XwiGaYnH07Cy3oAX6SnRSQA4qbM09Sj3CP7EHbaKz"
+      });
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+
+      fetch("https://t.ly/api/v1/link/shorten", requestOptions)
+        .then(response => response.json())
+        .then(result => {
+          document.getElementById("shortUrl_tr").className = ""
+          document.getElementById("shortUrl").innerHTML = result.short_url
+          document.getElementById("shortUrl2").innerHTML = result.short_url
+        })
+        .catch(error => console.log('error', error));
+    }
+
+    // Load File
+    function loadFile(url, callback) {
+      PizZipUtils.getBinaryContent(url, callback);
+    }
+
+    //
+    //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
+    // ██╔═══██╗████╗  ██║██║     ██╔═══██╗██╔══██╗██╔══██╗
+    // ██║   ██║██╔██╗ ██║██║     ██║   ██║███████║██║  ██║
+    // ██║   ██║██║╚██╗██║██║     ██║   ██║██╔══██║██║  ██║
+    // ╚██████╔╝██║ ╚████║███████╗╚██████╔╝██║  ██║██████╔╝
+    // ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝
+    //
+    window.onload = function () {
+
+      // Set name on all form elements to match the id
+      var elements = document.querySelectorAll('input, select, textarea');
+      for (var i = 0; i < elements.length; i++) {
+        elements[i].name = elements[i].id;
+      }
+
+      // Set focus to clientName
+      document.getElementById("clientName").focus();
+
+      console.log(document.getElementById("currency").value)
+
+      // TODO Get data from ddb to set and show pricing next to items
+
+      // Add event listener for when user count changes
+      document.getElementById("userCount").addEventListener("change", function () {
+        setPackageItems();
+      });
+
+      // Add event listener for when market changes
+      document.getElementById("market").addEventListener("change", function () {
+        // resetChoices();
+        setPackageItems();
+      });
+
+      // Add event listener for when package changes
+      document.getElementById("package").addEventListener("change", function () {
+        setPackageItems();
+      });
+
+      // Add event listener for when talent platform changes
+      document.getElementById("talentPlatform").addEventListener("change", function () {
+        getTalentPlatform()
+      });
+
+      // Run the Back office automation
+      funcBackOfficeOptions();
+
+      // Get the form element
+      const form = document.querySelector('form');
+
+      if (form) {
+        // Add an event listener for when the form changes
+        form.addEventListener('change', function () {
+          // Clear the pricing table
+          document.getElementById("pricing_ballpark").innerHTML = ""
+          document.getElementById("pricing_basePricing").innerHTML = ""
+          document.getElementById("pricing_additions").innerHTML = ""
+          document.getElementById("pricing_totalAmt").innerHTML = ""
+
+          // Change button color back to green
+          document.getElementById("getPricing").classList.remove("btn-secondary");
+          document.getElementById("getPricing").classList.add("btn-success");
+
+          // Run the Back office automation
+          funcBackOfficeOptions()
+
+          // Check valid
+          checkValid()
+        });
+
+        // Add an event listener for form submission
+        form.addEventListener('submit', async (event) => {
+
+          // Prevent the default form submission behavior
+          event.preventDefault();
+
+          // Get the form data as a new FormData object
+          const formData = new FormData(form);
+
+          // Validate the form data
+          let errorsResult = checkValid()
+          if (errorsResult?.length > 0) {
+            console.log("Errors")
+          }
+
+          // Convert FormData to json
+          let formProps = Object.fromEntries(formData.entries());
+
+          // Save a copy of the formData so we can compare
+          previousFormData = formProps
+
+          // Stringify the form data
+          formProps = JSON.stringify(formProps)
+          console.log("formData", formProps)
+
+          const urlDev = "https://yxb3ebdvpgwc5xz3w5ixvglht40dorqd.lambda-url.us-west-2.on.aws/"
+          const urlProd = "https://p5uwweeqrdvaabo7mwnet4whha0syuyu.lambda-url.us-west-2.on.aws/"
+
+          // Send the form data to the fetch URL
+          const response = await fetch(urlDev, {
+            method: 'POST',
+            body: formProps,
+            redirect: 'follow'
+          })
+          if (response.ok) {
+            const data = await response.json();
+            console.log("data", data)
+            const body = data.body
+
+            // Save the API response data to sessionStorage
+            sessionStorage.setItem('pricingData', JSON.stringify(body));
+
+            // Update Results table
+            document.getElementById("pricing_ballpark").innerHTML = `${body.calcs.total.ballparkString || "$0"}`
+            document.getElementById("pricing_basePricing").innerHTML = `$${body.calcs.products.low} - $${body.calcs.products.high}`
+            document.getElementById("pricing_additions").innerHTML = `$${body.calcs.options}`
+            document.getElementById("pricing_totalAmt").innerHTML = `$${body.calcs.total.low}`
+
+            // Set color of button to gray
+            document.getElementById("getPricing").classList.remove("btn-success");
+            document.getElementById("getPricing").classList.add("btn-secondary");
+
+            // TODO Update Optional Offering amounts
+            // funcOnSiteTraining();
+            funcAfterCare();
+          } else {
+            console.error("Request failed with status", response.status);
+          }
+        });
+      }
+
+      // Set reset form url to the url they came in with
+      // document.getElementById("resetForm").addEventListener("click", function () {
+      //   window.location = window.location.href;
+      // }) ;
+      // document.getElementById("resetForm").addEventListener("dblclick", function () {
+      //   window.location = "proposalCalculator.html";
+      // });
+
+      // Initialize all tooltips
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+      })
+
+      // Set values from the querystring
+      for (let key in query_string) {
+        console.log("key", key)
+
+        // used to hold the value through this loop
+        fieldId = key
+
+        // If we have a products list, then split it out
+        if (fieldId === "products") {
+          products = query_string[fieldId].split(",")
+          console.log("products", products)
+
+          // Loop through them and set the keyValue so we can use it to set the values in the form
+          for (let product of products) {
+            console.log("product", product)
+            if (document.getElementsByName(product)) {
+              fieldId = document.getElementsByName(product)[0].id
+              console.log("fieldId", fieldId)
+
+              // Check the box for this product
+              if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
+                console.log("Checkbox, checking", fieldId);
+                document.getElementById(fieldId).checked = true;
+              }
+            }
+          }
+        }
+
+        // If it's a checkbox, check it, otherwise set the value
+        if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
+          console.log("Checkbox, checking", fieldId);
+          document.getElementById(fieldId).checked = true;
+        }
+        if (document.getElementById(fieldId) && document.getElementById(fieldId).type !== "checkbox") {
+          console.log("Not checkbox, setting value", fieldId);
+          document.getElementById(fieldId).value = query_string[fieldId];
+        }
+      }
+    };
+  </script>
+</head>
+
+<body>
+  <div class="container-md">
+    <form action="#" id="form" title="form" method="GET" class="needs-validation" novalidate>
+      <h1 class="display-6" onclick="window.location='proposalCalculator.html'">Tonic HQ Proposal Generator</h1>
+      <br>
+
+      <h5>Basic Information</h5>
+      <div class="row mb-3">
+        <div class="col-sm-2">Company Name</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="clientName" title="Client Name" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Market</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="market" title="Market">
+            <option value="APAC">APAC</option>
+            <option value="EMEA">EMEA</option>
+            <option value="NOAM" SELECTED>North America</option>
+            <option value="LATAM">Latin America</option>
+            <option value="UKI">UK & Ireland</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3" id="currency-form-element">
+        <div class="col-sm-2">Currency</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="currency" title="Currency">
+            <option value="CAD">Canadian Dollar</option>
+            <option value="USD" SELECTED>US Dollar</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Existing System</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="existingSystem" title="Existing System">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Additional Data Sources</div>
+        <div class="col-sm-6">
+          <input type="text" class="form-control" id="addtlDatasources" title="addtlDatasources">
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Number of Users*</div>
+        <div class="col-sm-2">
+          <input type="number" class="form-control" id="userCount" title="userCount" value="10" min="1" max="150" />
+        </div>
+      </div>
+
+      <div class="row mb-5"></div>
+
+      <div class="row mb-3" id="package-form-element">
+        <div class="col-sm-2">Package</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="package" title="package">
+            <option value="" SELECTED></option>
+            <option value="smbGrowth">Growth Edition - SMB</option>
+            <option value="fieldGrowth">Growth Edition - Field</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Analytics</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="analytics" title="analytics">
+            <option value="" SELECTED></option>
+            <option value="analyticsGrowth">Growth</option>
+            <option value="analyticsEnterprise">Enterprise</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">ATS & CRM</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="ats" title="ats">
+            <option value="" SELECTED></option>
+            <option value="ats_corp">Corporate</option>
+            <option value="ats_enterprise">Enterprise</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Automation</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="automation" title="automation">
+            <option value="" SELECTED></option>
+            <option value="autoEss">Essentials</option>
+            <option value="autoInt">Intermediate</option>
+            <option value="autoAdv">Advanced</option>
+            <option value="autoTra">Transformed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3" id="backoffice-form-element">
+        <div class="col-sm-2">Back Office</div>
+        <div class="col-sm-auto">
+          <div class="form-check form-switch" id="time_expense-form-element">
+            <input class="form-check-input" type="checkbox" id="time_expense" title="time_expense" value="true" onClick="funcBackOfficeOptions('BBO')">
+            <label class="form-check-label" id="time_expense_label" for="time_expense">
+              Time/Expense
+            </label>
+          </div>
+          <div class="form-check form-switch" id="invoicing-form-element">
+            <input class="form-check-input" type="checkbox" id="invoicing" title="invoicing" value="true" onClick="funcBackOfficeOptions('BBO')">
+            <label class="form-check-label" id="invoicing_label" for="invoicing">
+              Invoicing
+            </label>
+            <!--        </div>-->
+            <!--        <div class="form-check form-switch" id="pay_bill_div">-->
+            <!--            <input class="form-check-input" type="checkbox" id="pay_bill" title="pay_bill" value="true">-->
+            <!--            <label class="form-check-label" id="pay_bill_label" for="pay_bill">-->
+            <!--  Pay/Bill <span class="badge bg-secondary bg-warning text-dark">Experimental</span>-->
+            <!--</label>-->
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Onboarding</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="onboarding" title="onboarding">
+            <option value="" SELECTED></option>
+            <option value="onbClassic">SMB Edition</option>
+            <option value="onb365">365 Edition</option>
+            <option value="onbTalentEss">Talent Edition Essentials</option>
+            <option value="onbTalentInt">Talent Edition Intermediate</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Reporting</div>
+        <div class="col-sm-auto">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="canvas-form-element" title="canvas" value="true">
+            <label class="form-check-label" for="canvas">
+              Reporting Ad-hoc Edition
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3" id="talent_platform-form-element">
+        <div class="col-sm-2">Talent Platform</div>
+        <div class="col-sm-6">
+          <select class="form-select" id="talentPlatform" title="talentPlatform">
+            <option value="" SELECTED></option>
+            <option value="talentPlatformEss">Essentials</option>
+            <option value="talentPlatformInt">Intermediate</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-sm-2">Vendor Management</div>
+        <div class="col-sm-auto">
+          <div class="row">
+            <div class="col">
+              <div class="form-check form-switch">
+                <input type="number" class="form-control" id="vms_sync" title="vms_sync" min="0" max="20" />
+              </div>
+            </div>
+            <div class="col">
+              <label class="form-check-label" for="vms_sync">
+                VMS Sync
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="form-check form-switch">
+                <input type="number" class="form-control" id="vms_submittals" title="vms_submittals" min="0" max="2" />
+              </div>
+            </div>
+            <div class="col">
+              <label class="form-check-label" for="vms_submittals">
+                VMS Submittals
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" id="noOpp" value="true">
+      <input type="hidden" id="noEmail" value="true">
+      <input type="hidden" id="noBCC" value="true">
+      <input type="hidden" id="noDDB" value="true">
+      <input type="hidden" id="locale" value="">
+      <input type="hidden" id="countryCode" value="">
+  </div>
+
+  <div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingAdditions">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
+          <h5>Options</h5>
+        </button>
+      </h2>
+      <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div class="row mb-3 d-none" id="backoffice_options_div">
+            <div class="col-sm-2">Back Office Options</div>
+            <div class="col-sm-6">
+              <div id="qbIntegration_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="qbIntegration" title="qbIntegration" value="true" onClick="funcBackOfficeOptions('BBO')"> Quickbooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
+              </div>
+              <div id="InvoiceExport_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" title="InvoiceExport" value="true" onClick="funcBackOfficeOptions('BBO')"> Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
+              </div>
+              <div class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-sm-2">Payroll Reports</div>
+            <div class="col-sm">
+              <div id="newHireExport_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="newHireExport" title="newHireExport" value="true" /> New Hire Export <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
+              </div>
+              <div id="PayDataExport_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="PayDataExport" title="PayDataExport" value="true" /> Pay Data Export <small><span class="text-black-50" id="PayDataExport_pricing"></span></small>
+              </div>
+            </div>
+          </div>
+
+          <div id="pl_div" class="form-group row mb-3">
+            <div class="col-sm-2">Private Labels</div>
+            <div class="col-sm-2">
+              <input type="number" class="form-control" id="plCount" title="plCount" value="1" min="1" max="5" />
+            </div>
+            <div class="col-sm-6">
+              <small><span class="text-black-50" id="plCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
+            </div>
+          </div>
+
+          <div id="npe_div" class="form-group row mb-3">
+            <div class="col-sm-2">Non-Production Environments</div>
+            <div class="col-sm-2">
+              <input type="number" class="form-control" id="npeCount" title="npeCount" min="0" max="5" />
+            </div>
+            <div class="col-sm-6">
+              <small><span class="text-black-50" id="npeCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
+            </div>
+          </div>
+
+          <div id="oscp_div" class="form-group row mb-3">
+            <div class="col-sm-2">OSCPs</div>
+            <div class="col-sm-2">
+              <input type="number" class="form-control" id="oscpCount" title="oscpCount" min="0" max="5" />
+            </div>
+            <div class="col-sm-6">
+              <small><span class="text-black-50" id="oscpCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
+            </div>
+          </div>
+          <br />
+
+          <div id="otherOptions_div" class="row mb-3">
+            <div class="col-sm-2">Other Options</div>
+            <div class="col-sm-6">
+              <div id="credentialing_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="credentialing" title="Credentialing" value="true" />Credentialing <small><span class="text-black-50" id="credentialing_pricing"></span></small>
+              </div>
+              <div id="emailsAsNotes_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" title="emailsAsNotes" value="true" />Importing emails as notes <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
+              </div>
+              <div id="NoDataMigration_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" title="NoDataMigration" value="true" />Do not perform data migration <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
+              </div>
+              <div id="histSubmissions_div" class="form-check form-switch">
+                <input class="form-check-input position-static" type="checkbox" id="histSubmissions" title="histSubmissions" value="true" />Load historical submissions <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOptTHQ">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
+          <h5>Optional THQ Offerings</h5>
+        </button>
+      </h2>
+      <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div class="alert alert-secondary" role="alert">
+            Enabling will show the item on the proposal, it does not include it in the price. You can alter the price that's shown on the proposal.
+          </div>
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">OSCP</div>
+            <div class="col-sm-6">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" title="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpOption_pricing"></span></small>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">On Site Training</div>
+            <div class="col-sm-6">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
+              </div>
+              <div class="col-sm-3 d-none" id="onSiteTraining_div">
+                <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">White Glove</div>
+            <div class="col-sm-6">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
+              </div>
+              <div class="col-sm-3 d-none" id="afterCare_div">
+                <input class="form-control" type="number" id="afterCareAmt" title="Timeline Table" title="afterCareAmt" value="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingBilling">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
+          <h5>Billing and Timeline</h5>
+        </button>
+      </h2>
+      <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling" data-bs-parent="#accordionExample">
+        <div class="accordion-body">
+          <div class="row mb-3">
+            <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
+            <div class="col-sm-3">
+              <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED>
+                <option value="" SELECTED>-- Please Select --</option>
+                <option value="NoDM">No Data Migration</option>
+                <option value="SMB">SMB</option>
+                <option value="Field">Field</option>
+                <option value="BH1">Bullhorn One</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">Timeline (weeks)</div>
+            <div class="col-sm-2">
+              <div class="row mb-3">
+                <div class="col-auto">
+                  <input class="form-control" type="number" id="timelineLow" title="timelineLow" value="12" min="10" max="52" />
+                </div>
+                <div class="col-3">Low</div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-auto">
+                  <input class="form-control" type="number" id="timelineHigh" title="timelineHigh" value="16" min="10" max="52" />
+                </div>
+                <div class="col-3">High</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">Number of Payments</div>
+            <div class="col-sm-2">
+              <input class="form-control" type="number" id="numPayments" title="numPayments" value="2" min="2" max="5" />
+            </div>
+          </div>
+
+          <div class="form-group row mb-3">
+            <div class="col-sm-2">Bullhorn Subsidy</div>
+            <div class="col-sm-2">
+              <input type="number" class="form-control" id="subsidyAmt" title="subsidyAmt" value="" min="1">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item d-none">
+        <h2 class="accordion-header" id="headingSigning">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSigning" aria-expanded="false" aria-controls="collapseSigning">
+            <h5>Signing Recipients</h5>
+          </button>
+        </h2>
+        <div id="collapseSigning" class="accordion-collapse collapse" aria-labelledby="headingSigning" data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+            <div class="row mb-3">
+              <div class="alert alert-warning" role="alert">
+                This is not currently in use.
+              </div>
+              <div class="col-sm-2">THQ Rep</div>
+              <div class="col-sm-8">
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" title="recThqName" />
+                  &nbsp;&nbsp;&nbsp;
+                  <span class="input-group-text">@</span>
+                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" title="recThqEmail" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-2">Client Signer</div>
+              <div class="col-sm-8">
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" title="recClientName" />
+                  &nbsp;&nbsp;&nbsp;
+                  <span class="input-group-text">@</span>
+                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" title="recClientEmail" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-2">Bullhorn Rep</div>
+              <div class="col-sm-8">
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" title="recBhName" />
+                  &nbsp;&nbsp;&nbsp;
+                  <span class="input-group-text">@</span>
+                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" title="reBhEmail" />
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-2">Additional CC</div>
+              <div class="col-sm-8">
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" title="recCcName" />
+                  &nbsp;&nbsp;&nbsp;
+                  <span class="input-group-text">@</span>
+                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" title="reCcEmail" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingMisc">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+            <h5>Miscellaneous</h5>
+          </button>
+        </h2>
+        <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
+          <div class="accordion-body">
+            <div class="form-group row mb-3">
+              <div class="col-sm-2">Price Override</div>
+              <div class="col-sm-2">
+                <input type="number" class="form-control" id="overridePriceAmt" title="overridePriceAmt" value="" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="row" id="validationMsg_div" class="d-none">
+      <div class="col-sm-5">
+        <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
+      </div>
+    </div>
+    </form>
+
+    <div class="row">
+      <div class="col-12">
+        <button class="btn btn-outline-secondary" type="button" id="resetForm" data-bs-toggle="tooltip" data-bs-placement="right" title="Clears all data out of the form and resets to a 10 user ATS only imp">Reset Form</button>
+        <!-- <button class="btn btn-primary" type="submit">Submit form</button> -->
+        <button id="saveDraft" class="btn btn-secondary" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button>
+        <button id="getPricing" class="btn btn-success" form="form" type="submit" data-bs-toggle="tooltip" data-bs-placement="right" title="Get latest pricing based on your inputs">Get Pricing</button>
+        <button id="generateProposal" class="btn btn-primary" type="button" onclick="generate();">Generate Proposal</button>
+      </div>
+    </div>
+
+    <br /><br />
+    <h1 class="display-6">Pricing Results</h1>
+    <div class="row">
+      <div class="col-sm-6">
+        <table class="table table-striped table-hover">
+          <tbody>
+            <tr>
+              <td>Ballpark:</td>
+              <td><span id="pricing_ballpark"></span></td>
+            </tr>
+            <tr>
+              <td>Base Pricing:</td>
+              <td>
+                <span id="pricing_basePricing"></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <small><span class="text-muted" id="discount"></span></small>
+              </td>
+            </tr>
+            <tr>
+              <td>Additions:</td>
+              <td><span id="pricing_additions"></span></td>
+            </tr>
+            <tr>
+              <td>Total Amount:</td>
+              <td><span id="pricing_totalAmt" class=""></span>&nbsp;&nbsp;&nbsp;<span id="pricing_totalAmt_override" class=""></span></td>
+            </tr>
+            <tr id="shortUrl_tr" class="d-none">
+              <td>Link:</td>
+              <td><span id="shortUrl" class=""></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    //
+    // Form Validation
+    //
+    (function () {
+      "use strict";
+      window.addEventListener(
+        "load",
+        function () {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName("needs-validation");
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(
+            forms,
+            function (form) {
+              form.addEventListener(
+                "submit",
+                function (event) {
+                  if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }
+                  form.classList.add("was-validated");
+                },
+                false
+              );
+            }
+          );
+        },
+        false
+      );
+    })();
+  </script>
+
+  <!-- Bootstrap bundle-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</body>
+
+</html>
