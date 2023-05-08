@@ -142,7 +142,7 @@
             const errorMessages = error.properties.errors.map(function (error) {
               return error.properties.explanation;
             }).join("\n");
-            console.log('errorMessages', errorMessages);
+            console.error('errorMessages', errorMessages);
             // errorMessages is a humanly readable message looking like this :
             // 'The tag beginning with "foobar" is unopened'
           }
@@ -184,7 +184,12 @@
         })
 
 
-
+        // Get any data we need that's in the form that didn't go to AWS and back
+        if (document.getElementById("bullhornSubsidy").checked) {
+          dataToSend.bullhornSubsidy = true;
+        } else {
+          dataToSend.bullhornSubsidy = false;
+        }
 
         // Format dollar amounts if we have them (and remove dollar sign from template)
         dataToSend.onSiteTrainingAmt = formatter.format(dataToSend.onSiteTrainingAmt);
@@ -1110,8 +1115,10 @@
 
           <div class="form-group row mb-3">
             <div class="col-sm-2">Bullhorn Subsidy</div>
-            <div class="col-sm-2">
-              <input type="number" class="form-control" id="subsidyAmt" title="subsidyAmt" value="" min="1">
+            <div class="col-sm-6">
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input position-static" type="checkbox" id="bullhornSubsidy" title="Bullhorn Subsidy" value="true" /> <small><span class="text-black-50" id="bullhornSubsidy_pricing"></span></small>
+              </div>
             </div>
           </div>
         </div>
