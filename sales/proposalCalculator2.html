@@ -13,10 +13,11 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
 
   <!-- Docx Templater -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.19.7/docxtemplater.js"></script>
-  <script src="https://unpkg.com/pizzip@3.0.6/dist/pizzip.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
+  <!-- https://modules.docxtemplater.com/packages/v2/dan_tonichq/8a839e74-82a0-43c5-607f-fcb252c0e8a2/ -->
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
-  <script src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils.js"></script>
+  <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
   <!--
     Mandatory in IE 6, 7, 8 and 9.
     -->
@@ -666,6 +667,49 @@
             document.getElementById("getPricing").classList.add("btn-secondary");
 
             // TODO Update Optional Offering amounts
+            // Process additions
+            // Loop through body.lookup.additions
+            for (let entry of body.lookup.options) {
+              // Object.entries(body.lookup.options).forEach(entry => {
+              console.log("entry", entry)
+              const key = entry.id
+              const value = entry;
+
+              if (document.getElementById(`${key}_pricing`)) {
+                console.log("entry", entry)
+                let descToUse, addtlPricing
+
+                // If method is dollars, set description and additional pricing
+                if (value.method === "$") {
+                  descToUse = formatter.format(value.pricing);
+                  addtlPricing = formatter.format(value.addtlPricing)
+                }
+
+                // If method is percent, set description and calculate out additional pricing (round up to the tens)
+                if (value.method === "%") {
+                  descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")";
+                  if (value.addtlPricing) addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+
+                // If method is perEach
+                if (value.method === "perEach") {
+                  descToUse = `Base: ${formatter.format(value.pricingBase * 2, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`
+                  if (value.include > 0) {
+                    descToUse += ` ${value.include} included free.`
+                  }
+                  if (value.addtlPricing) addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+
+                // if it's addtional pricing, add
+                if (value.addtlPricing) descToUse += " first instance, " + addtlPricing + " each additional"
+
+                // Set label
+                if (descToUse) document.getElementById(`${key}_pricing`).innerHTML = descToUse
+              } else {
+                console.log(key, "not found")
+              }
+            }
+
             // funcOnSiteTraining();
             funcAfterCare();
           } else {
@@ -932,282 +976,281 @@
       <input type="hidden" id="noDDB" value="true">
       <input type="hidden" id="locale" value="">
       <input type="hidden" id="countryCode" value="">
-  </div>
 
-  <div class="accordion" id="accordionExample">
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingAdditions">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
-          <h5>Options</h5>
-        </button>
-      </h2>
-      <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <div class="row mb-3 d-none" id="backoffice_options_div">
-            <div class="col-sm-2">Back Office Options</div>
-            <div class="col-sm-6">
-              <div id="qbIntegration_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="qbIntegration" title="qbIntegration" value="true" onClick="funcBackOfficeOptions('BBO')"> Quickbooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
+      <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingAdditions">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdditions" aria-expanded="false" aria-controls="collapseAdditions">
+              <h5>Options</h5>
+            </button>
+          </h2>
+          <div id="collapseAdditions" class="accordion-collapse collapse" aria-labelledby="headingAdditions" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <div class="row mb-3 d-none" id="backoffice_options_div">
+                <div class="col-sm-2">Back Office Options</div>
+                <div class="col-sm-6">
+                  <div id="qbIntegration_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="qbIntegration" title="qbIntegration" value="true" onClick="funcBackOfficeOptions('BBO')"> Quickbooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
+                  </div>
+                  <div id="InvoiceExport_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" title="InvoiceExport" value="true" onClick="funcBackOfficeOptions('BBO')"> Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
+                  </div>
+                </div>
               </div>
-              <div id="InvoiceExport_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" title="InvoiceExport" value="true" onClick="funcBackOfficeOptions('BBO')"> Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
-              </div>
-              <div class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
-              </div>
-            </div>
-          </div>
 
-          <div class="row mb-3">
-            <div class="col-sm-2">Payroll Reports</div>
-            <div class="col-sm">
-              <div id="newHireExport_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="newHireExport" title="newHireExport" value="true" /> New Hire Export <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
-              </div>
-              <div id="PayDataExport_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="PayDataExport" title="PayDataExport" value="true" /> Pay Data Export <small><span class="text-black-50" id="PayDataExport_pricing"></span></small>
-              </div>
-            </div>
-          </div>
-
-          <div id="pl_div" class="form-group row mb-3">
-            <div class="col-sm-2">Private Labels</div>
-            <div class="col-sm-2">
-              <input type="number" class="form-control" id="plCount" title="plCount" value="1" min="1" max="5" />
-            </div>
-            <div class="col-sm-6">
-              <small><span class="text-black-50" id="plCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
-            </div>
-          </div>
-
-          <div id="npe_div" class="form-group row mb-3">
-            <div class="col-sm-2">Non-Production Environments</div>
-            <div class="col-sm-2">
-              <input type="number" class="form-control" id="npeCount" title="npeCount" min="0" max="5" />
-            </div>
-            <div class="col-sm-6">
-              <small><span class="text-black-50" id="npeCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
-            </div>
-          </div>
-
-          <div id="oscp_div" class="form-group row mb-3">
-            <div class="col-sm-2">OSCPs</div>
-            <div class="col-sm-2">
-              <input type="number" class="form-control" id="oscpCount" title="oscpCount" min="0" max="5" />
-            </div>
-            <div class="col-sm-6">
-              <small><span class="text-black-50" id="oscpCount_pricing"></span></small> <span class="text-black-50" id="plCount_addtl"></span></small>
-            </div>
-          </div>
-          <br />
-
-          <div id="otherOptions_div" class="row mb-3">
-            <div class="col-sm-2">Other Options</div>
-            <div class="col-sm-6">
-              <div id="credentialing_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="credentialing" title="Credentialing" value="true" />Credentialing <small><span class="text-black-50" id="credentialing_pricing"></span></small>
-              </div>
-              <div id="emailsAsNotes_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" title="emailsAsNotes" value="true" />Importing emails as notes <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
-              </div>
-              <div id="NoDataMigration_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" title="NoDataMigration" value="true" />Do not perform data migration <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
-              </div>
-              <div id="histSubmissions_div" class="form-check form-switch">
-                <input class="form-check-input position-static" type="checkbox" id="histSubmissions" title="histSubmissions" value="true" />Load historical submissions <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingOptTHQ">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
-          <h5>Optional THQ Offerings</h5>
-        </button>
-      </h2>
-      <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <div class="alert alert-secondary" role="alert">
-            Enabling will show the item on the proposal, it does not include it in the price. You can alter the price that's shown on the proposal.
-          </div>
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">OSCP</div>
-            <div class="col-sm-6">
-              <div class="form-check form-switch mb-3">
-                <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" title="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpOption_pricing"></span></small>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">On Site Training</div>
-            <div class="col-sm-6">
-              <div class="form-check form-switch mb-3">
-                <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
-              </div>
-              <div class="col-sm-3 d-none" id="onSiteTraining_div">
-                <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">White Glove</div>
-            <div class="col-sm-6">
-              <div class="form-check form-switch mb-3">
-                <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
-              </div>
-              <div class="col-sm-3 d-none" id="afterCare_div">
-                <input class="form-control" type="number" id="afterCareAmt" title="Timeline Table" title="afterCareAmt" value="" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingBilling">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
-          <h5>Billing and Timeline</h5>
-        </button>
-      </h2>
-      <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling" data-bs-parent="#accordionExample">
-        <div class="accordion-body">
-          <div class="row mb-3">
-            <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
-            <div class="col-sm-3">
-              <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED>
-                <option value="" SELECTED>-- Please Select --</option>
-                <option value="NoDM">No Data Migration</option>
-                <option value="SMB">SMB</option>
-                <option value="Field">Field</option>
-                <option value="BH1">Bullhorn One</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">Timeline (weeks)</div>
-            <div class="col-sm-2">
               <div class="row mb-3">
-                <div class="col-auto">
-                  <input class="form-control" type="number" id="timelineLow" title="timelineLow" value="12" min="10" max="52" />
+                <div class="col-sm-2">Payroll Reports</div>
+                <div class="col-sm">
+                  <div id="newHireExport_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="newHireExport" title="newHireExport" value="true" /> New Hire Export <small><span class="text-black-50" id="newHireExport_pricing"></span></small>
+                  </div>
+                  <div id="PayDataExport_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="PayDataExport" title="PayDataExport" value="true" /> Pay Data Export <small><span class="text-black-50" id="PayDataExport_pricing"></span></small>
+                  </div>
                 </div>
-                <div class="col-3">Low</div>
               </div>
+
+              <div id="pl_div" class="form-group row mb-3">
+                <div class="col-sm-2">Private Labels</div>
+                <div class="col-sm-2">
+                  <input type="number" class="form-control" id="plCount" title="plCount" value="1" min="1" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="plCount_pricing"></span></small>
+                </div>
+              </div>
+
+              <div id="npe_div" class="form-group row mb-3">
+                <div class="col-sm-2">Non-Production Environments</div>
+                <div class="col-sm-2">
+                  <input type="number" class="form-control" id="npeCount" title="npeCount" min="0" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="npeCount_pricing"></span></small>
+                </div>
+              </div>
+
+              <div id="oscp_div" class="form-group row mb-3">
+                <div class="col-sm-2">OSCPs</div>
+                <div class="col-sm-2">
+                  <input type="number" class="form-control" id="oscpCount" title="oscpCount" min="0" max="5" />
+                </div>
+                <div class="col-sm-6">
+                  <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
+                </div>
+              </div>
+              <br />
+
+              <div id="otherOptions_div" class="row mb-3">
+                <div class="col-sm-2">Other Options</div>
+                <div class="col-sm-6">
+                  <div id="credentialing_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="credentialing" title="Credentialing" value="true" />Credentialing <small><span class="text-black-50" id="credentialing_pricing"></span></small>
+                  </div>
+                  <div id="emailsAsNotes_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="emailsAsNotes" title="emailsAsNotes" value="true" />Importing emails as notes <small><span class="text-black-50" id="emailsAsNotes_pricing"></span></small>
+                  </div>
+                  <div id="NoDataMigration_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="NoDataMigration" title="NoDataMigration" value="true" />Do not perform data migration <small><span class="text-black-50" id="NoDataMigration_pricing"></span></small>
+                  </div>
+                  <div id="histSubmissions_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="histSubmissions" title="histSubmissions" value="true" />Load historical submissions <small><span class="text-black-50" id="histSubmissions_pricing"></span></small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOptTHQ">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOptTHQ" aria-expanded="false" aria-controls="collapseOptTHQ">
+              <h5>Optional THQ Offerings</h5>
+            </button>
+          </h2>
+          <div id="collapseOptTHQ" class="accordion-collapse collapse" aria-labelledby="headingOptTHQ" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <div class="alert alert-secondary" role="alert">
+                Enabling will show the item on the proposal, it does not include it in the price. You can alter the price that's shown on the proposal.
+              </div>
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">OSCP</div>
+                <div class="col-sm-6">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" title="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">On Site Training</div>
+                <div class="col-sm-6">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
+                  </div>
+                  <div class="col-sm-3 d-none" id="onSiteTraining_div">
+                    <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">White Glove</div>
+                <div class="col-sm-6">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
+                  </div>
+                  <div class="col-sm-3 d-none" id="afterCare_div">
+                    <input class="form-control" type="number" id="afterCareAmt" title="Timeline Table" title="afterCareAmt" value="" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingBilling">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBilling" aria-expanded="false" aria-controls="collapseBilling">
+              <h5>Billing and Timeline</h5>
+            </button>
+          </h2>
+          <div id="collapseBilling" class="accordion-collapse collapse" aria-labelledby="headingBilling" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
               <div class="row mb-3">
-                <div class="col-auto">
-                  <input class="form-control" type="number" id="timelineHigh" title="timelineHigh" value="16" min="10" max="52" />
+                <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
+                <div class="col-sm-3">
+                  <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED>
+                    <option value="" SELECTED>-- Please Select --</option>
+                    <option value="NoDM">No Data Migration</option>
+                    <option value="SMB">SMB</option>
+                    <option value="Field">Field</option>
+                    <option value="BH1">Bullhorn One</option>
+                  </select>
                 </div>
-                <div class="col-3">High</div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">Timeline (weeks)</div>
+                <div class="col-sm-2">
+                  <div class="row mb-3">
+                    <div class="col-auto">
+                      <input class="form-control" type="number" id="timelineLow" title="timelineLow" value="12" min="10" max="52" />
+                    </div>
+                    <div class="col-3">Low</div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-auto">
+                      <input class="form-control" type="number" id="timelineHigh" title="timelineHigh" value="16" min="10" max="52" />
+                    </div>
+                    <div class="col-3">High</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">Number of Payments</div>
+                <div class="col-sm-2">
+                  <input class="form-control" type="number" id="numPayments" title="numPayments" value="2" min="2" max="5" />
+                </div>
+              </div>
+
+              <div class="form-group row mb-3">
+                <div class="col-sm-2">Bullhorn Subsidy</div>
+                <div class="col-sm-6">
+                  <div class="form-check form-switch mb-3">
+                    <input class="form-check-input position-static" type="checkbox" id="bullhornSubsidy" title="Bullhorn Subsidy" value="true" /> <small><span class="text-black-50" id="bullhornSubsidy_pricing"></span></small>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <div class="accordion-item d-none">
+            <h2 class="accordion-header" id="headingSigning">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSigning" aria-expanded="false" aria-controls="collapseSigning">
+                <h5>Signing Recipients</h5>
+              </button>
+            </h2>
+            <div id="collapseSigning" class="accordion-collapse collapse" aria-labelledby="headingSigning" data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <div class="row mb-3">
+                  <div class="alert alert-warning" role="alert">
+                    This is not currently in use.
+                  </div>
+                  <div class="col-sm-2">THQ Rep</div>
+                  <div class="col-sm-8">
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" title="recThqName" />
+                      &nbsp;&nbsp;&nbsp;
+                      <span class="input-group-text">@</span>
+                      <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" title="recThqEmail" />
+                    </div>
+                  </div>
+                </div>
 
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">Number of Payments</div>
-            <div class="col-sm-2">
-              <input class="form-control" type="number" id="numPayments" title="numPayments" value="2" min="2" max="5" />
+                <div class="row mb-3">
+                  <div class="col-sm-2">Client Signer</div>
+                  <div class="col-sm-8">
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" title="recClientName" />
+                      &nbsp;&nbsp;&nbsp;
+                      <span class="input-group-text">@</span>
+                      <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" title="recClientEmail" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-sm-2">Bullhorn Rep</div>
+                  <div class="col-sm-8">
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" title="recBhName" />
+                      &nbsp;&nbsp;&nbsp;
+                      <span class="input-group-text">@</span>
+                      <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" title="reBhEmail" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col-sm-2">Additional CC</div>
+                  <div class="col-sm-8">
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" title="recCcName" />
+                      &nbsp;&nbsp;&nbsp;
+                      <span class="input-group-text">@</span>
+                      <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" title="reCcEmail" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="form-group row mb-3">
-            <div class="col-sm-2">Bullhorn Subsidy</div>
-            <div class="col-sm-6">
-              <div class="form-check form-switch mb-3">
-                <input class="form-check-input position-static" type="checkbox" id="bullhornSubsidy" title="Bullhorn Subsidy" value="true" /> <small><span class="text-black-50" id="bullhornSubsidy_pricing"></span></small>
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingMisc">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
+                <h5>Miscellaneous</h5>
+              </button>
+            </h2>
+            <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
+              <div class="accordion-body">
+                <div class="form-group row mb-3">
+                  <div class="col-sm-2">Price Override</div>
+                  <div class="col-sm-2">
+                    <input type="number" class="form-control" id="overridePriceAmt" title="overridePriceAmt" value="" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="accordion-item d-none">
-        <h2 class="accordion-header" id="headingSigning">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSigning" aria-expanded="false" aria-controls="collapseSigning">
-            <h5>Signing Recipients</h5>
-          </button>
-        </h2>
-        <div id="collapseSigning" class="accordion-collapse collapse" aria-labelledby="headingSigning" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <div class="row mb-3">
-              <div class="alert alert-warning" role="alert">
-                This is not currently in use.
-              </div>
-              <div class="col-sm-2">THQ Rep</div>
-              <div class="col-sm-8">
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recThqName" title="recThqName" />
-                  &nbsp;&nbsp;&nbsp;
-                  <span class="input-group-text">@</span>
-                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recThqEmail" title="recThqEmail" />
-                </div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-sm-2">Client Signer</div>
-              <div class="col-sm-8">
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recClientName" title="recClientName" />
-                  &nbsp;&nbsp;&nbsp;
-                  <span class="input-group-text">@</span>
-                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="recClientEmail" title="recClientEmail" />
-                </div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-sm-2">Bullhorn Rep</div>
-              <div class="col-sm-8">
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recBhName" title="recBhName" />
-                  &nbsp;&nbsp;&nbsp;
-                  <span class="input-group-text">@</span>
-                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reBhEmail" title="reBhEmail" />
-                </div>
-              </div>
-            </div>
-
-            <div class="row mb-3">
-              <div class="col-sm-2">Additional CC</div>
-              <div class="col-sm-8">
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="Name" aria-label="Name" id="recCcName" title="recCcName" />
-                  &nbsp;&nbsp;&nbsp;
-                  <span class="input-group-text">@</span>
-                  <input type="text" class="form-control" placeholder="Email" aria-label="Email" id="reCcEmail" title="reCcEmail" />
-                </div>
-              </div>
-            </div>
+        <br>
+        <div class="row" id="validationMsg_div" class="d-none">
+          <div class="col-sm-5">
+            <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
           </div>
         </div>
-      </div>
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingMisc">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" aria-expanded="false" aria-controls="collapseMisc">
-            <h5>Miscellaneous</h5>
-          </button>
-        </h2>
-        <div id="collapseMisc" class="accordion-collapse collapse" aria-labelledby="headingMisc" data-bs-parent="#accordionExample">
-          <div class="accordion-body">
-            <div class="form-group row mb-3">
-              <div class="col-sm-2">Price Override</div>
-              <div class="col-sm-2">
-                <input type="number" class="form-control" id="overridePriceAmt" title="overridePriceAmt" value="" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <br>
-    <div class="row" id="validationMsg_div" class="d-none">
-      <div class="col-sm-5">
-        <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
-      </div>
-    </div>
     </form>
 
     <div class="row">
