@@ -254,8 +254,9 @@
       }
 
       // If we've gotten pricing back, use the amounts to validate things
-      const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
-      if (pricingData) {
+      if (sessionStorage.getItem('pricingData') !== "undefined") {
+        const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
+
         // Amount is zero
         if (!pricingData?.calcs?.total?.low || pricingData?.calcs?.total?.low === 0) {
           console.error("Price is zero")
@@ -280,6 +281,8 @@
         document.getElementById("generateProposal").className = "btn btn-primary";
       } else {
         // Otherwise, show alerts
+        console.warn({ validationErrors })
+
         // Show the alert box
         document.getElementById("validationMsg_div").className = "";
 
@@ -556,6 +559,159 @@
       PizZipUtils.getBinaryContent(url, callback);
     }
 
+    // Update choices based on market
+    function resetChoices() {
+      let package = document.getElementById('package').value;
+      let market = document.getElementById('market').value;
+
+      // Hide items that aren't available in the selected market
+      switch (market) {
+        case 'APAC':
+          // Update the currency select box
+          var selectBox = document.getElementById('currency');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('Australian Dollar', 'AUD'));
+          selectBox.options.add(new Option('US Dollar', 'USD'));
+          selectBox.selectedIndex = 1;
+
+          // Hide options that aren't available
+          document.getElementById('package-form-element').style.display = 'none';
+          document.getElementById('backoffice-form-element').style.display = 'none';
+          document.getElementById('invoicing-form-element').style.display = 'none';
+          document.getElementById('time_expense-form-element').style.display = 'none';
+          document.getElementById('talent_platform-form-element').style.display = 'none';
+          // document.getElementById('backoffice_options').style.display = 'none';
+          // document.getElementById('payroll_exports_option').style.display = 'none';
+
+          // Reset Onboarding Options
+          var selectBox = document.getElementById('onboarding');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('', ''));
+          selectBox.options.add(new Option('SMB Edition', 'onbClassic'));
+          selectBox.selectedIndex = 0;
+
+          // Reset to none
+          document.getElementById('analytics').value = '';
+          document.getElementById('automation').value = '';
+          document.getElementById('onboarding').value = '';
+
+          // Change the Calendly URL
+          var link = document.getElementById('calendlyLink');
+          link.href = 'https://calendly.com/becky-thq/60min-apac';
+
+          break;
+
+        case 'NOAM':
+          // Update the currency select box
+          var selectBox = document.getElementById('currency');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('Canadian Dollar', 'CAD'));
+          selectBox.options.add(new Option('US Dollar', 'USD'));
+          selectBox.selectedIndex = 1;
+
+          // Reset options
+          document.getElementById('package-form-element').style.display = 'flex';
+          document.getElementById('backoffice-form-element').style.display = 'flex';
+          document.getElementById('invoicing-form-element').style.display = 'block';
+          document.getElementById('time_expense-form-element').style.display = 'block';
+          document.getElementById('talent_platform-form-element').style.display = 'flex';
+          // document.getElementById('backoffice_options').style.display = 'block';
+          // document.getElementById('payroll_exports_option').style.display = 'block';
+
+          // Reset Onboarding Options
+          var selectBox = document.getElementById('onboarding');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('', ''));
+          selectBox.options.add(new Option('SMB Edition', 'onbClassic'));
+          selectBox.options.add(new Option('365 Edition', 'onb365'));
+          selectBox.options.add(new Option('Talent Edition Essentials', 'onbTalentEss'));
+          selectBox.options.add(new Option('Talent Edition Intermediate', 'onbTalentInt'));
+          selectBox.selectedIndex = 0;
+
+          // Change the Calendly URL
+          var link = document.getElementById('calendlyLink');
+          link.href = 'https://calendly.com/becky-thq/60min';
+
+          break;
+
+        case 'EMEA':
+          // Update the currency select box
+          var selectBox = document.getElementById('currency');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('British pound', 'GBP'));
+          selectBox.options.add(new Option('Euro', 'EUR'));
+          selectBox.options.add(new Option('US Dollar', 'USD'));
+          selectBox.selectedIndex = 2;
+
+          // Hide options that aren't available
+          document.getElementById('package-form-element').style.display = 'none';
+          document.getElementById('backoffice-form-element').style.display = 'none';
+          document.getElementById('invoicing-form-element').style.display = 'none';
+          document.getElementById('time_expense-form-element').style.display = 'none';
+          document.getElementById('talent_platform-form-element').style.display = 'none';
+          // document.getElementById('backoffice_options').style.display = 'none';
+          // document.getElementById('payroll_exports_option').style.display = 'none';
+
+          // Reset Onboarding Options
+          var selectBox = document.getElementById('onboarding');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('', ''));
+          selectBox.options.add(new Option('SMB Edition', 'onbClassic'));
+          selectBox.selectedIndex = 0;
+
+          // Change the Calendly URL
+          var link = document.getElementById('calendlyLink');
+          link.href = 'https://calendly.com/becky-thq/60min-emea';
+
+          break;
+
+        case 'UKI':
+          // Update the currency select box
+          var selectBox = document.getElementById('currency');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('British pound', 'GBP'));
+          selectBox.options.add(new Option('Euro', 'EUR'));
+          selectBox.options.add(new Option('US Dollar', 'USD'));
+          selectBox.selectedIndex = 2;
+
+          // Hide options that aren't available
+          document.getElementById('backoffice-form-element').style.display = 'none';
+          document.getElementById('invoicing-form-element').style.display = 'none';
+          document.getElementById('time_expense-form-element').style.display = 'none';
+          document.getElementById('talent_platform-form-element').style.display = 'none';
+          // document.getElementById('backoffice_options').style.display = 'none';
+          // document.getElementById('payroll_exports_option').style.display = 'none';
+
+          // Restore options that are available
+          document.getElementById('package-form-element').style.display = 'flex';
+
+          // Reset Onboarding Options
+          var selectBox = document.getElementById('onboarding');
+          selectBox.options.length = 0;
+          selectBox.options.add(new Option('', ''));
+          selectBox.options.add(new Option('SMB Edition', 'onbClassic'));
+          selectBox.options.add(new Option('365 Edition', 'onb365'));
+          selectBox.selectedIndex = 0;
+
+          // Change the Calendly URL
+          var link = document.getElementById('calendlyLink');
+          link.href = 'https://calendly.com/becky-thq/60min-emea';
+
+          break;
+        default:
+          console.log('No Market Selected');
+      }
+
+      // Set options to none
+      document.getElementById('package').value = '';
+      document.getElementById('ats').value = '';
+      document.getElementById('invoicing').checked = false;
+      document.getElementById('time_expense').checked = false;
+      document.getElementById('analytics').value = '';
+      document.getElementById('automation').value = '';
+      document.getElementById('onboarding').value = '';
+    }
+
     //
     //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
     // ██╔═══██╗████╗  ██║██║     ██╔═══██╗██╔══██╗██╔══██╗
@@ -589,7 +745,7 @@
 
       // Add event listener for when market changes
       document.getElementById("market").addEventListener("change", function () {
-        // resetChoices();
+        resetChoices();
         setPackageItems();
       });
 
@@ -667,18 +823,23 @@
             redirect: 'follow'
           })
           if (response.ok) {
-            const data = await response.json();
-            console.log("data", data)
-            const body = data.body
+            const body = await response.json();
+            console.log({ body })
 
             // Save the API response data to sessionStorage
             sessionStorage.setItem('pricingData', JSON.stringify(body));
 
+            // Get Currency
+            const currency = body.data.currency
+
+            // Get exchange rate by looking for
+            const rate = body.calcs.rates[currency]
+
             // Update Results table
             document.getElementById("pricing_ballpark").innerHTML = `${body.calcs.total.ballparkString || "$0"}`
-            document.getElementById("pricing_basePricing").innerHTML = `$${body.calcs.products.low} - $${body.calcs.products.high}`
-            document.getElementById("pricing_additions").innerHTML = `$${body.calcs.options}`
-            document.getElementById("pricing_totalAmt").innerHTML = `$${body.calcs.total.low}`
+            document.getElementById("pricing_basePricing").innerHTML = `${formatCurrency(body.calcs.products.low, currency, rate)} - ${formatCurrency(body.calcs.products.high, currency, rate)}`
+            document.getElementById("pricing_additions").innerHTML = `${formatCurrency(body.calcs.options, currency, rate)}`
+            document.getElementById("pricing_totalAmt").innerHTML = `${formatCurrency(body.calcs.total.low, currency, rate)}`
 
             // Set color of button to gray
             document.getElementById("getPricing").classList.remove("btn-success");
@@ -998,6 +1159,7 @@
       <input type="hidden" id="noDDB" value="true">
       <input type="hidden" id="locale" value="">
       <input type="hidden" id="countryCode" value="">
+      <input type="hidden" id="calendlyLink" value="">
 
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
