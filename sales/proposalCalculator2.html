@@ -869,7 +869,11 @@
             document.getElementById("getPricing").classList.remove("btn-success");
             document.getElementById("getPricing").classList.add("btn-secondary");
 
-            // TODO Update Optional Offering amounts
+            // Set number of payments depending on certain criteria
+            if (body.calcs.total.low >= 35000 || document.getElementById("automation").value || document.getElementById("timelineLow").value >= 18) {
+              document.getElementById("numPayments").value = 4
+            }
+
             // Process additions
             // Loop through body.lookup.additions
             for (let entry of body.lookup.options) {
@@ -894,7 +898,7 @@
 
                 // If method is perEach
                 if (value.method === "perEach") {
-                  descToUse = `Base: ${formatter.format(value.pricingBase * 2, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`
+                  descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`
                   if (value.include > 0) {
                     descToUse += ` ${value.include} included free.`
                   }
@@ -1198,7 +1202,7 @@
                 <div class="col-sm-2">Back Office Options</div>
                 <div class="col-sm-6">
                   <div id="qbIntegration_div" class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="qbIntegration" title="qbIntegration" value="true" onClick="funcBackOfficeOptions('BBO')"> Quickbooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="qbIntegration" title="qbIntegration" value="true" onClick="funcBackOfficeOptions('BBO')"> QuickBooks Integration <small><span class="text-black-50" id="qbIntegration_pricing"></span></small>
                   </div>
                   <div id="InvoiceExport_div" class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" title="InvoiceExport" value="true" onClick="funcBackOfficeOptions('BBO')"> Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
