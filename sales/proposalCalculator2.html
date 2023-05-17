@@ -329,6 +329,7 @@
     }
 
     // Set options based on back office
+    var isFirstRun = true;
     function funcBackOfficeOptions(backoffice) {
       // If ATS or not, show the ATS options or not
       console.log(document.getElementById("ats").value)
@@ -358,6 +359,19 @@
         document.getElementById("backoffice_options_div").className = "row mb-3";
       } else {
         document.getElementById("backoffice_options_div").className = "row mb-3 d-none";
+      }
+
+      // If time_expense, show and check the commissions option
+      if (document.getElementById("time_expense")?.checked) {
+        // Check the commissions checkbox only on the first run
+        if (isFirstRun === true) {
+          document.getElementById("commissions").checked = true;
+
+          // Update the variable to indicate that the code has already run
+          isFirstRun = false;
+        }
+      } else {
+        document.getElementById("commissions").checked = false;
       }
 
       // If time/expense then show pay data export is checked then hide invoicing as an option
@@ -757,6 +771,16 @@
       // Add event listener for when talent platform changes
       document.getElementById("talentPlatform").addEventListener("change", function () {
         getTalentPlatform()
+      });
+
+      // Add event listener for when package changes
+      document.getElementById("onboarding").addEventListener("change", function () {
+        // If onboarding has a value, show onboarding_options_div
+        if (document.getElementById("onboarding")) {
+          document.getElementById("onboarding_options_div").className = "row mb-3";
+        } else {
+          document.getElementById("onboarding_options_div").className = "row mb-3 d-none";
+        }
       });
 
       // Run the Back office automation
@@ -1181,6 +1205,15 @@
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mb-3 d-none" id="onboarding_options_div">
+                <div class="col-sm-2">Onboarding Options</div>
+                <div class="col-sm-6">
+                  <div id="additionalForms_div" class="form-check form-switch">
+                    <input class="form-check-input position-static" type="checkbox" id="additionalForms" title="additionalForms" value="true" onClick="funcBackOfficeOptions('BBO')"> More than 50 forms <small><span class="text-black-50" id="additionalForms_pricing"></span></small>
                   </div>
                 </div>
               </div>
