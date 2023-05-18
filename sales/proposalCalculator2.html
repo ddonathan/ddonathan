@@ -861,9 +861,9 @@
 
             // Update Results table
             document.getElementById("pricing_ballpark").innerHTML = `${body.calcs.total.ballparkString || "$0"}`
-            document.getElementById("pricing_basePricing").innerHTML = `${formatCurrency(body.calcs.products.low, currency, rate)} - ${formatCurrency(body.calcs.products.high, currency, rate)}`
-            document.getElementById("pricing_additions").innerHTML = `${formatCurrency(body.calcs.options, currency, rate)}`
-            document.getElementById("pricing_totalAmt").innerHTML = `${formatCurrency(body.calcs.total.low, currency, rate)}`
+            document.getElementById("pricing_basePricing").innerHTML = `${formatCurrency(roundTo(body.calcs.products.low, 10), currency, rate)} - ${formatCurrency(roundTo(body.calcs.products.high, 10), currency, rate)}`
+            document.getElementById("pricing_additions").innerHTML = `${formatCurrency(roundTo(body.calcs.options, 10), currency, rate)}`
+            document.getElementById("pricing_totalAmt").innerHTML = `${formatCurrency(roundTo(body.calcs.total.low, 10), currency, rate)}`
 
             // Set color of button to gray
             document.getElementById("getPricing").classList.remove("btn-success");
@@ -878,40 +878,60 @@
             // Loop through body.lookup.additions
             for (let entry of body.lookup.options) {
               // Object.entries(body.lookup.options).forEach(entry => {
-              const key = entry.id
+              const key = entry.id;
               const value = entry;
 
               if (document.getElementById(`${key}_pricing`)) {
-                let descToUse, addtlPricing
+                let descToUse, addtlPricing;
 
-                // If method is dollars, set description and additional pricing
-                if (value.method === "$") {
-                  descToUse = formatter.format(value.pricing);
-                  addtlPricing = formatter.format(value.addtlPricing)
+                switch (value.method) {
+                  case "$":
+                    descToUse = formatter.format(value.pricing);
+                    addtlPricing = formatter.format(value.addtlPricing);
+                    break;
+
+                  case "%":
+                    console.log(value)
+
+                    // If we have a number from previously submitting it, use that instead of calculating it
+                    // TODO Fix issue where when a percentage is checked and then submitted, it will go to very large values. I believe it's because the actual number gets submitted and then comes back as the amount rather than the percent.
+                    if (value.pricing > 1 || value.pricing < -1) {
+                      descToUse = formatter.format(value.pricing)
+                    } else {
+                      descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")"
+                    }
+
+                    if (value.addtlPricing) {
+                      addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                    }
+                    break;
+
+                  case "perEach":
+                    descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`;
+
+                    if (value.include > 0) {
+                      descToUse += ` ${value.include} included free.`;
+                    }
+
+                    if (value.addtlPricing) {
+                      addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                    }
+                    break;
+
+                  default:
+                    console.error("Invalid method:", value.method);
+                    break;
                 }
 
-                // If method is percent, set description and calculate out additional pricing (round up to the tens)
-                if (value.method === "%") {
-                  descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")";
-                  if (value.addtlPricing) addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                if (value.addtlPricing) {
+                  descToUse += " first instance, " + addtlPricing + " each additional";
                 }
 
-                // If method is perEach
-                if (value.method === "perEach") {
-                  descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`
-                  if (value.include > 0) {
-                    descToUse += ` ${value.include} included free.`
-                  }
-                  if (value.addtlPricing) addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                if (descToUse) {
+                  document.getElementById(`${key}_pricing`).innerHTML = descToUse;
                 }
-
-                // if it's addtional pricing, add
-                if (value.addtlPricing) descToUse += " first instance, " + addtlPricing + " each additional"
-
-                // Set label
-                if (descToUse) document.getElementById(`${key}_pricing`).innerHTML = descToUse
               } else {
-                console.log(key, "not found")
+                console.log(key, "not found");
               }
             }
 
