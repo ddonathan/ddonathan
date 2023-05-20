@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Gantt Chart</title>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
+
+    <script>
+        let items = [
+            {
+                id: "autoEss",
+                type: "product",
+                catalogId: 6323,
+                catalogName: "BH-IMP-AUTO-01",
+                category: "automation",
+                method: "$",
+                name: "Automation Essentials",
+                pricing: 3500,
+                weeksLow: 18,
+                weeksHigh: 24,
+                startAt: 0
+            },
+            {
+                id: "onbTalentEss",
+                type: "product",
+                catalogId: 6338,
+                catalogName: "BH-IMP-ONB-TLNT-ESS",
+                category: "onboarding",
+                method: "$",
+                name: "Onboarding Talent Essentials",
+                pricingHigh: 10000,
+                pricingLow: 10000,
+                weeksLow: 17,
+                weeksHigh: 22,
+                startAt: -5
+            },
+            {
+                id: "vms_sync",
+                type: "product",
+                catalogName: "BH-IMP-VMS-SYNC",
+                include: 0,
+                method: "perEach",
+                name: "VMS Sync",
+                pricingBase: 2500,
+                pricingEach: 500,
+                weeksLow: 9,
+                weeksHigh: 15,
+                startAt: -5
+            },
+        ];
+
+        // let itemsToInclude = ["autoEss", "onbTalentEss", "vms_sync"];
+
+        // Get itemsToInclude from query_string and turn it into an Array
+        let query_string = window.location.search;
+        let urlParams = new URLSearchParams(query_string);
+        let itemsToInclude = urlParams.get('itemsToInclude').split(',');
+
+
+        let timelineDetails = {
+            products: [],
+            baselineLow: 12,
+            baselineHigh: 14,
+            weeksLow: 0,
+            weeksHigh: 0,
+        };
+
+        // Set start date of the project to today plus two weeks using dayjs
+        timelineDetails.start = dayjs().add(2, 'week').toDate();
+
+        // Set end date of the ats to the start plus the baselineLow weeks
+        timelineDetails.end = dayjs(timelineDetails.start)
+            .add(timelineDetails.baselineHigh, 'week').toDate();
+
+        let tasks = itemsToInclude.map((item) => {
+            let itemDetails = items.find((i) => i.id === item);
+            if (itemDetails) {
+                let start = dayjs(timelineDetails.end).add(itemDetails.startAt, 'week').toDate();
+                let end = dayjs(start).add(itemDetails.weeksHigh, 'week').toDate();
+
+                var durationInWeeks = itemDetails.weeksHigh;
+                var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+                var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+
+                // Setup for gantt chart
+                return [itemDetails.id, itemDetails.name, start, null, durationInMilliseconds, 0, null];
+            }
+        });
+
+        // Add ATS to the Gantt tasks at the beginning
+        var durationInWeeks = timelineDetails.baselineHigh;
+        var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+        var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+        tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, 0, null]);
+
+        console.log(timelineDetails);
+        console.log(tasks);
+
+        var dataTable;
+        var chart;
+        var options;
+
+        function drawGanttChart() {
+            dataTable = new google.visualization.DataTable();
+            // Create a DataTable with the required columns
+            dataTable.addColumn('string', 'Task ID');
+            dataTable.addColumn('string', 'Task Name');
+            dataTable.addColumn('date', 'Start Date');
+            dataTable.addColumn('date', 'End Date');
+            dataTable.addColumn('number', 'Duration');
+            dataTable.addColumn('number', 'Percent Complete');
+            dataTable.addColumn('string', 'Dependencies');
+
+            // Add the tasks to the DataTable
+            dataTable.addRows(tasks);
+
+            // calculate number of tasks
+            var numTasks = tasks.length;
+
+            // Set chart options with dynamic trackHeight
+            options = {
+                height: numTasks * 40,  // 40 pixels per task is just an example, you might adjust this according to your needs
+                gantt: {
+                    trackHeight: 30,   // keep a static trackHeight
+                    sortTasks: true
+                },
+            };
+
+
+            // Set chart options
+            options = {
+                height: 400,
+                gantt: {
+                    trackHeight: 30,
+                    sortTasks: true
+                },
+            };
+
+            // Instantiate and draw the chart
+            chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+            chart.draw(dataTable, options);
+        }
+
+        function saveGanttChartAsImage() {
+            google.visualization.events.addListener(chart, 'ready', function () {
+                // Wait for 2 seconds before creating the image
+                setTimeout(function () {
+                    var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
+
+                    // Create a Canvas element
+                    var canvas = document.createElement('canvas');
+                    // Use canvg to render the SVG on the Canvas
+                    canvg(canvas, svg);
+
+                    // Convert the Canvas to PNG data using toDataURL
+                    var pngData = canvas.toDataURL("image/png");
+
+                    // Create a Blob from the PNG data
+                    var byteString = atob(pngData.split(',')[1]);
+                    var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
+                    var ab = new ArrayBuffer(byteString.length);
+                    var ia = new Uint8Array(ab);
+                    for (var i = 0; i < byteString.length; i++) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    var blob = new Blob([ab], { type: mimeString });
+
+                    // Create a temporary link element and trigger the download
+                    var link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'gantt_chart.png';
+                    link.click();
+                }, 2000);
+            });
+
+            chart.draw(dataTable, options);
+        }
+
+        google.charts.load('current', { 'packages': ['gantt'] });
+        google.charts.setOnLoadCallback(drawGanttChart);
+    </script>
+</head>
+
+<body>
+    <div id="chart_div"></div>
+    <button onclick="saveGanttChartAsImage()">Save as Image</button>
+</body>
+
+</html>
