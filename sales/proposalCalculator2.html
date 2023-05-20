@@ -17,6 +17,11 @@
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="https://www.google.com/jsapi"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
+
   <!--
     Mandatory in IE 6, 7, 8 and 9.
     -->
@@ -724,6 +729,41 @@
       document.getElementById('analytics').value = '';
       document.getElementById('automation').value = '';
       document.getElementById('onboarding').value = '';
+
+      function saveGanttChartAsImage() {
+        google.visualization.events.addListener(chart, 'ready', function () {
+          // Wait for 2 seconds before creating the image
+          setTimeout(function () {
+            var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
+
+            // Create a Canvas element
+            var canvas = document.createElement('canvas');
+            // Use canvg to render the SVG on the Canvas
+            canvg(canvas, svg);
+
+            // Convert the Canvas to PNG data using toDataURL
+            var pngData = canvas.toDataURL("image/png");
+
+            // Create a Blob from the PNG data
+            var byteString = atob(pngData.split(',')[1]);
+            var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
+            var ab = new ArrayBuffer(byteString.length);
+            var ia = new Uint8Array(ab);
+            for (var i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            var blob = new Blob([ab], { type: mimeString });
+
+            // Create a temporary link element and trigger the download
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'gantt_chart.png';
+            link.click();
+          }, 2000);
+        });
+
+        chart.draw(dataTable, options);
+      }
     }
 
     //
@@ -941,6 +981,99 @@
             // Check that we're valid
             checkValid()
 
+            // Setup for drawing the gantt chart
+            let timelineDetails = {
+              products: [],
+              baselineLow: document.getElementById("timelineLow").value,
+              baselineHigh: document.getElementById("timelineHigh").value,
+              weeksLow: 0,
+              weeksHigh: 0,
+            };
+
+            // Set start date of the project to today plus two weeks using dayjs
+            timelineDetails.start = dayjs().add(2, 'week').toDate();
+
+            // Set end date of the ats to the start plus the baselineLow weeks
+            timelineDetails.end = dayjs(timelineDetails.start)
+              .add(timelineDetails.baselineHigh, 'week').toDate();
+
+
+            // Loop through body.calcs.itemized array and add items to gantt chart tasks
+            var tasks = []
+            body.calcs.itemized.map((item) => {
+              if (item.weeksHigh) {
+                console.log({ item })
+                let start = dayjs(timelineDetails.end).add(item.startAt, 'week').toDate();
+                let end = dayjs(start).add(item.weeksHigh, 'week').toDate();
+
+                var durationInWeeks = item.weeksHigh;
+                var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+                var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+
+                let itemArray = [item.id, item.name, start, null, durationInMilliseconds, 0, null]
+                console.log({ itemArray })
+
+                // Setup for gantt chart
+                tasks.push(itemArray);
+              }
+            });
+
+            // Add ATS to the Gantt tasks at the beginning
+            var durationInWeeks = timelineDetails.baselineHigh;
+            var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+            var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+            tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, 0, null]);
+
+            console.log(timelineDetails);
+            console.log({ tasks });
+
+            var dataTable;
+            var chart;
+            var options;
+
+            function drawGanttChart() {
+              dataTable = new google.visualization.DataTable();
+              // Create a DataTable with the required columns
+              dataTable.addColumn('string', 'Task ID');
+              dataTable.addColumn('string', 'Task Name');
+              dataTable.addColumn('date', 'Start Date');
+              dataTable.addColumn('date', 'End Date');
+              dataTable.addColumn('number', 'Duration');
+              dataTable.addColumn('number', 'Percent Complete');
+              dataTable.addColumn('string', 'Dependencies');
+
+              // Add the tasks to the DataTable
+              dataTable.addRows(tasks);
+
+              // calculate number of tasks
+              var numTasks = tasks.length;
+
+              // Set chart options with dynamic trackHeight
+              options = {
+                height: numTasks * 40,  // 40 pixels per task is just an example, you might adjust this according to your needs
+                gantt: {
+                  trackHeight: 30,   // keep a static trackHeight
+                  sortTasks: true
+                },
+              };
+
+
+              // Set chart options
+              options = {
+                height: 400,
+                gantt: {
+                  trackHeight: 30,
+                  sortTasks: true
+                },
+              };
+
+              // Instantiate and draw the chart
+              chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+              chart.draw(dataTable, options);
+            }
+
+            google.charts.load('current', { 'packages': ['gantt'] });
+            google.charts.setOnLoadCallback(drawGanttChart);
           } else {
             console.error("Request failed with status", response.status);
           }
@@ -1536,6 +1669,15 @@
         </table>
       </div>
     </div>
+
+    <h1 class="display-6">Timeline Chart</h1>
+    <div class="row">
+      <div id="chart_div"></div>
+      <!-- <div class="col-12">
+        <button onclick="saveGanttChartAsImage()">Save as Image</button>
+      </div> -->
+    </div>
+
   </div>
 
 
