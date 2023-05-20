@@ -1464,11 +1464,15 @@
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
-                  <div class="col-sm-3 d-none" id="onSiteTraining_div">
-                    <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
+                  <div class="col-sm-6 d-none" id="onSiteTraining_div">
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
+                    </div>
                   </div>
                 </div>
               </div>
+
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove</div>
@@ -1476,8 +1480,11 @@
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
-                  <div class="col-sm-3 d-none" id="afterCare_div">
-                    <input class="form-control" type="number" id="afterCareAmt" title="Timeline Table" title="afterCareAmt" value="" />
+                  <div class="col-sm-4 d-none" id="afterCare_div">
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input class="form-control" type="number" id="afterCareAmt" title="afterCareAmt" value="" />
+                    </div>
                   </div>
                 </div>
               </div>
