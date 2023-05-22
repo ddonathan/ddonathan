@@ -172,26 +172,48 @@
         dataToSend[`timeline${pricingData.data.timelineTable}`] = true;
         dataToSend.timelineWeeks = `${dataToSend.timelineLow} - ${dataToSend.timelineHigh} weeks`;
 
+        // Sort pricingData.calcs.itemized by type in Z-A order so that bundles will be processed last and can remove product items.
+        pricingData.calcs.itemized.sort((a, b) => {
+          if (a.type < b.type) {
+            return 1;
+          }
+          if (a.type > b.type) {
+            return -1;
+          }
+          return 0;
+        });
+
         // Loop through pricingData.calcs.itemized and push to dataToSend.products
         dataToSend.products = [];
         pricingData.calcs.itemized.forEach((item) => {
-          if (item.type === "product") {
+          if (item.type === "product" || item.type === "bundle") {
 
             let name = item.name;
 
             // Add items ids to the data object to enable additional items to show in the contract
+            console.log(item.id)
             switch (item.id) {
+              case "autoEss":
+              case "autoInt":
               case "onbTalentEss":
-                dataToSend[item.id] = true;
-                break;
               case "onbTalentInt":
                 dataToSend[item.id] = true;
                 break;
               case "talentPlatformEss":
                 dataToSend[item.id] = true;
+
+                // Find and remove the bundled items from dataToSend
+                delete dataToSend.autoEss
+                delete dataToSend.onbTalentEss
+
                 break;
               case "talentPlatformInt":
                 dataToSend[item.id] = true;
+
+                // Find and remove the bundled items from dataToSend
+                delete dataToSend.autoInt
+                delete dataToSend.onbTalentInt
+
                 break;
             }
 
@@ -229,7 +251,7 @@
 
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
-        dataToSend[`payments_${paymentNumber}`] = true
+        dataToSend[`payments_${paymentNumber} `] = true
 
         console.log("generate-dataToSend", dataToSend)
 
@@ -273,7 +295,7 @@
       }
 
       if (document.getElementById("userCount").value > 15 && document.getElementById("timelineLow").value <= "13") {
-        validationWarnings.push(`  - User count is ${document.getElementById("userCount").value} and timeline low is ${document.getElementById("timelineLow").value}`)
+        validationWarnings.push(`  - User count is ${document.getElementById("userCount").value} and timeline low is ${document.getElementById("timelineLow").value} `)
       }
 
       // If we've gotten pricing back, use the amounts to validate things
