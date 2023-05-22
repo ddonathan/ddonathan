@@ -195,6 +195,8 @@
             switch (item.id) {
               case "autoEss":
               case "autoInt":
+              case "autoAdv":
+              case "autoTra":
               case "onbTalentEss":
               case "onbTalentInt":
                 dataToSend[item.id] = true;
@@ -1012,7 +1014,7 @@
             };
 
             // Set start date of the project to today plus two weeks using dayjs
-            timelineDetails.start = dayjs().add(2, 'week').toDate();
+            timelineDetails.start = dayjs().add(4, 'week').toDate();
 
             // Set end date of the ats to the start plus the baselineLow weeks
             timelineDetails.end = dayjs(timelineDetails.start)
@@ -1037,10 +1039,12 @@
             });
 
             // Add ATS to the gantt tasks at the beginning
-            var durationInWeeks = timelineDetails.baselineHigh;
-            var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
-            var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
-            tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, timelineDetails.baselineLow / timelineDetails.baselineHigh * 100, null]);
+            if (document.getElementById("ats").value) {
+              var durationInWeeks = timelineDetails.baselineHigh;
+              var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+              var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+              tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, timelineDetails.baselineLow / timelineDetails.baselineHigh * 100, null]);
+            }
 
             console.log(timelineDetails);
             console.log({ tasks });
