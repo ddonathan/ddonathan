@@ -126,7 +126,7 @@
     }
 
     function generate() {
-      loadFile("template.docx", function (error, content) {
+      loadFile("template2.docx", function (error, content) {
         if (error) { throw error };
 
         // The error object contains additional information when logged with JSON.stringify (it contains a properties object containing all suberrors).
@@ -179,6 +179,23 @@
 
             let name = item.name;
 
+            // Add items ids to the data object to enable additional items to show in the contract
+            switch (item.id) {
+              case "onbTalentEss":
+                dataToSend[item.id] = true;
+                break;
+              case "onbTalentInt":
+                dataToSend[item.id] = true;
+                break;
+              case "talentPlatformEss":
+                dataToSend[item.id] = true;
+                break;
+              case "talentPlatformInt":
+                dataToSend[item.id] = true;
+                break;
+            }
+
+
             // if there's a quantity, add to name
             if (item.quantity) {
               name = `${name} (${item.quantity})`
@@ -187,6 +204,7 @@
             dataToSend.products.push(name);
           }
         })
+
 
 
         // Get any data we need that's in the form that didn't go to AWS and back
@@ -337,7 +355,6 @@
     var isFirstRun = true;
     function funcBackOfficeOptions(backoffice) {
       // If ATS or not, show the ATS options or not
-      console.log(document.getElementById("ats").value)
       if (document.getElementById("ats").value) {
         if (document.getElementById("ats").value === "ats_enterprise") {
           document.getElementById("credentialing_div").className = "form-check form-switch";
@@ -570,7 +587,7 @@
           document.getElementById("shortUrl").innerHTML = result.short_url
           document.getElementById("shortUrl2").innerHTML = result.short_url
         })
-        .catch(error => console.log('error', error));
+        .catch(error => console.error('error', error));
     }
 
     // Load File
@@ -718,7 +735,7 @@
 
           break;
         default:
-          console.log('No Market Selected');
+          console.warn('No Market Selected');
       }
 
       // Set options to none
@@ -729,42 +746,27 @@
       document.getElementById('analytics').value = '';
       document.getElementById('automation').value = '';
       document.getElementById('onboarding').value = '';
-
-      function saveGanttChartAsImage() {
-        google.visualization.events.addListener(chart, 'ready', function () {
-          // Wait for 2 seconds before creating the image
-          setTimeout(function () {
-            var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
-
-            // Create a Canvas element
-            var canvas = document.createElement('canvas');
-            // Use canvg to render the SVG on the Canvas
-            canvg(canvas, svg);
-
-            // Convert the Canvas to PNG data using toDataURL
-            var pngData = canvas.toDataURL("image/png");
-
-            // Create a Blob from the PNG data
-            var byteString = atob(pngData.split(',')[1]);
-            var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
-            var ab = new ArrayBuffer(byteString.length);
-            var ia = new Uint8Array(ab);
-            for (var i = 0; i < byteString.length; i++) {
-              ia[i] = byteString.charCodeAt(i);
-            }
-            var blob = new Blob([ab], { type: mimeString });
-
-            // Create a temporary link element and trigger the download
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'gantt_chart.png';
-            link.click();
-          }, 2000);
-        });
-
-        chart.draw(dataTable, options);
-      }
     }
+
+    let productVisibility = {};
+
+    function hideShowFields(product) {
+      // If product was not tracked before, assume it's visible and needs to be hidden
+      if (!(product in productVisibility)) {
+        productVisibility[product] = true;
+      }
+
+      const action = productVisibility[product] ? 'none' : 'block';
+      const fields = document.querySelectorAll(`[data-product='${product}']`);
+
+      for (let field of fields) {
+        field.style.display = action;
+      }
+
+      // Toggle the visibility state for the next call
+      productVisibility[product] = !productVisibility[product];
+    }
+
 
     //
     //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
@@ -775,7 +777,6 @@
     // ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝
     //
     window.onload = function () {
-
       // Set name on all form elements to match the id
       var elements = document.querySelectorAll('input, select, textarea');
       for (var i = 0; i < elements.length; i++) {
@@ -787,8 +788,6 @@
 
       // Set focus to clientName
       document.getElementById("clientName").focus();
-
-      console.log(document.getElementById("currency").value)
 
       // TODO Get data from ddb to set and show pricing next to items
 
@@ -864,7 +863,7 @@
           // Validate the form data
           let errorsResult = checkValid()
           if (errorsResult?.length > 0) {
-            console.log("Errors")
+            console.error("Errors")
           }
 
           // Convert FormData to json
@@ -1010,19 +1009,16 @@
                 var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
                 var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
 
-                let itemArray = [item.id, item.name, start, null, durationInMilliseconds, 0, null]
-                console.log({ itemArray })
-
                 // Setup for gantt chart
-                tasks.push(itemArray);
+                tasks.push([item.id, item.name, start, null, durationInMilliseconds, item.weeksLow / item.weeksHigh * 100, null]);
               }
             });
 
-            // Add ATS to the Gantt tasks at the beginning
+            // Add ATS to the gantt tasks at the beginning
             var durationInWeeks = timelineDetails.baselineHigh;
             var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
             var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
-            tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, 0, null]);
+            tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, timelineDetails.baselineLow / timelineDetails.baselineHigh * 100, null]);
 
             console.log(timelineDetails);
             console.log({ tasks });
@@ -1053,7 +1049,7 @@
                 height: numTasks * 40,  // 40 pixels per task is just an example, you might adjust this according to your needs
                 gantt: {
                   trackHeight: 30,   // keep a static trackHeight
-                  sortTasks: true
+                  sortTasks: true,
                 },
               };
 
@@ -1063,17 +1059,62 @@
                 height: 400,
                 gantt: {
                   trackHeight: 30,
-                  sortTasks: true
+                  sortTasks: true,
+                  labelStyle: {
+                    fontName: "Arial",
+                    fontSize: 14,
+                    color: "#757575"
+                  },
+
                 },
               };
 
               // Instantiate and draw the chart
               chart = new google.visualization.Gantt(document.getElementById('chart_div'));
               chart.draw(dataTable, options);
+
+              // remove d-none class from timeline_chart
+              document.getElementById("timeline_chart").classList.remove("d-none");
+            }
+
+            function saveGanttChartAsImage() {
+              google.visualization.events.addListener(chart, 'ready', function () {
+                // Wait for 2 seconds before creating the image
+                setTimeout(function () {
+                  var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
+
+                  // Create a Canvas element
+                  var canvas = document.createElement('canvas');
+                  // Use canvg to render the SVG on the Canvas
+                  canvg(canvas, svg);
+
+                  // Convert the Canvas to PNG data using toDataURL
+                  var pngData = canvas.toDataURL("image/png");
+
+                  // Create a Blob from the PNG data
+                  var byteString = atob(pngData.split(',')[1]);
+                  var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
+                  var ab = new ArrayBuffer(byteString.length);
+                  var ia = new Uint8Array(ab);
+                  for (var i = 0; i < byteString.length; i++) {
+                    ia[i] = byteString.charCodeAt(i);
+                  }
+                  var blob = new Blob([ab], { type: mimeString });
+
+                  // Create a temporary link element and trigger the download
+                  var link = document.createElement('a');
+                  link.href = URL.createObjectURL(blob);
+                  link.download = 'gantt_chart.png';
+                  link.click();
+                }, 2000);
+              });
+
+              chart.draw(dataTable, options);
             }
 
             google.charts.load('current', { 'packages': ['gantt'] });
             google.charts.setOnLoadCallback(drawGanttChart);
+
           } else {
             console.error("Request failed with status", response.status);
           }
@@ -1098,26 +1139,24 @@
 
       // Set values from the querystring
       for (let key in query_string) {
-        console.log("key", key)
-
         // used to hold the value through this loop
         fieldId = key
 
         // If we have a products list, then split it out
         if (fieldId === "products") {
           products = query_string[fieldId].split(",")
-          console.log("products", products)
+          // console.log("products", products)
 
           // Loop through them and set the keyValue so we can use it to set the values in the form
           for (let product of products) {
-            console.log("product", product)
+            // console.log("product", product)
             if (document.getElementsByName(product)) {
               fieldId = document.getElementsByName(product)[0].id
-              console.log("fieldId", fieldId)
+              // console.log("fieldId", fieldId)
 
               // Check the box for this product
               if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
-                console.log("Checkbox, checking", fieldId);
+                // console.log("Checkbox, checking", fieldId);
                 document.getElementById(fieldId).checked = true;
               }
             }
@@ -1126,11 +1165,11 @@
 
         // If it's a checkbox, check it, otherwise set the value
         if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
-          console.log("Checkbox, checking", fieldId);
+          // console.log("Checkbox, checking", fieldId);
           document.getElementById(fieldId).checked = true;
         }
         if (document.getElementById(fieldId) && document.getElementById(fieldId).type !== "checkbox") {
-          console.log("Not checkbox, setting value", fieldId);
+          // console.log("Not checkbox, setting value", fieldId);
           document.getElementById(fieldId).value = query_string[fieldId];
         }
       }
@@ -1361,7 +1400,7 @@
                     <input class="form-check-input position-static" type="checkbox" id="InvoiceExport" title="InvoiceExport" value="true" onClick="funcBackOfficeOptions('BBO')"> Invoice Export <small><span class="text-black-50" id="InvoiceExport_pricing"></span></small>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="commissions" title="commissions" data-product="time_expense" value="true" onClick="funcBackOfficeOptions('BBO')"> Commissions <small><span class="text-black-50" id="commissions_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -1460,7 +1499,7 @@
 
               <div class="form-group row mb-3">
                 <div class="col-sm-2">On Site Training</div>
-                <div class="col-sm-6">
+                <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
@@ -1474,13 +1513,14 @@
               </div>
 
 
+
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove</div>
-                <div class="col-sm-6">
+                <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
                     <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
-                  <div class="col-sm-4 d-none" id="afterCare_div">
+                  <div class="col-sm-6 d-none" id="afterCare_div">
                     <div class="input-group">
                       <span class="input-group-text">$</span>
                       <input class="form-control" type="number" id="afterCareAmt" title="afterCareAmt" value="" />
@@ -1488,6 +1528,7 @@
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -1503,10 +1544,10 @@
                 <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
                 <div class="col-sm-3">
                   <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED>
-                    <option value="" SELECTED>-- Please Select --</option>
+                    <option value="">-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
                     <option value="SMB">SMB</option>
-                    <option value="Field">Field</option>
+                    <option value="Field" SELECTED>Field</option>
                     <option value="BH1">Bullhorn One</option>
                   </select>
                 </div>
@@ -1677,7 +1718,7 @@
       </div>
     </div>
 
-    <h1 class="display-6">Timeline Chart</h1>
+    <h1 id="timeline_chart" class="display-6 d-none">Timeline Chart</h1>
     <div class="row">
       <div id="chart_div"></div>
       <!-- <div class="col-12">
@@ -1685,45 +1726,51 @@
       </div> -->
     </div>
 
-  </div>
+    <!-- List itemized products -->
+    <div class="row">
+      <div class="col-12">
+        <textarea id="debug" class="form-control" rows="10"></textarea>
+      </div>
+    </div>
 
 
-  <script>
-    //
-    // Form Validation
-    //
-    (function () {
-      "use strict";
-      window.addEventListener(
-        "load",
-        function () {
-          // Fetch all the forms we want to apply custom Bootstrap validation styles to
-          var forms = document.getElementsByClassName("needs-validation");
-          // Loop over them and prevent submission
-          var validation = Array.prototype.filter.call(
-            forms,
-            function (form) {
-              form.addEventListener(
-                "submit",
-                function (event) {
-                  if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }
-                  form.classList.add("was-validated");
-                },
-                false
-              );
-            }
-          );
-        },
-        false
-      );
-    })();
-  </script>
+    <script>
+      //
+      // Form Validation
+      //
+      (function () {
+        "use strict";
+        window.addEventListener(
+          "load",
+          function () {
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.getElementsByClassName("needs-validation");
+            // Loop over them and prevent submission
+            var validation = Array.prototype.filter.call(
+              forms,
+              function (form) {
+                form.addEventListener(
+                  "submit",
+                  function (event) {
+                    if (form.checkValidity() === false) {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }
+                    form.classList.add("was-validated");
+                  },
+                  false
+                );
+              }
+            );
+          },
+          false
+        );
+      })();
 
-  <!-- Bootstrap bundle-->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+    </script>
+
+    <!-- Bootstrap bundle-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
 </body>
 
 </html>
