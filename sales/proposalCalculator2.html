@@ -22,6 +22,28 @@
   <script src="https://www.google.com/jsapi"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
 
+  <style>
+    .receipt {
+      border: 1px solid black;
+      max-width: 300px;
+      margin: auto;
+      padding: 20px;
+      font-family: "Courier New", monospace;
+      /* Set the font */
+    }
+
+    .header,
+    .footer {
+      text-align: center;
+    }
+
+    .item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+  </style>
+
   <!--
     Mandatory in IE 6, 7, 8 and 9.
     -->
@@ -189,6 +211,9 @@
           if (item.type === "product" || item.type === "bundle") {
 
             let name = item.name;
+
+            // Add timeline Image
+            dataToSend.image = localStorage.getItem('gantt_chart');
 
             // Add items ids to the data object to enable additional items to show in the contract
             console.log(item.id)
@@ -791,6 +816,147 @@
       productVisibility[product] = !productVisibility[product];
     }
 
+    var dataTable;
+    var chart;
+    var options;
+    var tasks = []
+
+    function drawGanttChart() {
+      dataTable = new google.visualization.DataTable();
+      // Create a DataTable with the required columns
+      dataTable.addColumn('string', 'Task ID');
+      dataTable.addColumn('string', 'Task Name');
+      dataTable.addColumn('date', 'Start Date');
+      dataTable.addColumn('date', 'End Date');
+      dataTable.addColumn('number', 'Duration');
+      dataTable.addColumn('number', 'Percent Complete');
+      dataTable.addColumn('string', 'Dependencies');
+
+      // Add the tasks to the DataTable
+      dataTable.addRows(tasks);
+
+      // calculate number of tasks
+      var numTasks = tasks.length;
+
+      // Set chart options with dynamic trackHeight
+      options = {
+        height: numTasks * 40,  // 40 pixels per task is just an example, you might adjust this according to your needs
+        gantt: {
+          trackHeight: 30,   // keep a static trackHeight
+          sortTasks: true,
+        },
+      };
+
+
+      // Set chart options
+      options = {
+        height: 400,
+        gantt: {
+          trackHeight: 30,
+          sortTasks: true,
+          labelStyle: {
+            fontName: "Arial",
+            fontSize: 14,
+            color: "#757575"
+          },
+
+        },
+      };
+
+      // Instantiate and draw the chart
+      chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+      chart.draw(dataTable, options);
+
+      // remove d-none class from timeline_chart
+      document.getElementById("timeline_chart").classList.remove("d-none");
+    }
+
+    function saveGanttChartAsImage() {
+      google.visualization.events.addListener(chart, 'ready', function () {
+        // Wait for 2 seconds before creating the image
+        setTimeout(function () {
+          var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
+
+          // Create a Canvas element
+          var canvas = document.createElement('canvas');
+          // Use canvg to render the SVG on the Canvas
+          canvg(canvas, svg);
+
+          // Convert the Canvas to PNG data using toDataURL
+          var pngData = canvas.toDataURL("image/png");
+
+          // Store the image data in LocalStorage
+          localStorage.setItem('gantt_chart', pngData);
+
+          // Create a Blob from the PNG data
+          var byteString = atob(pngData.split(',')[1]);
+          var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
+          var ab = new ArrayBuffer(byteString.length);
+          var ia = new Uint8Array(ab);
+          for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+          }
+          var blob = new Blob([ab], { type: mimeString });
+
+          // Create a temporary link element and trigger the download
+          var link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'gantt_chart.png';
+          link.click();
+        }, 2000);
+      });
+
+      chart.draw(dataTable, options);
+    }
+
+    const base64Regex =
+      /^data:image\/(png|jpg|svg|svg\+xml);base64,/;
+    function base64Parser(dataURL) {
+      if (
+        typeof dataURL !== "string" ||
+        !base64Regex.test(dataURL)
+      ) {
+        return false;
+      }
+
+      const validBase64 =
+        /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+
+      if (!validBase64.test(stringBase64)) {
+        throw new Error(
+          "Error parsing base64 data, your data contains invalid characters"
+        );
+      }
+
+      const stringBase64 = dataURL.replace(base64Regex, "");
+
+      // For nodejs, return a Buffer
+      if (typeof Buffer !== "undefined" && Buffer.from) {
+        return Buffer.from(stringBase64, "base64");
+      }
+
+      // For browsers, return a string (of binary content) :
+      const binaryString = window.atob(stringBase64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        const ascii = binaryString.charCodeAt(i);
+        bytes[i] = ascii;
+      }
+      return bytes.buffer;
+    }
+    const imageOpts = {
+      getImage(tag) {
+        return base64Parser(tag);
+      },
+      getSize() {
+        return [100, 100];
+      },
+    };
+    //const doc = new Docxtemplater(zip, {
+    //  modules: [new ImageModule(imageOpts)],
+    //});
+
 
     //
     //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
@@ -1021,9 +1187,30 @@
               .add(timelineDetails.baselineHigh, 'week').toDate();
 
 
+            // Reinitialize tasks to an empty array
+            tasks = [];
+
+            // Setup for receipt
+            const itemListElement = document.getElementById('item-list');
+            itemListElement.innerHTML = '';
+            const footerElement = document.getElementById('footer');
+            footerElement.innerHTML = '';
+            let total = 0;
+
             // Loop through body.calcs.itemized array and add items to gantt chart tasks
-            var tasks = []
             body.calcs.itemized.map((item) => {
+
+              // Add to receipt
+              if (item.pricingLow || item.pricing) {
+                const price = item.pricingLow || item.pricing;
+                total += price;
+
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('item');
+                itemElement.innerHTML = `<p>${item.name}</p><p>$${price.toFixed(2)}</p>`;
+                itemListElement.appendChild(itemElement);
+              }
+
               if (item.weeksHigh) {
                 console.log({ item })
                 let start = dayjs(timelineDetails.end).add(item.startAt, 'week').toDate();
@@ -1038,6 +1225,13 @@
               }
             });
 
+            // Add total to receipt
+            const totalElement = document.createElement('div');
+            totalElement.classList.add('item');
+            totalElement.innerHTML = `<strong>Total</strong><p>$${total.toFixed(2)}</p>`;
+            footerElement.appendChild(totalElement);
+
+
             // Add ATS to the gantt tasks at the beginning
             if (document.getElementById("ats").value) {
               var durationInWeeks = timelineDetails.baselineHigh;
@@ -1049,98 +1243,9 @@
             console.log(timelineDetails);
             console.log({ tasks });
 
-            var dataTable;
-            var chart;
-            var options;
-
-            function drawGanttChart() {
-              dataTable = new google.visualization.DataTable();
-              // Create a DataTable with the required columns
-              dataTable.addColumn('string', 'Task ID');
-              dataTable.addColumn('string', 'Task Name');
-              dataTable.addColumn('date', 'Start Date');
-              dataTable.addColumn('date', 'End Date');
-              dataTable.addColumn('number', 'Duration');
-              dataTable.addColumn('number', 'Percent Complete');
-              dataTable.addColumn('string', 'Dependencies');
-
-              // Add the tasks to the DataTable
-              dataTable.addRows(tasks);
-
-              // calculate number of tasks
-              var numTasks = tasks.length;
-
-              // Set chart options with dynamic trackHeight
-              options = {
-                height: numTasks * 40,  // 40 pixels per task is just an example, you might adjust this according to your needs
-                gantt: {
-                  trackHeight: 30,   // keep a static trackHeight
-                  sortTasks: true,
-                },
-              };
-
-
-              // Set chart options
-              options = {
-                height: 400,
-                gantt: {
-                  trackHeight: 30,
-                  sortTasks: true,
-                  labelStyle: {
-                    fontName: "Arial",
-                    fontSize: 14,
-                    color: "#757575"
-                  },
-
-                },
-              };
-
-              // Instantiate and draw the chart
-              chart = new google.visualization.Gantt(document.getElementById('chart_div'));
-              chart.draw(dataTable, options);
-
-              // remove d-none class from timeline_chart
-              document.getElementById("timeline_chart").classList.remove("d-none");
-            }
-
-            function saveGanttChartAsImage() {
-              google.visualization.events.addListener(chart, 'ready', function () {
-                // Wait for 2 seconds before creating the image
-                setTimeout(function () {
-                  var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
-
-                  // Create a Canvas element
-                  var canvas = document.createElement('canvas');
-                  // Use canvg to render the SVG on the Canvas
-                  canvg(canvas, svg);
-
-                  // Convert the Canvas to PNG data using toDataURL
-                  var pngData = canvas.toDataURL("image/png");
-
-                  // Create a Blob from the PNG data
-                  var byteString = atob(pngData.split(',')[1]);
-                  var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
-                  var ab = new ArrayBuffer(byteString.length);
-                  var ia = new Uint8Array(ab);
-                  for (var i = 0; i < byteString.length; i++) {
-                    ia[i] = byteString.charCodeAt(i);
-                  }
-                  var blob = new Blob([ab], { type: mimeString });
-
-                  // Create a temporary link element and trigger the download
-                  var link = document.createElement('a');
-                  link.href = URL.createObjectURL(blob);
-                  link.download = 'gantt_chart.png';
-                  link.click();
-                }, 2000);
-              });
-
-              chart.draw(dataTable, options);
-            }
-
+            // Draw the gantt chart
             google.charts.load('current', { 'packages': ['gantt'] });
             google.charts.setOnLoadCallback(drawGanttChart);
-
           } else {
             console.error("Request failed with status", response.status);
           }
@@ -1747,17 +1852,26 @@
     <h1 id="timeline_chart" class="display-6 d-none">Timeline Chart</h1>
     <div class="row">
       <div id="chart_div"></div>
-      <!-- <div class="col-12">
+      <div class="col-12">
         <button onclick="saveGanttChartAsImage()">Save as Image</button>
-      </div> -->
+      </div>
     </div>
 
     <!-- List itemized products -->
-    <div class="row">
-      <div class="col-12">
-        <textarea id="debug" class="form-control" rows="10"></textarea>
+    <div class="receipt">
+      <!--...same structure as before...-->
+
+      <div class="body" id="item-list">
+        <!-- Items will be dynamically added here -->
       </div>
+
+      <div class="footer" id="footer">
+        <!-- Total will be dynamically added here -->
+      </div>
+
+      <!--...same structure as before...-->
     </div>
+
 
 
     <script>
