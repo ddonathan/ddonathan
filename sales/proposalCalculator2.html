@@ -1100,6 +1100,63 @@
           }
         }
 
+        for (let entry of body.lookup.additionalOptional) {
+          // Object.entries(body.lookup.additionalOptional).forEach(entry => {
+          const key = entry.id;
+          const value = entry;
+
+          if (document.getElementById(`${key}_pricing`)) {
+            let descToUse, addtlPricing;
+
+            switch (value.method) {
+              case "$":
+                descToUse = formatter.format(value.pricing);
+                addtlPricing = formatter.format(value.addtlPricing);
+                break;
+
+              case "%":
+                // If we have a number from previously submitting it, use that instead of calculating it
+                // TODO Fix issue where when a percentage is checked and then submitted, it will go to very large values. I believe it's because the actual number gets submitted and then comes back as the amount rather than the percent.
+                if (value.pricing > 1 || value.pricing < -1) {
+                  descToUse = formatter.format(value.pricing)
+                } else {
+                  descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")"
+                }
+
+                if (value.addtlPricing) {
+                  addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+                break;
+
+              case "perEach":
+                descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`;
+
+                if (value.include > 0) {
+                  descToUse += ` ${value.include} included free.`;
+                }
+
+                if (value.addtlPricing) {
+                  addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+                break;
+
+              default:
+                console.error("Invalid method:", value.method);
+                break;
+            }
+
+            if (value.addtlPricing) {
+              descToUse += " first instance, " + addtlPricing + " each additional";
+            }
+
+            if (descToUse) {
+              document.getElementById(`${key}_pricing`).innerHTML = descToUse;
+            }
+          } else {
+            console.error(key, "not found");
+          }
+        }
+
         // funcOnSiteTraining();
         funcAfterCare();
 
@@ -1138,16 +1195,13 @@
 
           // Add to receipt
           if (item.pricingLow || item.pricing) {
-            // Exclude certain items
-            if (item.id != "afterCare") {
-              const price = item.pricingLow || item.pricing;
-              total += price;
+            const price = item.pricingLow || item.pricing;
+            total += price;
 
-              const itemElement = document.createElement('div');
-              itemElement.classList.add('item');
-              itemElement.innerHTML = `<p>${item.name}</p><p>$${price.toFixed(2)}</p>`;
-              itemListElement.appendChild(itemElement);
-            }
+            const itemElement = document.createElement('div');
+            itemElement.classList.add('item');
+            itemElement.innerHTML = `<p>${item.name}</p><p>$${price.toFixed(2)}</p>`;
+            itemListElement.appendChild(itemElement);
           }
 
           if (item.weeksHigh) {
