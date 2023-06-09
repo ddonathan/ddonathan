@@ -88,7 +88,7 @@
           document.getElementById("ats").value = "ats_enterprise";
           document.getElementById("time_expense").checked = true;
           document.getElementById("invoicing").checked = true;
-          document.getElementById("analytics").value = "analyticsEnterprise";
+          document.getElementById("analytics").value = "";
 
           // Depending on user count, set essentials or intermediate
           if (userCount < 25) {
@@ -163,7 +163,7 @@
         }
 
         function errorHandler(error) {
-          console.log(JSON.stringify({ error: error }, replaceErrors));
+          console.error(JSON.stringify({ error: error }, replaceErrors));
 
           if (error.properties && error.properties.errors instanceof Array) {
             const errorMessages = error.properties.errors.map(function (error) {
@@ -189,8 +189,14 @@
         const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
         const dataToSend = pricingData.data;
 
+
+        // Get Currency
+        const currency = pricingData.data.currency
+        const rate = pricingData.calcs.rates[currency] || 1;
+
+
         // Copy down relevant data to dataToSend
-        dataToSend.totalAmt = pricingData.calcs.total.low;
+        // Set timelineLow and timelineHigh
         dataToSend[`timeline${pricingData.data.timelineTable}`] = true;
         dataToSend.timelineWeeks = `${dataToSend.timelineLow} - ${dataToSend.timelineHigh} weeks`;
 
@@ -216,8 +222,9 @@
             dataToSend.image = localStorage.getItem('gantt_chart');
 
             // Add items ids to the data object to enable additional items to show in the contract
-            console.log(item.id)
             switch (item.id) {
+              case "ats_essentials":
+              case "ats_premium":
               case "autoEss":
               case "autoInt":
               case "autoAdv":
@@ -263,10 +270,17 @@
           dataToSend.bullhornSubsidy = false;
         }
 
-        // Format dollar amounts if we have them (and remove dollar sign from template)
-        dataToSend.onSiteTrainingAmt = formatter.format(dataToSend.onSiteTrainingAmt);
-        dataToSend.afterCareAmt = formatter.format(dataToSend.afterCareAmt);
-        dataToSend.totalAmt = formatter.format(dataToSend.totalAmt);
+        // Format dollar amounts if we have them
+        dataToSend.onSiteTrainingAmt = formatCurrency(dataToSend.onSiteTrainingAmt, currency, rate);
+        dataToSend.afterCareAmt = formatCurrency(dataToSend.afterCareAmt, currency, rate);
+
+        // If there's a price override, use that, otherwise use totalAmt
+        if (pricingData.data.overridePriceAmt) {
+          console.info("Using override amount")
+          dataToSend.totalAmt = formatCurrency(pricingData.data.overridePriceAmt, currency, rate);
+        } else {
+          dataToSend.totalAmt = formatCurrency(pricingData.calcs.total.low, currency, rate);
+        }
 
         // If needed to convert number to word
         var dg = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
@@ -278,9 +292,9 @@
 
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
-        dataToSend[`payments_${paymentNumber} `] = true
+        dataToSend[`payments_${paymentNumber}`] = true
 
-        console.log("generate-dataToSend", dataToSend)
+        console.info("generate-dataToSend", dataToSend)
 
         // Send to document creation
         doc.setData(dataToSend);
@@ -382,7 +396,7 @@
     }
 
     function checkValidOverride() {
-      document.getElementById("generateProposal").className = "btn btn-primary";
+      // document.getElementById("generateProposal").className = "btn btn-primary";
     }
 
     // Remove Falsy Function
@@ -534,8 +548,8 @@
 
     // Formatting functions
     function formatCurrency(amount, currency, exchangeRate) {
-      // Determine language
-      let language = "en-US";
+
+      // Set language based on curren
       switch (currency) {
         case "CAD":
           language = "en-CA";
@@ -549,25 +563,29 @@
         case "AUD":
           language = "en-AU";
           break;
+        case "USD":
+          language = "en-US";
+          exchangeRate = 1
+          break;
       }
 
       if (currency === "USD" || currency === "EUR" || currency === "GBP") {
-        const formatterUSD = new Intl.NumberFormat(language, {
+        const formatter = new Intl.NumberFormat(language, {
           style: "currency",
           currency: currency,
           currencyDisplay: "narrowSymbol",
           minimumFractionDigits: 0
         });
 
-        // If the currency isn't USD, then use the exchange rate
-        if (currency != "USD") {
-          amount = roundTo(amount * exchangeRate, 500);
-        }
-
         // Format the amount
-        amount = formatterUSD.format(amount);
+        amount = roundTo(amount * exchangeRate, 500);
+        amount = formatter.format(amount);
+
+        if (currency === "USD") {
+          amount = amount + " USD";
+        }
       } else {
-        const formatterIntl = new Intl.NumberFormat(language, {
+        const formatter = new Intl.NumberFormat(language, {
           style: "currency",
           currency: currency,
           currencyDisplay: "code",
@@ -575,7 +593,7 @@
         });
 
         amount = roundTo(amount * exchangeRate, 500);
-        amount = formatterIntl.format(amount);
+        amount = formatter.format(amount);
       }
 
       return amount;
@@ -610,7 +628,6 @@
     function saveDraft() {
       let linkURL = document.getElementById("linkURL").href
       linkURL = linkURL.replace("file:///C:/Source/", "https://ddonathan.github.io/")
-      console.log(linkURL)
 
       var myHeaders = new Headers();
       myHeaders.append("Content-Type", "application/json");
@@ -957,6 +974,219 @@
     //  modules: [new ImageModule(imageOpts)],
     //});
 
+    function openModal() {
+      var myModal = new bootstrap.Modal(document.getElementById('opportunityModal'), {});
+      document.getElementById('opportunityId').value = "";  // clear input field
+      myModal.show();
+    }
+
+    async function getPricing() {
+
+      // Get the form data as a new FormData object
+      const formData = new FormData(form);
+
+      // Validate the form data
+      let errorsResult = checkValid()
+      if (errorsResult?.length > 0) {
+        console.error("Errors")
+      }
+
+      // Convert FormData to json
+      let formProps = Object.fromEntries(formData.entries());
+
+      // Save a copy of the formData so we can compare
+      previousFormData = formProps
+
+      // Stringify the form data
+      formProps = JSON.stringify(formProps)
+      console.info("formData", formProps)
+
+      const urlDev = "https://yxb3ebdvpgwc5xz3w5ixvglht40dorqd.lambda-url.us-west-2.on.aws/"
+      const urlProd = "https://p5uwweeqrdvaabo7mwnet4whha0syuyu.lambda-url.us-west-2.on.aws/"
+
+      // Send the form data to the fetch URL
+      const response = await fetch(urlDev, {
+        method: 'POST',
+        body: formProps,
+        redirect: 'follow'
+      })
+      if (response.ok) {
+        const body = await response.json();
+        console.info({ body })
+
+        // Save the API response data to sessionStorage
+        sessionStorage.setItem('pricingData', JSON.stringify(body));
+
+        // Get Currency
+        const currency = body.data.currency
+        const rate = body.calcs.rates[currency] || 1
+
+        // Update Results table
+        document.getElementById("pricing_ballpark").innerHTML = `${body.calcs.total.ballparkString || "$0"} ${currency === "USD" ? currency : ""}`
+        document.getElementById("pricing_basePricing").innerHTML = `${formatCurrency(roundTo(body.calcs.products.low, 10), currency, rate)} - ${formatCurrency(roundTo(body.calcs.products.high, 10), currency, rate)}`
+        document.getElementById("pricing_additions").innerHTML = `${formatCurrency(roundTo(body.calcs.options, 10), currency, rate)}`
+        document.getElementById("pricing_totalAmt").innerHTML = `${formatCurrency(roundTo(body.calcs.total.low, 10), currency, rate)}`
+
+        // If we have body.data.overridePriceAmt set pricing_totalAmt to have body.calcs.total.low crossed out and body.data.overridePriceAmt next to it in red
+        if (body.data.overridePriceAmt) {
+          document.getElementById("pricing_totalAmt").innerHTML = `<span style="text-decoration: line-through;">${formatCurrency(roundTo(body.calcs.total.low, 10), currency, rate)}</span> <span style="color: red;">${formatCurrency(roundTo(body.data.overridePriceAmt, 10), currency, rate)}</span>`
+        }
+
+        // Set color of button to gray
+        document.getElementById("getPricing").classList.remove("btn-success");
+        document.getElementById("getPricing").classList.add("btn-secondary");
+
+        // Set number of payments depending on certain criteria
+        if (body.calcs.total.low >= 35000 || document.getElementById("automation").value || document.getElementById("timelineLow").value >= 18) {
+          document.getElementById("numPayments").value = 4
+        }
+
+        // Process additions
+        // Loop through body.lookup.additions
+        for (let entry of body.lookup.options) {
+          // Object.entries(body.lookup.options).forEach(entry => {
+          const key = entry.id;
+          const value = entry;
+
+          if (document.getElementById(`${key}_pricing`)) {
+            let descToUse, addtlPricing;
+
+            switch (value.method) {
+              case "$":
+                descToUse = formatter.format(value.pricing);
+                addtlPricing = formatter.format(value.addtlPricing);
+                break;
+
+              case "%":
+                // If we have a number from previously submitting it, use that instead of calculating it
+                // TODO Fix issue where when a percentage is checked and then submitted, it will go to very large values. I believe it's because the actual number gets submitted and then comes back as the amount rather than the percent.
+                if (value.pricing > 1 || value.pricing < -1) {
+                  descToUse = formatter.format(value.pricing)
+                } else {
+                  descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")"
+                }
+
+                if (value.addtlPricing) {
+                  addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+                break;
+
+              case "perEach":
+                descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`;
+
+                if (value.include > 0) {
+                  descToUse += ` ${value.include} included free.`;
+                }
+
+                if (value.addtlPricing) {
+                  addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
+                }
+                break;
+
+              default:
+                console.error("Invalid method:", value.method);
+                break;
+            }
+
+            if (value.addtlPricing) {
+              descToUse += " first instance, " + addtlPricing + " each additional";
+            }
+
+            if (descToUse) {
+              document.getElementById(`${key}_pricing`).innerHTML = descToUse;
+            }
+          } else {
+            console.error(key, "not found");
+          }
+        }
+
+        // funcOnSiteTraining();
+        funcAfterCare();
+
+        // Check that we're valid
+        checkValid()
+
+        // Setup for drawing the gantt chart
+        let timelineDetails = {
+          products: [],
+          baselineLow: document.getElementById("timelineLow").value,
+          baselineHigh: document.getElementById("timelineHigh").value,
+          weeksLow: 0,
+          weeksHigh: 0,
+        };
+
+        // Set start date of the project to today plus two weeks using dayjs
+        timelineDetails.start = dayjs().add(4, 'week').toDate();
+
+        // Set end date of the ats to the start plus the baselineLow weeks
+        timelineDetails.end = dayjs(timelineDetails.start)
+          .add(timelineDetails.baselineHigh, 'week').toDate();
+
+
+        // Reinitialize tasks to an empty array
+        tasks = [];
+
+        // Setup for receipt
+        const itemListElement = document.getElementById('item-list');
+        itemListElement.innerHTML = '';
+        const footerElement = document.getElementById('footer');
+        footerElement.innerHTML = '';
+        let total = 0;
+
+        // Loop through body.calcs.itemized array and add items to gantt chart tasks
+        body.calcs.itemized.map((item) => {
+
+          // Add to receipt
+          if (item.pricingLow || item.pricing) {
+            // Exclude certain items
+            if (item.id != "afterCare") {
+              const price = item.pricingLow || item.pricing;
+              total += price;
+
+              const itemElement = document.createElement('div');
+              itemElement.classList.add('item');
+              itemElement.innerHTML = `<p>${item.name}</p><p>$${price.toFixed(2)}</p>`;
+              itemListElement.appendChild(itemElement);
+            }
+          }
+
+          if (item.weeksHigh) {
+            let start = dayjs(timelineDetails.end).add(item.startAt, 'week').toDate();
+            let end = dayjs(start).add(item.weeksHigh, 'week').toDate();
+
+            var durationInWeeks = item.weeksHigh;
+            var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+            var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+
+            // Setup for gantt chart
+            tasks.push([item.id, item.name, start, null, durationInMilliseconds, item.weeksLow / item.weeksHigh * 100, null]);
+          }
+        });
+
+        // Add total to receipt
+        const totalElement = document.createElement('div');
+        totalElement.classList.add('item');
+        totalElement.innerHTML = `<strong>Total</strong><p>$${total.toFixed(2)}</p>`;
+        footerElement.appendChild(totalElement);
+
+
+        // Add ATS to the gantt tasks at the beginning
+        if (document.getElementById("ats").value) {
+          var durationInWeeks = timelineDetails.baselineHigh;
+          var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+          var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
+          tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, timelineDetails.baselineLow / timelineDetails.baselineHigh * 100, null]);
+        }
+
+        // Draw the gantt chart
+        google.charts.load('current', { 'packages': ['gantt'] });
+        google.charts.setOnLoadCallback(drawGanttChart);
+      } else {
+        console.error("Request failed with status", response.status);
+      }
+    }
+
+
 
     //
     //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
@@ -967,6 +1197,137 @@
     // ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝
     //
     window.onload = function () {
+
+      var opportunityModalElement = document.getElementById('opportunityModal');
+      var myModal = new bootstrap.Modal(opportunityModalElement, {});
+
+      document.getElementById('import').addEventListener('click', function () {
+        myModal.show();
+      });
+
+      opportunityModalElement.addEventListener('shown.bs.modal', function () {
+        var submitButton = opportunityModalElement.querySelector('#submitOpportunity');
+        var opportunityIdInput = opportunityModalElement.querySelector('#opportunityId');
+
+        // Set focus to the input box
+        opportunityIdInput.focus();
+
+        // Handle the enter key
+        opportunityIdInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.keyCode === 13) {
+            submitButton.click();
+          }
+        });
+
+        // Add new click event listener
+        submitButton.addEventListener('click', function () {
+          var opportunityId = opportunityIdInput.value;
+          if (opportunityId) {
+            getOpportunityInfo(opportunityId);
+            myModal.hide();
+
+            // Remove modal backdrop manually
+            let backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop && backdrop.parentNode) {
+              backdrop.parentNode.removeChild(backdrop);
+            }
+
+            // Add this line to remove the 'modal-open' class from the body
+            document.body.classList.remove('modal-open');
+          } else {
+            console.error("Opportunity ID is empty");
+          }
+        });
+
+        opportunityModalElement.addEventListener('hidden.bs.modal', function () {
+          let backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop && backdrop.parentNode) {
+            backdrop.parentNode.removeChild(backdrop);
+          }
+
+          // Additionally, remove the 'modal-open' class from the body
+          document.body.classList.remove('modal-open');
+        });
+
+
+      });
+
+      // Check the URL for an opportunityId query parameter
+      var urlParams = new URLSearchParams(window.location.search);
+      var opportunityId = urlParams.get('opportunityId');
+      if (opportunityId) {
+        console.info("Found opportunityId in URL: " + opportunityId);
+        getOpportunityInfo(opportunityId);
+      }
+
+      // getOpportunityInfo function
+      async function getOpportunityInfo(opportunityId) {
+        try {
+          var response = await fetch('https://up3s5fcw7gyqlsfhub3ehhlpli0tubgi.lambda-url.us-west-2.on.aws/?id=' + opportunityId);
+          if (response.ok) {
+            var data = await response.json();
+            console.info("opportunityData", data);
+
+            // Set the values of the form elements
+            document.getElementById("clientName").value = data.company.name;
+            document.getElementById("userCount").value = data.userCount?.value || "";
+            document.getElementById("existingSystem").value = data.legacySystem?.value || "";
+            document.getElementById("currency").value = data.currency;
+            document.getElementById("opportunityId").value = opportunityId;
+
+            // Update the Update button to include the OpportunityId
+            document.getElementById("update").innerHTML = `Update: ${opportunityId}`;
+
+            // Update the Update button class to remove d-none
+            document.getElementById("update").classList.remove('d-none');
+
+            // Loop through data.items
+            for (var i = 0; i < data.items.length; i++) {
+              // Set the value of the item
+              let desiredItem = data.items[i].catalogItem;
+
+              let element = document.querySelector(`[data-catalog-item="${desiredItem}"]`);
+
+              if (element) {
+                switch (element.tagName) {
+                  case 'OPTION':
+                    element.selected = true;
+                    break;
+                  case 'INPUT':
+                    switch (element.type) {
+                      case 'checkbox':
+                        element.checked = true;
+                        break;
+                      case 'number':
+                        element.value = data.items[i].quantity;
+                        break;
+                    }
+                    break;
+                }
+              }
+            }
+
+            // Hide the modal using Bootstrap's hide method
+            myModal.hide();
+
+            // Go ahead and run pricing for this
+            getPricing()
+
+          } else {
+            console.error('Error making GET request');
+            throw new Error('Error making GET request');
+          }
+        } catch (error) {
+          console.error(error);
+
+          // Hide the modal using Bootstrap's hide method
+          myModal.hide();
+
+          throw error;
+        }
+      }
+
+
       // Set name on all form elements to match the id
       var elements = document.querySelectorAll('input, select, textarea');
       for (var i = 0; i < elements.length; i++) {
@@ -1021,6 +1382,15 @@
       if (form) {
         // Add an event listener for when the form changes
         form.addEventListener('change', function () {
+          // Run the Back office automation
+          funcBackOfficeOptions()
+
+          // Check valid
+          checkValid()
+
+          // Disable "Generate Proposal" button until we have pricing
+          document.getElementById("generateProposal").className = "btn btn-primary d-none";
+
           // Clear the pricing table
           document.getElementById("pricing_ballpark").innerHTML = ""
           document.getElementById("pricing_basePricing").innerHTML = ""
@@ -1031,14 +1401,7 @@
           document.getElementById("getPricing").classList.remove("btn-secondary");
           document.getElementById("getPricing").classList.add("btn-success");
 
-          // Disable "Generate Proposal" button until we have pricing
-          document.getElementById("generateProposal").className = "btn btn-primary d-none";
 
-          // Run the Back office automation
-          funcBackOfficeOptions()
-
-          // Check valid
-          checkValid()
         });
 
         // Add an event listener for form submission
@@ -1047,209 +1410,9 @@
           // Prevent the default form submission behavior
           event.preventDefault();
 
-          // Get the form data as a new FormData object
-          const formData = new FormData(form);
+          getPricing()
 
-          // Validate the form data
-          let errorsResult = checkValid()
-          if (errorsResult?.length > 0) {
-            console.error("Errors")
-          }
-
-          // Convert FormData to json
-          let formProps = Object.fromEntries(formData.entries());
-
-          // Save a copy of the formData so we can compare
-          previousFormData = formProps
-
-          // Stringify the form data
-          formProps = JSON.stringify(formProps)
-          console.log("formData", formProps)
-
-          const urlDev = "https://yxb3ebdvpgwc5xz3w5ixvglht40dorqd.lambda-url.us-west-2.on.aws/"
-          const urlProd = "https://p5uwweeqrdvaabo7mwnet4whha0syuyu.lambda-url.us-west-2.on.aws/"
-
-          // Send the form data to the fetch URL
-          const response = await fetch(urlDev, {
-            method: 'POST',
-            body: formProps,
-            redirect: 'follow'
-          })
-          if (response.ok) {
-            const body = await response.json();
-            console.log({ body })
-
-            // Save the API response data to sessionStorage
-            sessionStorage.setItem('pricingData', JSON.stringify(body));
-
-            // Get Currency
-            const currency = body.data.currency
-
-            // Get exchange rate by looking for
-            const rate = body.calcs.rates[currency]
-
-            // Update Results table
-            document.getElementById("pricing_ballpark").innerHTML = `${body.calcs.total.ballparkString || "$0"}`
-            document.getElementById("pricing_basePricing").innerHTML = `${formatCurrency(roundTo(body.calcs.products.low, 10), currency, rate)} - ${formatCurrency(roundTo(body.calcs.products.high, 10), currency, rate)}`
-            document.getElementById("pricing_additions").innerHTML = `${formatCurrency(roundTo(body.calcs.options, 10), currency, rate)}`
-            document.getElementById("pricing_totalAmt").innerHTML = `${formatCurrency(roundTo(body.calcs.total.low, 10), currency, rate)}`
-
-            // Set color of button to gray
-            document.getElementById("getPricing").classList.remove("btn-success");
-            document.getElementById("getPricing").classList.add("btn-secondary");
-
-            // Set number of payments depending on certain criteria
-            if (body.calcs.total.low >= 35000 || document.getElementById("automation").value || document.getElementById("timelineLow").value >= 18) {
-              document.getElementById("numPayments").value = 4
-            }
-
-            // Process additions
-            // Loop through body.lookup.additions
-            for (let entry of body.lookup.options) {
-              // Object.entries(body.lookup.options).forEach(entry => {
-              const key = entry.id;
-              const value = entry;
-
-              if (document.getElementById(`${key}_pricing`)) {
-                let descToUse, addtlPricing;
-
-                switch (value.method) {
-                  case "$":
-                    descToUse = formatter.format(value.pricing);
-                    addtlPricing = formatter.format(value.addtlPricing);
-                    break;
-
-                  case "%":
-                    console.log(value)
-
-                    // If we have a number from previously submitting it, use that instead of calculating it
-                    // TODO Fix issue where when a percentage is checked and then submitted, it will go to very large values. I believe it's because the actual number gets submitted and then comes back as the amount rather than the percent.
-                    if (value.pricing > 1 || value.pricing < -1) {
-                      descToUse = formatter.format(value.pricing)
-                    } else {
-                      descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")"
-                    }
-
-                    if (value.addtlPricing) {
-                      addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
-                    }
-                    break;
-
-                  case "perEach":
-                    descToUse = `Base: ${formatter.format(value.pricingBase + value.pricingEach, 10)} each, ${formatter.format(value.pricingEach, 10)} each additional.`;
-
-                    if (value.include > 0) {
-                      descToUse += ` ${value.include} included free.`;
-                    }
-
-                    if (value.addtlPricing) {
-                      addtlPricing = formatter.format(roundTo(body.calcs.total.low * value.addtlPricing, 10)) + " (" + fmtPct.format(value.addtlPricing) + ")";
-                    }
-                    break;
-
-                  default:
-                    console.error("Invalid method:", value.method);
-                    break;
-                }
-
-                if (value.addtlPricing) {
-                  descToUse += " first instance, " + addtlPricing + " each additional";
-                }
-
-                if (descToUse) {
-                  document.getElementById(`${key}_pricing`).innerHTML = descToUse;
-                }
-              } else {
-                console.log(key, "not found");
-              }
-            }
-
-            // funcOnSiteTraining();
-            funcAfterCare();
-
-            // Check that we're valid
-            checkValid()
-
-            // Setup for drawing the gantt chart
-            let timelineDetails = {
-              products: [],
-              baselineLow: document.getElementById("timelineLow").value,
-              baselineHigh: document.getElementById("timelineHigh").value,
-              weeksLow: 0,
-              weeksHigh: 0,
-            };
-
-            // Set start date of the project to today plus two weeks using dayjs
-            timelineDetails.start = dayjs().add(4, 'week').toDate();
-
-            // Set end date of the ats to the start plus the baselineLow weeks
-            timelineDetails.end = dayjs(timelineDetails.start)
-              .add(timelineDetails.baselineHigh, 'week').toDate();
-
-
-            // Reinitialize tasks to an empty array
-            tasks = [];
-
-            // Setup for receipt
-            const itemListElement = document.getElementById('item-list');
-            itemListElement.innerHTML = '';
-            const footerElement = document.getElementById('footer');
-            footerElement.innerHTML = '';
-            let total = 0;
-
-            // Loop through body.calcs.itemized array and add items to gantt chart tasks
-            body.calcs.itemized.map((item) => {
-
-              // Add to receipt
-              if (item.pricingLow || item.pricing) {
-                const price = item.pricingLow || item.pricing;
-                total += price;
-
-                const itemElement = document.createElement('div');
-                itemElement.classList.add('item');
-                itemElement.innerHTML = `<p>${item.name}</p><p>$${price.toFixed(2)}</p>`;
-                itemListElement.appendChild(itemElement);
-              }
-
-              if (item.weeksHigh) {
-                console.log({ item })
-                let start = dayjs(timelineDetails.end).add(item.startAt, 'week').toDate();
-                let end = dayjs(start).add(item.weeksHigh, 'week').toDate();
-
-                var durationInWeeks = item.weeksHigh;
-                var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
-                var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
-
-                // Setup for gantt chart
-                tasks.push([item.id, item.name, start, null, durationInMilliseconds, item.weeksLow / item.weeksHigh * 100, null]);
-              }
-            });
-
-            // Add total to receipt
-            const totalElement = document.createElement('div');
-            totalElement.classList.add('item');
-            totalElement.innerHTML = `<strong>Total</strong><p>$${total.toFixed(2)}</p>`;
-            footerElement.appendChild(totalElement);
-
-
-            // Add ATS to the gantt tasks at the beginning
-            if (document.getElementById("ats").value) {
-              var durationInWeeks = timelineDetails.baselineHigh;
-              var millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
-              var durationInMilliseconds = durationInWeeks * millisecondsInWeek;
-              tasks.unshift(["ats", "ATS", timelineDetails.start, null, durationInMilliseconds, timelineDetails.baselineLow / timelineDetails.baselineHigh * 100, null]);
-            }
-
-            console.log(timelineDetails);
-            console.log({ tasks });
-
-            // Draw the gantt chart
-            google.charts.load('current', { 'packages': ['gantt'] });
-            google.charts.setOnLoadCallback(drawGanttChart);
-          } else {
-            console.error("Request failed with status", response.status);
-          }
-        });
+        })
       }
 
       // Set reset form url to the url they came in with
@@ -1276,18 +1439,14 @@
         // If we have a products list, then split it out
         if (fieldId === "products") {
           products = query_string[fieldId].split(",")
-          // console.log("products", products)
 
           // Loop through them and set the keyValue so we can use it to set the values in the form
           for (let product of products) {
-            // console.log("product", product)
             if (document.getElementsByName(product)) {
               fieldId = document.getElementsByName(product)[0].id
-              // console.log("fieldId", fieldId)
 
               // Check the box for this product
               if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
-                // console.log("Checkbox, checking", fieldId);
                 document.getElementById(fieldId).checked = true;
               }
             }
@@ -1296,11 +1455,9 @@
 
         // If it's a checkbox, check it, otherwise set the value
         if (document.getElementById(fieldId) && document.getElementById(fieldId).type === "checkbox") {
-          // console.log("Checkbox, checking", fieldId);
           document.getElementById(fieldId).checked = true;
         }
         if (document.getElementById(fieldId) && document.getElementById(fieldId).type !== "checkbox") {
-          // console.log("Not checkbox, setting value", fieldId);
           document.getElementById(fieldId).value = query_string[fieldId];
         }
       }
@@ -1373,8 +1530,8 @@
         <div class="col-sm-6">
           <select class="form-select" id="package" title="package">
             <option value="" SELECTED></option>
-            <option value="smbGrowth">Growth Edition - SMB</option>
-            <option value="fieldGrowth">Growth Edition - Field</option>
+            <option value="smbGrowth" data-catalog-item="BH-PKG-GRO-SMB">Growth Edition - SMB</option>
+            <option value="fieldGrowth" data-catalog-item="BH-PKG-GRO-FLD">Growth Edition - Field</option>
           </select>
         </div>
       </div>
@@ -1384,8 +1541,9 @@
         <div class="col-sm-6">
           <select class="form-select" id="analytics" title="analytics">
             <option value="" SELECTED></option>
-            <option value="analyticsGrowth">Growth</option>
-            <option value="analyticsEnterprise">Enterprise</option>
+            <option value="analyticsGrowth" data-catalog-item="BH-IMP-ANA-01">Growth (Implemented by Bullhorn)</option>
+            <option value="analyticsCorporate" data-catalog-item="BH-IMP-ANA-02">Corporate</option>
+            <option value="analyticsEnterprise" data-catalog-item="BH-IMP-ANA-03">Enterprise (Implemented by Bullhorn)</option>
           </select>
         </div>
       </div>
@@ -1396,7 +1554,9 @@
           <select class="form-select" id="ats" title="ats">
             <option value="" SELECTED></option>
             <option value="ats_corp">Corporate</option>
-            <option value="ats_enterprise">Enterprise</option>
+            <option value="ats_enterprise" data-catalog-item="BH-IMP-ATS">Enterprise</option>
+            <option value="ats_essentials" data-catalog-item="BH-IMP-ATS-01">Essentials</option>
+            <option value="ats" data-catalog-item="BH-IMP-ATS-02">Premium</option>
           </select>
         </div>
       </div>
@@ -1406,10 +1566,10 @@
         <div class="col-sm-6">
           <select class="form-select" id="automation" title="automation">
             <option value="" SELECTED></option>
-            <option value="autoEss">Essentials</option>
-            <option value="autoInt">Intermediate</option>
-            <option value="autoAdv">Advanced</option>
-            <option value="autoTra">Transformed</option>
+            <option value="autoEss" data-catalog-item="BH-IMP-AUTO-01">Essentials</option>
+            <option value="autoInt" data-catalog-item="BH-IMP-AUTO-02">Intermediate</option>
+            <option value="autoAdv" data-catalog-item="BH-IMP-AUTO-03">Advanced</option>
+            <option value="autoTra" data-catalog-item="BH-IMP-AUTO-04">Transformed</option>
           </select>
         </div>
       </div>
@@ -1418,13 +1578,13 @@
         <div class="col-sm-2">Back Office</div>
         <div class="col-sm-auto">
           <div class="form-check form-switch" id="time_expense-form-element">
-            <input class="form-check-input" type="checkbox" id="time_expense" title="time_expense" value="true" onClick="funcBackOfficeOptions('BBO')">
+            <input class="form-check-input" type="checkbox" id="time_expense" title="time_expense" data-catalog-item="BH-IMP-BBO-TE" value="true" onClick="funcBackOfficeOptions('BBO')">
             <label class="form-check-label" id="time_expense_label" for="time_expense">
               Time/Expense
             </label>
           </div>
           <div class="form-check form-switch" id="invoicing-form-element">
-            <input class="form-check-input" type="checkbox" id="invoicing" title="invoicing" value="true" onClick="funcBackOfficeOptions('BBO')">
+            <input class="form-check-input" type="checkbox" id="invoicing" title="invoicing" data-catalog-item="BH-IMP-BBO-INV" value="true" onClick="funcBackOfficeOptions('BBO')">
             <label class="form-check-label" id="invoicing_label" for="invoicing">
               Invoicing
             </label>
@@ -1443,19 +1603,19 @@
         <div class="col-sm-6">
           <select class="form-select" id="onboarding" title="onboarding">
             <option value="" SELECTED></option>
-            <option value="onbClassic">SMB Edition</option>
-            <option value="onb365">365 Edition</option>
-            <option value="onbTalentEss">Talent Edition Essentials</option>
-            <option value="onbTalentInt">Talent Edition Intermediate</option>
+            <option value="onbClassic" data-catalog-item="BH-IMP-ONB-CLSC">SMB Edition</option>
+            <option value="onb365" data-catalog-item="BH-IMP-ONB-365">365 Edition</option>
+            <option value="onbTalentEss" data-catalog-item="BH-IMP-ONB-TLNT-ESS">Talent Edition Essentials</option>
+            <option value="onbTalentInt" data-catalog-item="BH-IMP-ONB-TLNT-INT">Talent Edition Intermediate</option>
           </select>
         </div>
       </div>
 
-      <div class="row mb-3">
+      <div class=" row mb-3">
         <div class="col-sm-2">Reporting</div>
         <div class="col-sm-auto">
           <div class="form-check form-switch">
-            <input class="form-check-input" type="checkbox" id="canvas-form-element" title="canvas" value="true">
+            <input class="form-check-input" type="checkbox" id="canvas-form-element" title="canvas" data-catalog-item="BH-IMP-CVS" value="true">
             <label class="form-check-label" for="canvas">
               Reporting Ad-hoc Edition
             </label>
@@ -1468,8 +1628,8 @@
         <div class="col-sm-6">
           <select class="form-select" id="talentPlatform" title="talentPlatform">
             <option value="" SELECTED></option>
-            <option value="talentPlatformEss">Essentials</option>
-            <option value="talentPlatformInt">Intermediate</option>
+            <option value="talentPlatformEss" data-catalog-item="BH-IMP-TLNT-01">Essentials</option>
+            <option value="talentPlatformInt" data-catalog-item="BH-IMP-TLNT-02">Intermediate</option>
           </select>
         </div>
       </div>
@@ -1480,7 +1640,7 @@
           <div class="row">
             <div class="col">
               <div class="form-check form-switch">
-                <input type="number" class="form-control" id="vms_sync" title="vms_sync" min="0" max="20" />
+                <input type="number" class="form-control" id="vms_sync" title="vms_sync" data-catalog-item="BH-IMP-VMS-SYNC" min="0" max="20" />
               </div>
             </div>
             <div class="col">
@@ -1492,7 +1652,7 @@
           <div class="row">
             <div class="col">
               <div class="form-check form-switch">
-                <input type="number" class="form-control" id="vms_submittals" title="vms_submittals" min="0" max="2" />
+                <input type="number" class="form-control" id="vms_submittals" title="vms_submittals" data-catalog-item="BH-IMP-VMS-SUBM" min="0" max="2" />
               </div>
             </div>
             <div class="col">
@@ -1511,6 +1671,7 @@
       <input type="hidden" id="locale" value="">
       <input type="hidden" id="countryCode" value="">
       <input type="hidden" id="calendlyLink" value="">
+      <input type="hidden" id="opportunityId" value="">
 
       <div class="accordion" id="accordionExample">
         <div class="accordion-item">
@@ -1623,7 +1784,7 @@
                 <div class="col-sm-2">OSCP</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" title="oscpOption" value="true" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" value="true" data-exclude="true" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -1632,7 +1793,7 @@
                 <div class="col-sm-2">On Site Training</div>
                 <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" data-exclude="true" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
                   <div class="col-sm-6 d-none" id="onSiteTraining_div">
                     <div class="input-group">
@@ -1643,13 +1804,11 @@
                 </div>
               </div>
 
-
-
               <div class="form-group row mb-3">
                 <div class="col-sm-2">White Glove</div>
                 <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" data-exclude="true" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
                   <div class="col-sm-6 d-none" id="afterCare_div">
                     <div class="input-group">
@@ -1809,9 +1968,30 @@
     <div class="row">
       <div class="col-12">
         <button class="btn btn-outline-secondary" type="button" id="resetForm" data-bs-toggle="tooltip" data-bs-placement="right" title="Clears all data out of the form and resets to a 10 user ATS only imp">Reset Form</button>
-        <button id="saveDraft" class="btn btn-secondary" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button>
+        <button class="btn btn-secondary" type="button" id="import" onclick="openModal()" data-bs-toggle="tooltip" data-bs-placement="right" title="Import from a ConnectWise Opp">Import</button>
+        <button class="btn btn-secondary d-none" type="button" id="update" data-bs-toggle="tooltip" data-bs-placement="right" title="Update Existing">Update</button>
+        <button class="btn btn-secondary d-none" type="button" id="save" data-bs-toggle="tooltip" data-bs-placement="right" title="Save ">Save as New</button>
+        <!-- <button id="saveDraft" class="btn btn-secondary" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button> -->
         <button id="getPricing" class="btn btn-success" form="form" type="submit" data-bs-toggle="tooltip" data-bs-placement="right" title="Get latest pricing based on your inputs">Get Pricing</button>
-        <button id="generateProposal" class="btn btn-primary" type="button" onclick="generate();">Generate Proposal</button>
+        <button id="generateProposal" class="btn btn-primary d-none" type="button" onclick="generate();">Generate Proposal</button>
+      </div>
+    </div>
+
+    <div class="modal fade" id="opportunityModal" tabindex="-1" aria-labelledby="opportunityModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="opportunityModalLabel">Enter Opportunity ID</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="text" id="opportunityId" class="form-control" placeholder="Enter Opportunity ID">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" id="submitOpportunity">Submit</button>
+          </div>
+        </div>
       </div>
     </div>
 
