@@ -189,7 +189,6 @@
         const pricingData = JSON.parse(sessionStorage.getItem('pricingData'));
         const dataToSend = pricingData.data;
 
-
         // Get Currency
         const currency = pricingData.data.currency
         const rate = pricingData.calcs.rates[currency] || 1;
@@ -199,6 +198,22 @@
         // Set timelineLow and timelineHigh
         dataToSend[`timeline${pricingData.data.timelineTable}`] = true;
         dataToSend.timelineWeeks = `${dataToSend.timelineLow} - ${dataToSend.timelineHigh} weeks`;
+
+        // Get the fields where data-noPriceRefresh and add them to dataToSend
+        const noPriceRefresh = document.querySelectorAll('[data-noPriceRefresh]');
+        noPriceRefresh.forEach((field) => {
+          // If the field is a checkbox, add the checked value
+          if (field.type === "checkbox") {
+            dataToSend[field.id] = field.checked;
+          } else {
+            dataToSend[field.id] = field.value;
+          }
+
+          // if the field is an input and has data in it, add it
+          if (field.type === "text" && field.value !== "") {
+            dataToSend[field.id] = field.value;
+          }
+        });
 
         // Sort pricingData.calcs.itemized by type in Z-A order so that bundles will be processed last and can remove product items.
         pricingData.calcs.itemized.sort((a, b) => {
@@ -251,7 +266,6 @@
                 break;
             }
 
-
             // if there's a quantity, add to name
             if (item.quantity) {
               name = `${name} (${item.quantity})`
@@ -260,8 +274,6 @@
             dataToSend.products.push(name);
           }
         })
-
-
 
         // Get any data we need that's in the form that didn't go to AWS and back
         if (document.getElementById("bullhornSubsidy").checked) {
@@ -521,6 +533,7 @@
       }
     }
 
+
     function funcTimelineTable() {
       switch (document.getElementById("timelineTable").value) {
         case "NoDM":
@@ -578,7 +591,7 @@
         });
 
         // Format the amount
-        amount = roundTo(amount * exchangeRate, 500);
+        amount = roundTo(amount * exchangeRate, 10);
         amount = formatter.format(amount);
 
         if (currency === "USD") {
@@ -592,7 +605,7 @@
           minimumFractionDigits: 0
         });
 
-        amount = roundTo(amount * exchangeRate, 500);
+        amount = roundTo(amount * exchangeRate, 10);
         amount = formatter.format(amount);
       }
 
@@ -1112,6 +1125,11 @@
               case "$":
                 descToUse = formatter.format(value.pricing);
                 addtlPricing = formatter.format(value.addtlPricing);
+
+                // Look for an element with the id of key but with Amt after it and set it's value to value.pricing
+                if (document.getElementById(`${key}Amt`)) {
+                  document.getElementById(`${key}Amt`).value = value.pricing;
+                }
                 break;
 
               case "%":
@@ -1119,8 +1137,18 @@
                 // TODO Fix issue where when a percentage is checked and then submitted, it will go to very large values. I believe it's because the actual number gets submitted and then comes back as the amount rather than the percent.
                 if (value.pricing > 1 || value.pricing < -1) {
                   descToUse = formatter.format(value.pricing)
+
+                  // Look for an element with the id of key but with Amt after it and set it's value to value.pricing
+                  if (document.getElementById(`${key}Amt`)) {
+                    document.getElementById(`${key}Amt`).value = value.pricing;
+                  }
                 } else {
                   descToUse = formatter.format(roundTo(body.calcs.total.low * value.pricing, 10)) + " (" + fmtPct.format(value.pricing) + ")"
+
+                  // Look for an element with the id of key but with Amt after it and set it's value to value.pricing
+                  if (document.getElementById(`${key}Amt`)) {
+                    document.getElementById(`${key}Amt`).value = roundTo(body.calcs.total.low * value.pricing, 10);
+                  }
                 }
 
                 if (value.addtlPricing) {
@@ -1435,12 +1463,17 @@
 
       if (form) {
         // Add an event listener for when the form changes
-        form.addEventListener('change', function () {
+        form.addEventListener('change', function (event) {
           // Run the Back office automation
           funcBackOfficeOptions()
 
           // Check valid
           checkValid()
+
+          // Do not run if data-noPriceRefresh is true (Note in the dataset the key is lowercase)
+          if (event.target.dataset.nopricerefresh === "true") {
+            return
+          }
 
           // Disable "Generate Proposal" button until we have pricing
           document.getElementById("generateProposal").className = "btn btn-primary d-none";
@@ -1454,9 +1487,8 @@
           // Change button color back to green
           document.getElementById("getPricing").classList.remove("btn-secondary");
           document.getElementById("getPricing").classList.add("btn-success");
-
-
         });
+
 
         // Add an event listener for form submission
         form.addEventListener('submit', async (event) => {
@@ -1838,7 +1870,7 @@
                 <div class="col-sm-2">OSCP</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" value="true" data-exclude="true" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="oscpOption" title="Open Source Career Portal(s)" value="true" data-noPriceRefresh="true" data-exclude="true" /> <small><span class="text-black-50" id="oscpCount_pricing"></span></small>
                   </div>
                 </div>
               </div>
@@ -1847,12 +1879,12 @@
                 <div class="col-sm-2">On Site Training</div>
                 <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" data-exclude="true" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="onSiteTraining" title="onSiteTraining" value="true" onChange="funcOnSiteTraining();" data-noPriceRefresh="true" data-exclude="true" /> <small><span class="text-black-50" id="onSiteTraining_pricing"></span></small>
                   </div>
                   <div class="col-sm-6 d-none" id="onSiteTraining_div">
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" />
+                      <input class="form-control" type="number" id="onSiteTrainingAmt" title="On Site Training Amount" title="onSiteTrainingAmt" value="" data-noPriceRefresh="true" />
                     </div>
                   </div>
                 </div>
@@ -1862,12 +1894,12 @@
                 <div class="col-sm-2">White Glove</div>
                 <div class="col-sm-10">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" data-exclude="true" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="afterCare" title="afterCare" value="true" onChange="funcAfterCare();" data-noPriceRefresh="true" data-exclude="true" /> <small><span class="text-black-50" id="afterCare_pricing"></span></small>
                   </div>
                   <div class="col-sm-6 d-none" id="afterCare_div">
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input class="form-control" type="number" id="afterCareAmt" title="afterCareAmt" value="" />
+                      <input class="form-control" type="number" id="afterCareAmt" title="afterCareAmt" value="" data-noPriceRefresh="true" />
                     </div>
                   </div>
                 </div>
