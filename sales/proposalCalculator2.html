@@ -266,6 +266,10 @@
                 break;
             }
 
+            if (dataToSend.ats) {
+              dataToSend[dataToSend.ats] = true;
+            }
+
             // if there's a quantity, add to name
             if (item.quantity) {
               name = `${name} (${item.quantity})`
@@ -1197,7 +1201,7 @@
           baselineLow: document.getElementById("timelineLow").value,
           baselineHigh: document.getElementById("timelineHigh").value,
           weeksLow: 0,
-          weeksHigh: 0,
+          weeksHigh: 0
         };
 
         // Set start date of the project to today plus two weeks using dayjs
@@ -1213,7 +1217,7 @@
 
         // Setup for receipt
         const itemListElement = document.getElementById('item-list');
-        itemListElement.innerHTML = '';
+        itemListElement.innerHTML = `<p style="text-align:center">${document.getElementById('clientName').value}</p><p style="text-align:center">${dayjs().format('MM/DD/YYYY hh:mm A')}</p><p style="text-align:center">${document.getElementById('userCount').value} users<br><br></p>`;
         const footerElement = document.getElementById('footer');
         footerElement.innerHTML = '';
         let total = 0;
@@ -1287,6 +1291,7 @@
         myModal.show();
       });
 
+
       opportunityModalElement.addEventListener('shown.bs.modal', function () {
         var submitButton = opportunityModalElement.querySelector('#submitOpportunity');
         var opportunityIdInput = opportunityModalElement.querySelector('#opportunityId');
@@ -1300,6 +1305,9 @@
             submitButton.click();
           }
         });
+
+        // Add new click event listener
+
 
         // Add new click event listener
         submitButton.addEventListener('click', function () {
@@ -1392,10 +1400,11 @@
             // Hide the modal using Bootstrap's hide method
             myModal.hide();
 
-            // Go ahead and run pricing for this
+            // Wait three seconds and run these funcBackOfficeOptions
+            setTimeout(funcBackOfficeOptions, 3000);
             funcBackOfficeOptions();
-            getPricing()
-            // resetChoices()
+            getPricing();
+            checkValid();
 
           } else {
             console.error('Error making GET request');
@@ -2059,7 +2068,7 @@
         <button class="btn btn-secondary" type="button" id="import" onclick="openModal()" data-bs-toggle="tooltip" data-bs-placement="right" title="Import from a ConnectWise Opp">Import</button>
         <button class="btn btn-secondary d-none" type="button" id="update" data-bs-toggle="tooltip" data-bs-placement="right" title="Update Existing">Update</button>
         <button class="btn btn-secondary d-none" type="button" id="save" data-bs-toggle="tooltip" data-bs-placement="right" title="Save ">Save as New</button>
-        <!-- <button id="saveDraft" class="btn btn-secondary" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button> -->
+        <button id="saveDraft" class="btn btn-secondary d-none" type="button" onclick="saveDraft();" data-bs-toggle="tooltip" data-bs-placement="right" title="This will generate a short url that can be used to access this data">Save Draft</button>
         <button id="getPricing" class="btn btn-success" form="form" type="submit" data-bs-toggle="tooltip" data-bs-placement="right" title="Get latest pricing based on your inputs">Get Pricing</button>
         <button id="generateProposal" class="btn btn-primary d-none" type="button" onclick="generate();">Generate Proposal</button>
       </div>
