@@ -241,22 +241,29 @@
               case "autoInt":
               case "autoAdv":
               case "autoTra":
+                dataToSend[item.id] = true;
+                break;
               case "onbTalentEss":
               case "onbTalentInt":
+                dataToSend.talentEdition = true
                 dataToSend[item.id] = true;
                 break;
               case "talentPlatformEss":
+                dataToSend.talentPlatform = true
                 dataToSend[item.id] = true;
 
                 // Find and remove the bundled items from dataToSend
+                delete dataToSend.talentEdition
                 delete dataToSend.autoEss
                 delete dataToSend.onbTalentEss
 
                 break;
               case "talentPlatformInt":
+                dataToSend.talentPlatform = true
                 dataToSend[item.id] = true;
 
                 // Find and remove the bundled items from dataToSend
+                delete dataToSend.talentEdition
                 delete dataToSend.autoInt
                 delete dataToSend.onbTalentInt
 
@@ -951,8 +958,15 @@
           labelStyle: {
             fontName: "Arial",
             fontSize: 14,
-            color: "#757575"
+            color: "#0095a5"
           },
+          palette: [
+            {
+              "color": "#3bbae2",
+              "dark": "#0095a5",
+              "light": "#8ed6ec"
+            },
+          ]
         },
       };
 
