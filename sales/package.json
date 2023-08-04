@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.382.0",
+    "axios": "^1.4.0",
+    "dayjs": "^1.11.7",
+    "docxtemplater-image-module": "https://modules.docxtemplater.com/packages/v2/dan_tonichq/8a839e74-82a0-43c5-607f-fcb252c0e8a2/image-module-3.22.0.tar.gz",
+    "google-charts-node": "^2.0.0",
+    "image-size": "^1.0.2",
+    "pizzip": "^3.1.4",
+    "svg-to-img": "^2.0.9"
+  }
+}

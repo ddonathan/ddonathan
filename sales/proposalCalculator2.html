@@ -14,6 +14,7 @@
 
   <!-- Docx Templater -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
+  <script src="node_modules/docxtemplater-image-module/build/imagemodule.min.js"></script>
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
@@ -193,7 +194,6 @@
         const currency = pricingData.data.currency
         const rate = pricingData.calcs.rates[currency] || 1;
 
-
         // Copy down relevant data to dataToSend
         // Set timelineLow and timelineHigh
         dataToSend[`timeline${pricingData.data.timelineTable}`] = true;
@@ -232,9 +232,6 @@
           if (item.type === "product" || item.type === "bundle") {
 
             let name = item.name;
-
-            // Add timeline Image
-            dataToSend.image = localStorage.getItem('gantt_chart');
 
             // Add items ids to the data object to enable additional items to show in the contract
             switch (item.id) {
@@ -306,28 +303,98 @@
         dataToSend.npeCount = dg[dataToSend.npeCount]
         dataToSend.oscpCount = dg[dataToSend.oscpCount]
 
+
+
         // Convert numPayments
         let paymentNumber = dg[dataToSend.numPayments]
         dataToSend[`payments_${paymentNumber}`] = true
+
+        dataToSend.image = localStorage.getItem('gantt_chart')
 
         console.info("generate-dataToSend", dataToSend)
 
         // Send to document creation
         doc.setData(dataToSend);
         try {
-          // render the document (replace all occurrences of {first_name} by John, {last_name} by Doe, ...)
-          doc.render();
+          // Determine the image size. We have a set width we want to use, but the image can be different heights, so we need to use that to determine the final size.
+          dataToSend.width = 650;
+
+          let img = new Image();
+          img.onload = function () {
+            let aspectRatio = this.width / this.height;
+            dataToSend.height = dataToSend.width / aspectRatio;
+          };
+
+          img.src = dataToSend.image;
+
+          // To use the image module, you have to be using docxtemplater async
+          const imageOptions = {
+            centered: false,
+            getImage(url) {
+              return new Promise(function (resolve, reject) {
+                PizZipUtils.getBinaryContent(
+                  url,
+                  function (error, content) {
+                    if (error) {
+                      return reject(error);
+                    }
+                    return resolve(content);
+                  }
+                );
+              });
+            },
+            getSize(img, url, tagName) {
+              return new Promise(function (resolve, reject) {
+                const image = new Image();
+                image.src = url;
+                image.onload = function () {
+                  resolve([dataToSend.width, dataToSend.height]);
+                };
+                image.onerror = function (e) {
+                  console.log(
+                    "img, url, tagName : ",
+                    img,
+                    url,
+                    tagName
+                  );
+                  alert(
+                    "An error occurred while loading " +
+                    url
+                  );
+                  reject(e);
+                };
+              });
+            },
+          };
+          const docxType =
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          PizZipUtils.getBinaryContent(
+            "template2.docx",
+            function (error, content) {
+              if (error) {
+                console.error(error);
+                return;
+              }
+
+              const zip = new PizZip(content);
+              const doc = new docxtemplater(zip, {
+                modules: [new ImageModule(imageOptions)],
+              });
+
+              doc.renderAsync(dataToSend).then(function () {
+                const out = doc.getZip().generate({
+                  type: "blob",
+                  mimeType: docxType,
+                });
+                saveAs(out, `${dataToSend.clientName} - Tonic HQ Implementation.docx`)
+              });
+            }
+          );
         }
         catch (error) {
           // Catch rendering errors (errors relating to the rendering of the template : angularParser throws an error)
           errorHandler(error);
         }
-
-        var out = doc.getZip().generate({
-          type: "blob",
-          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        }) //Output the document using Data-URI
-        saveAs(out, `${dataToSend.clientName} - Tonic HQ Implementation.docx`)
       })
     }
 
@@ -855,6 +922,9 @@
     var options;
     var tasks = []
 
+    //
+    // Draw Gantt Chart
+    //
     function drawGanttChart() {
       dataTable = new google.visualization.DataTable();
       // Create a DataTable with the required columns
@@ -878,118 +948,70 @@
         gantt: {
           trackHeight: 30,   // keep a static trackHeight
           sortTasks: true,
-        },
-      };
-
-
-      // Set chart options
-      options = {
-        height: 400,
-        gantt: {
-          trackHeight: 30,
-          sortTasks: true,
           labelStyle: {
             fontName: "Arial",
             fontSize: 14,
             color: "#757575"
           },
-
         },
       };
 
       // Instantiate and draw the chart
       chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+
+      // Add 'ready' event listener to the chart to render the chart as base64
+      google.visualization.events.addListener(chart, 'ready', function () {
+        console.log("Chart is ready");
+        saveGanttChartAsBase64();
+      });
+
       chart.draw(dataTable, options);
 
       // remove d-none class from timeline_chart
       document.getElementById("timeline_chart").classList.remove("d-none");
     }
 
-    function saveGanttChartAsImage() {
-      google.visualization.events.addListener(chart, 'ready', function () {
-        // Wait for 2 seconds before creating the image
-        setTimeout(function () {
-          var svg = chart.getContainer().getElementsByTagName('svg')[0].outerHTML;
+    function saveGanttChartAsBase64() {
+      // Get SVG element from the chart and its bounding box
+      var svgElement = document.querySelector('#chart_div svg');
+      var bbox = svgElement.getBBox();
 
-          // Create a Canvas element
-          var canvas = document.createElement('canvas');
-          // Use canvg to render the SVG on the Canvas
-          canvg(canvas, svg);
-
-          // Convert the Canvas to PNG data using toDataURL
-          var pngData = canvas.toDataURL("image/png");
-
-          // Store the image data in LocalStorage
-          localStorage.setItem('gantt_chart', pngData);
-
-          // Create a Blob from the PNG data
-          var byteString = atob(pngData.split(',')[1]);
-          var mimeString = pngData.split(',')[0].split(':')[1].split(';')[0];
-          var ab = new ArrayBuffer(byteString.length);
-          var ia = new Uint8Array(ab);
-          for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-          }
-          var blob = new Blob([ab], { type: mimeString });
-
-          // Create a temporary link element and trigger the download
-          var link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = 'gantt_chart.png';
-          link.click();
-        }, 2000);
+      // Remove problematic SVG filters if they exist
+      var filters = svgElement.querySelectorAll('filter');
+      filters.forEach(function (filter) {
+        filter.remove();
       });
 
-      chart.draw(dataTable, options);
+      // Create a Canvas element
+      var canvas = document.createElement('canvas');
+      canvas.width = bbox.width;
+      canvas.height = bbox.height;
+
+      // Convert SVG to Canvas using Canvg
+      var ctx = canvas.getContext('2d');
+
+      var svgData = new XMLSerializer().serializeToString(svgElement);
+      var dataUrl = 'data:image/svg+xml; charset=utf8, ' + encodeURIComponent(svgData);
+
+      var img = new Image();
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0);
+        // Convert the Canvas to a PNG data URL
+        var pngData = canvas.toDataURL("image/png");
+        // Save the base64 string to localStorage
+        localStorage.setItem('gantt_chart', pngData);
+        console.log(pngData);
+      };
+      img.onerror = function (e) {
+        console.error('Error in saveGanttChartAsBase64: ', e);
+      };
+      img.src = dataUrl;
     }
 
-    const base64Regex =
-      /^data:image\/(png|jpg|svg|svg\+xml);base64,/;
-    function base64Parser(dataURL) {
-      if (
-        typeof dataURL !== "string" ||
-        !base64Regex.test(dataURL)
-      ) {
-        return false;
-      }
 
-      const validBase64 =
-        /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 
-      if (!validBase64.test(stringBase64)) {
-        throw new Error(
-          "Error parsing base64 data, your data contains invalid characters"
-        );
-      }
 
-      const stringBase64 = dataURL.replace(base64Regex, "");
 
-      // For nodejs, return a Buffer
-      if (typeof Buffer !== "undefined" && Buffer.from) {
-        return Buffer.from(stringBase64, "base64");
-      }
-
-      // For browsers, return a string (of binary content) :
-      const binaryString = window.atob(stringBase64);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        const ascii = binaryString.charCodeAt(i);
-        bytes[i] = ascii;
-      }
-      return bytes.buffer;
-    }
-    const imageOpts = {
-      getImage(tag) {
-        return base64Parser(tag);
-      },
-      getSize() {
-        return [100, 100];
-      },
-    };
-    //const doc = new Docxtemplater(zip, {
-    //  modules: [new ImageModule(imageOpts)],
-    //});
 
     function openModal() {
       var myModal = new bootstrap.Modal(document.getElementById('opportunityModal'), {});
@@ -998,7 +1020,6 @@
     }
 
     async function getPricing() {
-
       // Get the form data as a new FormData object
       const formData = new FormData(form);
 
@@ -2129,9 +2150,6 @@
     <h1 id="timeline_chart" class="display-6 d-none">Timeline Chart</h1>
     <div class="row">
       <div id="chart_div"></div>
-      <div class="col-12">
-        <button onclick="saveGanttChartAsImage()">Save as Image</button>
-      </div>
     </div>
 
     <!-- List itemized products -->
