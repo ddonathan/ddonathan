@@ -961,7 +961,6 @@
 
       // Add 'ready' event listener to the chart to render the chart as base64
       google.visualization.events.addListener(chart, 'ready', function () {
-        console.log("Chart is ready");
         saveGanttChartAsBase64();
       });
 
@@ -1000,7 +999,6 @@
         var pngData = canvas.toDataURL("image/png");
         // Save the base64 string to localStorage
         localStorage.setItem('gantt_chart', pngData);
-        console.log(pngData);
       };
       img.onerror = function (e) {
         console.error('Error in saveGanttChartAsBase64: ', e);

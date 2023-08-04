@@ -1,4 +1,3 @@
 
 .prettierrc
 sales/node_modules/*
-!sales/node_modules/docxtemplater-image-module
