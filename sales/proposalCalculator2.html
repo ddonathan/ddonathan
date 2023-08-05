@@ -321,7 +321,7 @@
         let paymentNumber = dg[dataToSend.numPayments]
         dataToSend[`payments_${paymentNumber}`] = true
 
-        dataToSend.image = localStorage.getItem('gantt_chart')
+        dataToSend.ganttChart = localStorage.getItem('gantt_chart')
 
         console.info("generate-dataToSend", dataToSend)
 
@@ -337,7 +337,7 @@
             dataToSend.height = dataToSend.width / aspectRatio;
           };
 
-          img.src = dataToSend.image;
+          img.src = dataToSend.ganttChart;
 
           // To use the image module, you have to be using docxtemplater async
           const imageOptions = {
