@@ -283,6 +283,11 @@
           }
         })
 
+        // If we have any paidAdditions, set paidAdditions to true
+        if (dataToSend.newHireExport || dataToSend.qbIntegration || dataToSend.InvoiceExport || dataToSend.PayDataExport || dataToSend.emailsAsNotes || dataToSend.histSubmissions || dataToSend.npeCount || dataToSend.oscpCount) {
+          dataToSend.paidAdditions = true;
+        }
+
         // Get any data we need that's in the form that didn't go to AWS and back
         if (document.getElementById("bullhornSubsidy").checked) {
           dataToSend.bullhornSubsidy = true;
