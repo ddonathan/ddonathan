@@ -284,8 +284,10 @@
         })
 
         // If we have any paidAdditions, set paidAdditions to true
-        if (dataToSend.newHireExport || dataToSend.qbIntegration || dataToSend.InvoiceExport || dataToSend.PayDataExport || dataToSend.emailsAsNotes || dataToSend.histSubmissions || dataToSend.npeCount || dataToSend.oscpCount) {
+        if (dataToSend.commissions || dataToSend.credentialing || dataToSend.newHireExport || dataToSend.qbIntegration || dataToSend.InvoiceExport || dataToSend.PayDataExport || dataToSend.emailsAsNotes || dataToSend.histSubmissions || dataToSend.npeCount || dataToSend.oscpCount) {
           dataToSend.paidAdditions = true;
+        } else {
+          dataToSend.paidAdditions = false;
         }
 
         // Get any data we need that's in the form that didn't go to AWS and back
