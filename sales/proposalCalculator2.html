@@ -1970,7 +1970,7 @@
               <div class="row mb-3">
                 <div class="col-sm-2" data-bs-toggle="tooltip" data-bs-placement="right" title="This determines the timeline table that will be used in the proposal">Timeline Table to use</div>
                 <div class="col-sm-3">
-                  <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED>
+                  <select name="timelineTable" id="timelineTable" title="Timeline Table" class="form-select" aria-label="" onChange="funcTimelineTable();" REQUIRED data-noPriceRefresh="true">
                     <option value="">-- Please Select --</option>
                     <option value="NoDM">No Data Migration</option>
                     <option value="SMB">SMB</option>
@@ -1985,13 +1985,13 @@
                 <div class="col-sm-2">
                   <div class="row mb-3">
                     <div class="col-auto">
-                      <input class="form-control" type="number" id="timelineLow" title="timelineLow" value="12" min="10" max="52" />
+                      <input class="form-control" type="number" id="timelineLow" title="timelineLow" value="12" min="10" max="52" data-noPriceRefresh="true" />
                     </div>
                     <div class="col-3">Low</div>
                   </div>
                   <div class="row mb-3">
                     <div class="col-auto">
-                      <input class="form-control" type="number" id="timelineHigh" title="timelineHigh" value="16" min="10" max="52" />
+                      <input class="form-control" type="number" id="timelineHigh" title="timelineHigh" value="16" min="10" max="52" data-noPriceRefresh="true" />
                     </div>
                     <div class="col-3">High</div>
                   </div>
@@ -2001,7 +2001,7 @@
               <div class="form-group row mb-3">
                 <div class="col-sm-2">Number of Payments</div>
                 <div class="col-sm-2">
-                  <input class="form-control" type="number" id="numPayments" title="numPayments" value="2" min="2" max="5" />
+                  <input class="form-control" type="number" id="numPayments" title="numPayments" value="2" min="2" max="5" data-noPriceRefresh="true" />
                 </div>
               </div>
 
@@ -2009,7 +2009,7 @@
                 <div class="col-sm-2">Bullhorn Subsidy</div>
                 <div class="col-sm-6">
                   <div class="form-check form-switch mb-3">
-                    <input class="form-check-input position-static" type="checkbox" id="bullhornSubsidy" title="Bullhorn Subsidy" value="true" /> <small><span class="text-black-50" id="bullhornSubsidy_pricing"></span></small>
+                    <input class="form-check-input position-static" type="checkbox" id="bullhornSubsidy" title="Bullhorn Subsidy" value="true" data-noPriceRefresh="true" /> <small><span class="text-black-50" id="bullhornSubsidy_pricing"></span></small>
                   </div>
                 </div>
               </div>
