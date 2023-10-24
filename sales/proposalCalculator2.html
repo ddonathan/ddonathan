@@ -475,11 +475,15 @@
         }
 
         // If it's a warning, show them
-        if (validationWarnings.length > 0) {
+        if (validationWarnings.length > 0 && document.getElementById("validationMsg")) {
           alertText += "<strong>Warnings:</strong> <br>" + validationWarnings.join("<br>");
           document.getElementById("validationMsg").className = "alert alert-warning alert-dismissible fade show";
         }
-        if (validationErrors.length > 0) document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+
+        // If it's an error, show them
+        if (validationErrors.length > 0 && document.getElementById("validationMsg")) {
+          document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+        }
 
         // Hide Generate Proposal
         document.getElementById("generateProposal").className = "btn btn-primary d-none";
