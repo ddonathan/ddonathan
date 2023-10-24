@@ -425,7 +425,7 @@
       }
 
       if (!document.getElementById("existingSystem").value) {
-        validationErrors.push("  - Existing System not provided")
+        validationWarnings.push("  - Existing System not provided")
       }
 
       if (!document.getElementById("timelineTable").value) {
@@ -457,6 +457,8 @@
         }
       }
 
+      console.log(validationErrors, validationWarnings)
+
       //  if the form is valid remove the validationMsg_div and show the generateProposal button
       if (validationErrors.length === 0 && validationWarnings.length === 0) {
         document.getElementById("validationMsg_div").className = "d-none";
@@ -475,21 +477,21 @@
         }
 
         // If it's a warning, show them
-        if (validationWarnings.length > 0 && document.getElementById("validationMsg")) {
+        if (validationWarnings.length > 0) {
           alertText += "<strong>Warnings:</strong> <br>" + validationWarnings.join("<br>");
-          document.getElementById("validationMsg").className = "alert alert-warning alert-dismissible fade show";
+          document.getElementById("validationMsg").className = "alert alert-warning fade show";
         }
 
         // If it's an error, show them
-        if (validationErrors.length > 0 && document.getElementById("validationMsg")) {
-          document.getElementById("validationMsg").className = "alert alert-danger alert-dismissible fade show";
+        if (validationErrors.length > 0) {
+          document.getElementById("validationMsg").className = "alert alert-danger fade show";
         }
 
         // Hide Generate Proposal
         document.getElementById("generateProposal").className = "btn btn-primary d-none";
 
         // Finish up alertText and set it
-        alertText += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"  data-bs-toggle="tooltip" data-bs-placement="right" title="Closing this alert will allow you to generate the proposal" onclick="checkValidOverride();"></button>';
+        // alertText += '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"  data-bs-toggle="tooltip" data-bs-placement="right" title="Closing this alert will allow you to generate the proposal" onclick="checkValidOverride();"></button>';
         document.getElementById("validationMsg").innerHTML = alertText
 
         return validationErrors
@@ -2101,7 +2103,7 @@
         <br>
         <div class="row" id="validationMsg_div" class="d-none">
           <div class="col-sm-5">
-            <div id="validationMsg" class="alert alert-warning alert-dismissible fade show"></div>
+            <div id="validationMsg" class="d-none"></div>
           </div>
         </div>
     </form>
