@@ -22,6 +22,11 @@
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://www.google.com/jsapi"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/styles/choices.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
+
+
+
 
   <style>
     .receipt {
@@ -1316,6 +1321,48 @@
       }
     }
 
+    // Initialize the data sources enter
+    document.addEventListener("DOMContentLoaded", function () {
+      let dataSourcesChoices = new Choices('#dataSources', {
+        delimiter: ',',
+        editItems: true,
+        removeItemButton: true,
+        duplicateItemsAllowed: false,
+        addItems: true,
+        addItemFilter: function (value) {
+          return value.length >= 1;
+        },
+      });
+
+      const existingSystemInput = document.getElementById('existingSystem');
+      existingSystemInput.addEventListener('blur', function () {
+        const inputValue = existingSystemInput.value.trim();
+        if (inputValue) {
+          console.log("Adding value to 'dataSources':", inputValue);
+
+          // Append the value
+          const currentVal = dataSourcesChoices.getValue(true);
+          dataSourcesChoices.destroy();
+
+          // Ensure we don't add an empty value
+          const combinedValue = currentVal ? (currentVal + ',' + inputValue).split(',').filter(Boolean).join(',') : inputValue;
+
+          document.getElementById('dataSources').value = combinedValue;
+
+          // Re-initialize Choices
+          dataSourcesChoices = new Choices('#dataSources', {
+            delimiter: ',',
+            editItems: true,
+            removeItemButton: true,
+            duplicateItemsAllowed: false,
+            addItems: true,
+            addItemFilter: function (value) {
+              return value.length >= 1;
+            },
+          });
+        }
+      });
+    });
 
 
     //
@@ -1651,9 +1698,9 @@
       </div>
 
       <div class="row mb-3">
-        <div class="col-sm-2">Additional Data Sources</div>
+        <div class="col-sm-2">Data Source(s)</div>
         <div class="col-sm-6">
-          <input type="text" class="form-control" id="addtlDatasources" title="addtlDatasources">
+          <input type="text" class="form-control" id="dataSources" title="dataSources">
         </div>
       </div>
 
