@@ -437,6 +437,10 @@
         validationErrors.push("  - Timeline table not selected")
       }
 
+      if (document.getElementById("ats").value && !document.getElementById("dataSources").value && !document.getElementById("NoDataMigration").checked) {
+        validationErrors.push(`  - No Data Source(s), but "No Data Migration" isn't checked`)
+      }
+
       if (document.getElementById("userCount").value > 15 && document.getElementById("timelineLow").value <= "13") {
         // validationWarnings.push(`  - User count is ${document.getElementById("userCount").value} and timeline low is ${document.getElementById("timelineLow").value} `)
       }
