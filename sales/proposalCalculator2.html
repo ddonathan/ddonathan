@@ -429,9 +429,9 @@
         validationErrors.push(" - Company Name not provided")
       }
 
-      if (!document.getElementById("existingSystem").value) {
-        validationWarnings.push("  - Existing System not provided")
-      }
+      // if (!document.getElementById("existingSystem").value) {
+      //   validationWarnings.push("  - Existing System not provided")
+      // }
 
       if (!document.getElementById("timelineTable").value) {
         validationErrors.push("  - Timeline table not selected")
@@ -1828,30 +1828,14 @@
 
       <div class="row mb-3">
         <div class="col-sm-2">Vendor Management</div>
-        <div class="col-sm-auto">
-          <div class="row">
-            <div class="col">
-              <div class="form-check form-switch">
-                <input type="number" class="form-control" id="vms_sync" title="vms_sync" data-catalog-item="BH-IMP-VMS-SYNC" min="0" max="20" />
-              </div>
-            </div>
-            <div class="col">
-              <label class="form-check-label" for="vms_sync">
-                VMS Sync
-              </label>
-            </div>
+        <div class="col-sm-6">
+          <div class="d-flex align-items-center mb-3">
+            <input type="number" class="form-control me-2" style="width: auto;" id="vms_sync" title="vms_sync" data-catalog-item="BH-IMP-VMS-SYNC" min="0" max="20" />
+            <label class="form-check-label" for="vms_sync">VMS Sync</label>
           </div>
-          <div class="row">
-            <div class="col">
-              <div class="form-check form-switch">
-                <input type="number" class="form-control" id="vms_submittals" title="vms_submittals" data-catalog-item="BH-IMP-VMS-SUBM" min="0" max="2" />
-              </div>
-            </div>
-            <div class="col">
-              <label class="form-check-label" for="vms_submittals">
-                VMS Submittals
-              </label>
-            </div>
+          <div class="d-flex align-items-center">
+            <input type="number" class="form-control me-2" style="width: auto;" id="vms_submittals" title="vms_submittals" data-catalog-item="BH-IMP-VMS-SUBM" min="0" max="2" />
+            <label class="form-check-label" for="vms_submittals">VMS Submittals</label>
           </div>
         </div>
       </div>
