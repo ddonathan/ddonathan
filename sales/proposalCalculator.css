@@ -1,0 +1,19 @@
+.receipt {
+    border: 1px solid black;
+    max-width: 300px;
+    margin: auto;
+    padding: 20px;
+    font-family: "Courier New", monospace;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.header,
+.footer {
+    text-align: center;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}

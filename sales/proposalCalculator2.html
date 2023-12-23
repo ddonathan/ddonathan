@@ -4,59 +4,32 @@
 <head>
   <title>THQ Proposal Generator</title>
   <link rel="shortcut icon" type="image/png" href="favicon.png" />
-  <!-- Bootstrap -->
+
   <!-- Required meta tags -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
 
-  <!-- Docx Templater -->
+  <!-- DocxTemplater -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
   <script src="imagemodule.min.js"></script>
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
   <script src="https://unpkg.com/pizzip@3.1.4/dist/pizzip-utils.js"></script>
+
+  <!-- Misc Utilities -->
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://www.google.com/jsapi"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/styles/choices.min.css">
   <script src="https://cdn.jsdelivr.net/npm/choices.js@9.0.1/public/assets/scripts/choices.min.js"></script>
+
+  <!-- File specific js/css -->
   <script src="proposalCalculator.js"></script>
-
-
-
-  <style>
-    .receipt {
-      border: 1px solid black;
-      max-width: 300px;
-      margin: auto;
-      padding: 20px;
-      font-family: "Courier New", monospace;
-      box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    .header,
-    .footer {
-      text-align: center;
-    }
-
-    .item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-  </style>
-
-  <!--
-    Mandatory in IE 6, 7, 8 and 9.
-    -->
-  <!--[if IE]>
-        <script type="text/javascript" src="https://unpkg.com/pizzip@3.0.6/dist/pizzip-utils-ie.js"></script>
-    <![endif]-->
-
+  <link rel="stylesheet" type="text/css" href="proposalCalculator.css">
 </head>
 
 <body>
@@ -572,8 +545,8 @@
         </div>
       </div>
     </div>
+    <br><br>
 
-    <br /><br />
     <h1 class="display-6">Pricing Results</h1>
     <div class="row">
       <div class="col-sm-6">
@@ -607,6 +580,7 @@
       </div>
     </div>
 
+    <!-- Placeholder for Gantt chart -->
     <h1 id="timeline_chart" class="display-6 d-none">Timeline Chart</h1>
     <div class="row">
       <div id="chart_div"></div>
@@ -615,8 +589,6 @@
 
     <!-- List itemized products -->
     <div class="receipt">
-      <!--...same structure as before...-->
-
       <div class="body" id="item-list">
         <!-- Items will be dynamically added here -->
       </div>
@@ -624,11 +596,16 @@
       <div class="footer" id="footer">
         <!-- Total will be dynamically added here -->
       </div>
-
-      <!--...same structure as before...-->
     </div>
     <br><br>
-    <textarea id="jsonOutput" title="jsonOutput" rows="25" cols="150"></textarea>
+
+    <!-- JSON Output -->
+    <div class="row">
+      <div class="col-12">
+        <textarea id="jsonOutput" title="jsonOutput" rows="25" cols="150"></textarea>
+      </div>
+    </div>
+
   </div>
 
 
@@ -669,7 +646,7 @@
   </script>
 
   <!-- Bootstrap bundle-->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 </body>
 
 </html>

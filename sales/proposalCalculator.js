@@ -232,6 +232,11 @@ function generate() {
       }
     });
 
+    // Determine if Time/Expense is an item in the products array
+    if (dataToSend.products.includes("Time/Expense") || dataToSend.products.includes("Time/Expense")) {
+      dataToSend.isBBO = true;
+    }
+
     // If we have any paidAdditions, set paidAdditions to true
     if (
       dataToSend.commissions ||
@@ -352,8 +357,7 @@ function generate() {
           });
         },
       };
-      const docxType =
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const docxType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       PizZipUtils.getBinaryContent("template2.docx", function (error, content) {
         if (error) {
           console.error(error);
@@ -380,6 +384,7 @@ function generate() {
       // Log out the dataToSend
       delete dataToSend.ganttChart;
       delete dataToSend.width;
+      // dataToSend = await removeBlankProperties(dataToSend);
       console.info("generate-dataToSend", dataToSend);
 
       // Add this to the jsonOutput textarea
@@ -1518,6 +1523,22 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
+async function removeBlankProperties(obj) {
+    for (let key in obj) {
+        if (obj[key] === null || obj[key] === undefined || obj[key] === '') {
+            delete obj[key];
+        } else if (Array.isArray(obj[key])) {
+            obj[key] = obj[key].filter(item => item !== '');
+            if (obj[key].length === 0) {
+                delete obj[key];
+            }
+        } else if (typeof obj[key] === 'object') {
+            removeBlankProperties(obj[key]);
+        }
+    }
+    return obj;
+}
+
 //
 //  ██████╗ ███╗   ██╗██╗      ██████╗  █████╗ ██████╗
 // ██╔═══██╗████╗  ██║██║     ██╔═══██╗██╔══██╗██╔══██╗
@@ -1666,7 +1687,7 @@ window.onload = function () {
 
       throw error;
     }
-  }
+    }
 
   // Set name on all form elements to match the id
   var elements = document.querySelectorAll("input, select, textarea");
