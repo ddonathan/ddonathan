@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbell Warm-up Set Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, button {
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Barbell Warm-up Set Calculator</h1>
+    <label for="targetWeight">Enter Target Weight (lbs): </label>
+    <input type="number" id="targetWeight" min="45" step="0.25">
+    <button onclick="calculateWarmupSets()">Calculate Warmup Sets</button>
+
+    <h2>Warm-up Sets</h2>
+    <table>
+        <thead id="warmupHeader">
+            <tr>
+                <th>Weight (lbs)</th>
+            </tr>
+        </thead>
+        <tbody id="warmupTable">
+        </tbody>
+    </table>
+
+    <script>
+        let inventory;
+        let config;
+
+        async function fetchData() {
+            try {
+                const inventoryResponse = await fetch('inventory.json');
+                const configResponse = await fetch('config.json');
+
+                if (!inventoryResponse.ok || !configResponse.ok) {
+                    throw new Error('Failed to load JSON files');
+                }
+
+                inventory = await inventoryResponse.json();
+                config = await configResponse.json();
+
+                console.log('Inventory:', inventory);
+                console.log('Config:', config);
+
+            } catch (error) {
+                console.error('Error fetching or parsing JSON:', error);
+            }
+        }
+
+        async function calculateWarmupSets() {
+            await fetchData();
+
+            const targetWeight = document.getElementById('targetWeight').value;
+            const warmupTable = document.getElementById('warmupTable');
+            const warmupHeader = document.getElementById('warmupHeader');
+            warmupTable.innerHTML = '';
+            warmupHeader.innerHTML = '<tr><th>Weight (lbs)</th></tr>';
+
+            if (!targetWeight || targetWeight < inventory.barbell) {
+                warmupTable.innerHTML = '<tr><td colspan="5">Please enter a valid target weight greater than the barbell weight.</td></tr>';
+                return;
+            }
+
+            const warmupSets = config.warmupPercentages.map(pct => ({
+                percentage: pct,
+                weight: Math.round(targetWeight * pct),
+                plates: calculatePlates(Math.round(targetWeight * pct))
+            }));
+
+            // Create header row with percentages
+            warmupSets.forEach(set => {
+                const headerCell = document.createElement('th');
+                headerCell.textContent = `${set.percentage * 100}% (${set.weight} lbs)`;
+                warmupHeader.firstElementChild.appendChild(headerCell);
+            });
+
+            // Fill table with plate data
+            inventory.plates.forEach(plate => {
+                const row = document.createElement('tr');
+                const weightCell = document.createElement('td');
+                weightCell.textContent = `${plate.mass} lbs (${plate.color})`;
+                row.appendChild(weightCell);
+
+                warmupSets.forEach(set => {
+                    const plateCell = document.createElement('td');
+                    const plateCount = set.plates.find(p => p.includes(`${plate.mass} lbs`));
+                    if (plateCount) {
+                        const count = parseInt(plateCount.split(' ')[0], 10);
+                        plateCell.textContent = count === 2 ? '1' : (count > 0 ? '1' : '');
+                    } else {
+                        plateCell.textContent = '';
+                    }
+                    row.appendChild(plateCell);
+                });
+
+                warmupTable.appendChild(row);
+            });
+        }
+
+        function calculatePlates(weight) {
+            let weightNeeded = (weight - inventory.barbell) / 2;
+            const platesToUse = [];
+
+            inventory.plates.sort((a, b) => b.mass - a.mass);
+
+            for (const plate of inventory.plates) {
+                let pairsNeeded = 0;
+                while (weightNeeded >= plate.mass && pairsNeeded < plate.pairs) {
+                    weightNeeded -= plate.mass;
+                    pairsNeeded++;
+                }
+                if (pairsNeeded > 0) {
+                    platesToUse.push(`${pairsNeeded * 2} x ${plate.mass} lbs (${plate.color})`);
+                }
+            }
+
+            if (weightNeeded > 0) {
+                return [];
+            } else {
+                return platesToUse;
+            }
+        }
+    </script>
+</body>
+</html>
