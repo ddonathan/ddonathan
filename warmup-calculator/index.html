@@ -334,7 +334,7 @@
             // Check if the weight was successfully allocated
             if (weightNeeded > 0) {
                 console.warn(`Cannot exactly match the weight ${weight}. Remaining weight: ${weightNeeded * 2}`);
-                return []; // Alternatively, handle partial allocations
+                return platesToUse; // Return partial allocations
             } else {
                 return platesToUse;
             }
