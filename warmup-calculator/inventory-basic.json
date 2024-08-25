@@ -1,0 +1,41 @@
+{
+    "barbell": 45,
+    "plates": [
+      {
+        "mass": 45,
+        "color": "blue",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 35,
+        "color": "yellow",
+        "diameter": 0.8,
+        "pairs": 1
+      },
+      {
+        "mass": 25,
+        "color": "green",
+        "diameter": 0.8,
+        "pairs": 1
+      },
+      {
+        "mass": 10,
+        "color": "black",
+        "diameter": 0.6,
+        "pairs": 1
+      },
+      {
+        "mass": 5,
+        "color": "white",
+        "diameter": 0.4,
+        "pairs": 1
+      },
+      {
+        "mass": 2.5,
+        "color": "blue",
+        "diameter": 0.3,
+        "pairs": 1
+      }
+    ]
+  }
