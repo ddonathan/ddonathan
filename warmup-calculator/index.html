@@ -9,8 +9,28 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        input, button, select {
+        input, button, select, textarea {
             margin: 10px 0;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            margin-right: 10px;
+        }
+        .form-group select, .form-group input {
+            flex: 1;
+            max-width: 200px;
+        }
+        .textarea-container {
+            display: none;
+            width: 100%;
+        }
+        .textarea-container textarea {
+            width: 100%;
+            box-sizing: border-box;
         }
         table {
             width: 100%;
@@ -27,6 +47,10 @@
         }
         .warning {
             background-color: red;
+            color: white;
+        }
+        .close-warning {
+            background-color: orange;
             color: white;
         }
         @media print {
@@ -49,24 +73,35 @@
 </head>
 <body>
     <h1>Barbell Warm-up Set Calculator</h1>
-    <label for="liftSelect1">Select Lift 1: </label>
-    <select id="liftSelect1">
-        <option value="">(Select Lift)</option>
-    </select>
-    <br>
-    <label for="targetWeight1">Enter Target Weight for Lift 1: </label>
-    <input type="number" id="targetWeight1" min="45" step="0.25">
-    <br>
-    <label for="liftSelect2">Select Lift 2: </label>
-    <select id="liftSelect2">
-        <option value="">(Select Lift)</option>
-    </select>
-    <br>
-    <label for="targetWeight2">Enter Target Weight for Lift 2: </label>
-    <input type="number" id="targetWeight2" min="45" step="0.25">
-    <br>
-    <button onclick="calculateWarmupSets()">Calculate Warmup Sets</button>
+    <div class="form-group">
+        <label for="liftSelect1">Lift 1:</label>
+        <select id="liftSelect1">
+            <option value="">(Select Lift)</option>
+        </select>
+        <input type="number" id="targetWeight1" min="45" step="0.25" placeholder="Target Weight">
+    </div>
+    <div class="form-group">
+        <label for="liftSelect2">Lift 2:</label>
+        <select id="liftSelect2">
+            <option value="">(Select Lift)</option>
+        </select>
+        <input type="number" id="targetWeight2" min="45" step="0.25" placeholder="Target Weight">
+    </div>
     <button onclick="window.print()">Print</button>
+    <br>
+    <button onclick="toggleTextarea('config')">Show Config</button>
+    <div id="configContainer" class="textarea-container">
+        <label for="configTextarea">Config JSON:</label>
+        <textarea id="configTextarea" rows="10"></textarea>
+    </div>
+    <br>
+    <button onclick="toggleTextarea('inventory')">Show Inventory</button>
+    <div id="inventoryContainer" class="textarea-container">
+        <label for="inventoryTextarea">Inventory JSON:</label>
+        <textarea id="inventoryTextarea" rows="10"></textarea>
+    </div>
+    <br>
+    <button onclick="calculateWarmupSets()">Recalculate</button>
 
     <div id="printableArea">
         <div id="lift1Container" class="hidden">
@@ -109,39 +144,25 @@
             await fetchData();
 
             // Populate lift options
-            const liftSelects = [document.getElementById('liftSelect1'), document.getElementById('liftSelect2')];
-            liftSelects.forEach(select => {
-                config.lifts.forEach(lift => {
-                    const option = document.createElement('option');
-                    option.value = lift;
-                    option.textContent = lift;
-                    select.appendChild(option);
-                });
-            });
+            populateLiftOptions();
+
+            // Populate textareas with JSON data
+            document.getElementById('configTextarea').value = JSON.stringify(config, null, 2);
+            document.getElementById('inventoryTextarea').value = JSON.stringify(inventory, null, 2);
 
             // Add event listeners for automatic calculation
-            const targetWeightInputs = [document.getElementById('targetWeight1'), document.getElementById('targetWeight2')];
-            targetWeightInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    const value = parseFloat(input.value);
-                    if (value >= inventory.barbell) {
-                        calculateWarmupSets();
-                    } else {
-                        // Clear the table if input is below barbell weight
-                        clearTables();
-                    }
-                });
+            document.getElementById('liftSelect1').addEventListener('change', () => {
+                document.getElementById('targetWeight1').focus();
+                document.getElementById('liftName1').textContent = document.getElementById('liftSelect1').value;
+                calculateWarmupSets();
             });
-
-            // Add event listeners to update lift names and focus input
-            liftSelects.forEach((select, index) => {
-                select.addEventListener('change', () => {
-                    const liftName = select.value ? `Warm-up Sets for ${select.value}` : `Warm-up Sets for Lift ${index + 1}`;
-                    document.getElementById(`liftName${index + 1}`).textContent = liftName;
-                    document.getElementById(`targetWeight${index + 1}`).focus();
-                    calculateWarmupSets();
-                });
+            document.getElementById('liftSelect2').addEventListener('change', () => {
+                document.getElementById('targetWeight2').focus();
+                document.getElementById('liftName2').textContent = document.getElementById('liftSelect2').value;
+                calculateWarmupSets();
             });
+            document.getElementById('targetWeight1').addEventListener('input', calculateWarmupSets);
+            document.getElementById('targetWeight2').addEventListener('input', calculateWarmupSets);
         });
 
         async function fetchData() {
@@ -164,6 +185,19 @@
             }
         }
 
+        function populateLiftOptions() {
+            const liftSelects = [document.getElementById('liftSelect1'), document.getElementById('liftSelect2')];
+            liftSelects.forEach(select => {
+                select.innerHTML = '<option value="">(Select Lift)</option>';
+                config.lifts.forEach(lift => {
+                    const option = document.createElement('option');
+                    option.value = lift;
+                    option.textContent = lift;
+                    select.appendChild(option);
+                });
+            });
+        }
+
         function clearTables() {
             const warmupTables = [document.getElementById('warmupTable1'), document.getElementById('warmupTable2')];
             const warmupHeaders = [document.getElementById('warmupHeader1'), document.getElementById('warmupHeader2')];
@@ -176,8 +210,11 @@
         }
 
         async function calculateWarmupSets() {
-            if (!inventory || !config) {
-                console.error('Inventory or Config data not loaded.');
+            try {
+                config = JSON.parse(document.getElementById('configTextarea').value);
+                inventory = JSON.parse(document.getElementById('inventoryTextarea').value);
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
                 return;
             }
 
@@ -205,10 +242,10 @@
                     plates: calculatePlates(Math.round(targetWeight * pct.percentage))
                 }));
 
-                // Create header row with percentages and reps
+                // Create header row with percentages, weights, and reps
                 warmupSets.forEach(set => {
                     const headerCell = document.createElement('th');
-                    headerCell.innerHTML = `${set.percentage * 100}%<br>${set.reps} reps`;
+                    headerCell.innerHTML = `${Math.round(set.percentage * 100)}%<br>${set.weight} lbs<br>${set.reps} reps`;
                     warmupHeaders[index].firstElementChild.appendChild(headerCell);
                 });
 
@@ -247,11 +284,17 @@
                 let warning = false;
                 warmupSets.forEach(set => {
                     const totalWeightDataCell = document.createElement('td');
-                    totalWeightDataCell.textContent = set.weight;
-                    if (set.plates.length === 0) {
+                    const actualWeight = set.plates.reduce((sum, plate) => sum + plate.mass * plate.count * 2, inventory.barbell);
+                    totalWeightDataCell.textContent = actualWeight;
+
+                    const weightDifference = Math.abs(actualWeight - set.weight);
+                    if (weightDifference > 5) {
                         totalWeightDataCell.classList.add('warning');
                         warning = true;
+                    } else if (weightDifference > 0) {
+                        totalWeightDataCell.classList.add('close-warning');
                     }
+
                     totalWeightRow.appendChild(totalWeightDataCell);
                 });
 
@@ -294,6 +337,18 @@
                 return []; // Alternatively, handle partial allocations
             } else {
                 return platesToUse;
+            }
+        }
+
+        function toggleTextarea(type) {
+            const container = document.getElementById(`${type}Container`);
+            const button = document.querySelector(`button[onclick="toggleTextarea('${type}')"]`);
+            if (container.style.display === 'none' || container.style.display === '') {
+                container.style.display = 'block';
+                button.textContent = `Hide ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            } else {
+                container.style.display = 'none';
+                button.textContent = `Show ${type.charAt(0).toUpperCase() + type.slice(1)}`;
             }
         }
     </script>
