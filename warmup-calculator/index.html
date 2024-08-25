@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        input, button {
+        input, button, select {
             margin: 10px 0;
         }
         table {
@@ -25,28 +25,124 @@
         th {
             background-color: #f2f2f2;
         }
+        .warning {
+            background-color: red;
+            color: white;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableArea, #printableArea * {
+                visibility: visible;
+            }
+            #printableArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <h1>Barbell Warm-up Set Calculator</h1>
-    <label for="targetWeight">Enter Target Weight (lbs): </label>
-    <input type="number" id="targetWeight" min="45" step="0.25">
+    <label for="liftSelect1">Select Lift 1: </label>
+    <select id="liftSelect1">
+        <option value="">(Select Lift)</option>
+    </select>
+    <br>
+    <label for="targetWeight1">Enter Target Weight for Lift 1: </label>
+    <input type="number" id="targetWeight1" min="45" step="0.25">
+    <br>
+    <label for="liftSelect2">Select Lift 2: </label>
+    <select id="liftSelect2">
+        <option value="">(Select Lift)</option>
+    </select>
+    <br>
+    <label for="targetWeight2">Enter Target Weight for Lift 2: </label>
+    <input type="number" id="targetWeight2" min="45" step="0.25">
+    <br>
     <button onclick="calculateWarmupSets()">Calculate Warmup Sets</button>
+    <button onclick="window.print()">Print</button>
 
-    <h2>Warm-up Sets</h2>
-    <table>
-        <thead id="warmupHeader">
-            <tr>
-                <th>Weight (lbs)</th>
-            </tr>
-        </thead>
-        <tbody id="warmupTable">
-        </tbody>
-    </table>
+    <div id="printableArea">
+        <div id="lift1Container" class="hidden">
+            <h2 id="liftName1">Warm-up Sets for Lift 1</h2>
+            <table>
+                <thead id="warmupHeader1">
+                    <tr>
+                        <th>Weight</th>
+                    </tr>
+                </thead>
+                <tbody id="warmupTable1">
+                </tbody>
+                <tfoot id="warmupFooter1">
+                </tfoot>
+            </table>
+        </div>
+
+        <div id="lift2Container" class="hidden">
+            <h2 id="liftName2">Warm-up Sets for Lift 2</h2>
+            <table>
+                <thead id="warmupHeader2">
+                    <tr>
+                        <th>Weight</th>
+                    </tr>
+                </thead>
+                <tbody id="warmupTable2">
+                </tbody>
+                <tfoot id="warmupFooter2">
+                </tfoot>
+            </table>
+        </div>
+    </div>
 
     <script>
-        let inventory;
-        let config;
+        let inventory = null;
+        let config = null;
+
+        // Fetch JSON data when the page loads
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchData();
+
+            // Populate lift options
+            const liftSelects = [document.getElementById('liftSelect1'), document.getElementById('liftSelect2')];
+            liftSelects.forEach(select => {
+                config.lifts.forEach(lift => {
+                    const option = document.createElement('option');
+                    option.value = lift;
+                    option.textContent = lift;
+                    select.appendChild(option);
+                });
+            });
+
+            // Add event listeners for automatic calculation
+            const targetWeightInputs = [document.getElementById('targetWeight1'), document.getElementById('targetWeight2')];
+            targetWeightInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const value = parseFloat(input.value);
+                    if (value >= inventory.barbell) {
+                        calculateWarmupSets();
+                    } else {
+                        // Clear the table if input is below barbell weight
+                        clearTables();
+                    }
+                });
+            });
+
+            // Add event listeners to update lift names and focus input
+            liftSelects.forEach((select, index) => {
+                select.addEventListener('change', () => {
+                    const liftName = select.value ? `Warm-up Sets for ${select.value}` : `Warm-up Sets for Lift ${index + 1}`;
+                    document.getElementById(`liftName${index + 1}`).textContent = liftName;
+                    document.getElementById(`targetWeight${index + 1}`).focus();
+                    calculateWarmupSets();
+                });
+            });
+        });
 
         async function fetchData() {
             try {
@@ -68,61 +164,118 @@
             }
         }
 
+        function clearTables() {
+            const warmupTables = [document.getElementById('warmupTable1'), document.getElementById('warmupTable2')];
+            const warmupHeaders = [document.getElementById('warmupHeader1'), document.getElementById('warmupHeader2')];
+            const warmupFooters = [document.getElementById('warmupFooter1'), document.getElementById('warmupFooter2')];
+            const containers = [document.getElementById('lift1Container'), document.getElementById('lift2Container')];
+            warmupTables.forEach(table => table.innerHTML = '');
+            warmupHeaders.forEach(header => header.innerHTML = '<tr><th>Weight</th></tr>');
+            warmupFooters.forEach(footer => footer.innerHTML = '');
+            containers.forEach(container => container.classList.add('hidden'));
+        }
+
         async function calculateWarmupSets() {
-            await fetchData();
-
-            const targetWeight = document.getElementById('targetWeight').value;
-            const warmupTable = document.getElementById('warmupTable');
-            const warmupHeader = document.getElementById('warmupHeader');
-            warmupTable.innerHTML = '';
-            warmupHeader.innerHTML = '<tr><th>Weight (lbs)</th></tr>';
-
-            if (!targetWeight || targetWeight < inventory.barbell) {
-                warmupTable.innerHTML = '<tr><td colspan="5">Please enter a valid target weight greater than the barbell weight.</td></tr>';
+            if (!inventory || !config) {
+                console.error('Inventory or Config data not loaded.');
                 return;
             }
 
-            const warmupSets = config.warmupPercentages.map(pct => ({
-                percentage: pct,
-                weight: Math.round(targetWeight * pct),
-                plates: calculatePlates(Math.round(targetWeight * pct))
-            }));
+            const targetWeights = [parseFloat(document.getElementById('targetWeight1').value), parseFloat(document.getElementById('targetWeight2').value)];
+            const warmupTables = [document.getElementById('warmupTable1'), document.getElementById('warmupTable2')];
+            const warmupHeaders = [document.getElementById('warmupHeader1'), document.getElementById('warmupHeader2')];
+            const warmupFooters = [document.getElementById('warmupFooter1'), document.getElementById('warmupFooter2')];
+            const containers = [document.getElementById('lift1Container'), document.getElementById('lift2Container')];
+            clearTables();
 
-            // Create header row with percentages
-            warmupSets.forEach(set => {
-                const headerCell = document.createElement('th');
-                headerCell.textContent = `${set.percentage * 100}% (${set.weight} lbs)`;
-                warmupHeader.firstElementChild.appendChild(headerCell);
-            });
+            targetWeights.forEach((targetWeight, index) => {
+                const liftSelect = document.getElementById(`liftSelect${index + 1}`);
+                if (!liftSelect.value || !targetWeight || targetWeight < inventory.barbell) {
+                    warmupTables[index].innerHTML = '<tr><td colspan="5">Please enter a valid target weight greater than or equal to the barbell weight.</td></tr>';
+                    return;
+                }
 
-            // Fill table with plate data
-            inventory.plates.forEach(plate => {
-                const row = document.createElement('tr');
-                const weightCell = document.createElement('td');
-                weightCell.textContent = `${plate.mass} lbs (${plate.color})`;
-                row.appendChild(weightCell);
+                containers[index].classList.remove('hidden');
 
+                // Calculate the weights and reps for each warm-up set
+                const warmupSets = config.warmupPercentages.map(pct => ({
+                    percentage: pct.percentage,
+                    weight: Math.round(targetWeight * pct.percentage),
+                    reps: pct.reps,
+                    plates: calculatePlates(Math.round(targetWeight * pct.percentage))
+                }));
+
+                // Create header row with percentages and reps
                 warmupSets.forEach(set => {
-                    const plateCell = document.createElement('td');
-                    const plateCount = set.plates.find(p => p.includes(`${plate.mass} lbs`));
-                    if (plateCount) {
-                        const count = parseInt(plateCount.split(' ')[0], 10);
-                        plateCell.textContent = count === 2 ? '1' : (count > 0 ? '1' : '');
-                    } else {
-                        plateCell.textContent = '';
-                    }
-                    row.appendChild(plateCell);
+                    const headerCell = document.createElement('th');
+                    headerCell.innerHTML = `${set.percentage * 100}%<br>${set.reps} reps`;
+                    warmupHeaders[index].firstElementChild.appendChild(headerCell);
                 });
 
-                warmupTable.appendChild(row);
+                // Fill table with plate data
+                inventory.plates.sort((a, b) => b.mass - a.mass); // Ensure plates are sorted descending
+
+                inventory.plates.forEach(plate => {
+                    const row = document.createElement('tr');
+                    const weightCell = document.createElement('td');
+                    weightCell.textContent = `${plate.mass}`;
+                    if (config.showColors) {
+                        weightCell.style.color = plate.color;
+                    }
+                    row.appendChild(weightCell);
+
+                    warmupSets.forEach(set => {
+                        const plateCell = document.createElement('td');
+                        const plateCount = set.plates.find(p => p.mass === plate.mass);
+                        if (plateCount) {
+                            plateCell.textContent = plateCount.count > 1 ? plateCount.count : '1';
+                        } else {
+                            plateCell.textContent = '';
+                        }
+                        row.appendChild(plateCell);
+                    });
+
+                    warmupTables[index].appendChild(row);
+                });
+
+                // Add total weight row
+                const totalWeightRow = document.createElement('tr');
+                const totalWeightCell = document.createElement('td');
+                totalWeightCell.textContent = 'Total Weight';
+                totalWeightRow.appendChild(totalWeightCell);
+
+                let warning = false;
+                warmupSets.forEach(set => {
+                    const totalWeightDataCell = document.createElement('td');
+                    totalWeightDataCell.textContent = set.weight;
+                    if (set.plates.length === 0) {
+                        totalWeightDataCell.classList.add('warning');
+                        warning = true;
+                    }
+                    totalWeightRow.appendChild(totalWeightDataCell);
+                });
+
+                warmupFooters[index].appendChild(totalWeightRow);
+
+                if (warning) {
+                    const warningRow = document.createElement('tr');
+                    const warningCell = document.createElement('td');
+                    warningCell.colSpan = warmupSets.length + 1;
+                    warningCell.classList.add('warning');
+                    warningCell.textContent = 'Warning: Unable to match the desired weight with available plates.';
+                    warmupFooters[index].appendChild(warningRow);
+                }
             });
         }
 
         function calculatePlates(weight) {
-            let weightNeeded = (weight - inventory.barbell) / 2;
+            let weightNeeded = weight - inventory.barbell;
+            if (weightNeeded < 0) return [];
+
+            weightNeeded /= 2; // Plates are added on both sides
             const platesToUse = [];
 
-            inventory.plates.sort((a, b) => b.mass - a.mass);
+            inventory.plates.sort((a, b) => b.mass - a.mass); // Sort plates descending
 
             for (const plate of inventory.plates) {
                 let pairsNeeded = 0;
@@ -131,12 +284,14 @@
                     pairsNeeded++;
                 }
                 if (pairsNeeded > 0) {
-                    platesToUse.push(`${pairsNeeded * 2} x ${plate.mass} lbs (${plate.color})`);
+                    platesToUse.push({ mass: plate.mass, count: pairsNeeded });
                 }
             }
 
+            // Check if the weight was successfully allocated
             if (weightNeeded > 0) {
-                return [];
+                console.warn(`Cannot exactly match the weight ${weight}. Remaining weight: ${weightNeeded * 2}`);
+                return []; // Alternatively, handle partial allocations
             } else {
                 return platesToUse;
             }

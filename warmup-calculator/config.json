@@ -1,3 +1,11 @@
 {
-    "warmupPercentages": [0.35, 0.65, 0.80, 0.95, 1.00]
+    "lifts": ["Deadlift", "Squat", "Bench Press", "Overhead Press"],
+    "warmupPercentages": [
+        { "percentage": 0.4, "reps": 10 },
+        { "percentage": 0.5, "reps": 6 },
+        { "percentage": 0.7, "reps": 4 },
+        { "percentage": 0.85, "reps": 2 },
+        { "percentage": 1, "reps": 5 }
+    ],
+    "showColors": true
 }
