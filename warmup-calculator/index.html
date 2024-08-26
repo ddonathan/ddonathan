@@ -4,77 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barbell Warm-up Set Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        input, button, select, textarea {
-            margin: 10px 0;
-        }
-        .form-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .form-group label {
-            margin-right: 10px;
-        }
-        .form-group select, .form-group input {
-            flex: 1;
-            max-width: 200px;
-        }
-        .textarea-container {
-            display: none;
-            width: 100%;
-        }
-        .textarea-container textarea {
-            width: 100%;
-            box-sizing: border-box;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .warning {
-            background-color: red;
-            color: white;
-        }
-        .close-warning {
-            background-color: orange;
-            color: white;
-        }
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #printableArea, #printableArea * {
-                visibility: visible;
-            }
-            #printableArea {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-        }
-        .hidden {
-            display: none;
-        }
-        .error {
-            color: red;
-            font-weight: bold;
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Barbell Warm-up Set Calculator</h1>
@@ -121,38 +51,72 @@
     <button onclick="resetToDefaults()">Reset to Defaults</button>
 
     <div id="printableArea">
-        <div id="lift1Container" class="hidden">
-            <h2 id="liftName1">Warm-up Sets for Lift 1</h2>
-            <table>
-                <thead id="warmupHeader1">
-                    <tr>
-                        <th>Weight</th>
-                    </tr>
-                </thead>
-                <tbody id="warmupTable1">
-                </tbody>
-                <tfoot id="warmupFooter1">
-                </tfoot>
-            </table>
+        <div class="table-container">
+            <div id="lift1Container" class="hidden no-page-break">
+                <h2 id="liftName1">Warm-up Sets for Lift 1</h2>
+                <table>
+                    <thead id="warmupHeader1">
+                        <tr>
+                            <th>Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warmupTable1">
+                    </tbody>
+                    <tfoot id="warmupFooter1">
+                    </tfoot>
+                </table>
+            </div>
         </div>
 
-        <div id="lift2Container" class="hidden">
-            <h2 id="liftName2">Warm-up Sets for Lift 2</h2>
-            <table>
-                <thead id="warmupHeader2">
-                    <tr>
-                        <th>Weight</th>
-                    </tr>
-                </thead>
-                <tbody id="warmupTable2">
-                </tbody>
-                <tfoot id="warmupFooter2">
-                </tfoot>
-            </table>
+        <div class="table-container">
+            <div id="lift2Container" class="hidden no-page-break">
+                <h2 id="liftName2">Warm-up Sets for Lift 2</h2>
+                <table>
+                    <thead id="warmupHeader2">
+                        <tr>
+                            <th>Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warmupTable2">
+                    </tbody>
+                    <tfoot id="warmupFooter2">
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 
+    <footer id="printFooter">
+        <div class="footer-left" id="footerText"></div>
+        <div class="footer-right" id="printDateTime"></div>
+    </footer>
+
     <script src="js/config.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        // Function to set the current date and time in the footer
+        function setPrintDateTime() {
+            const now = new Date();
+            const dateTimeString = now.toLocaleString();
+            document.getElementById('printDateTime').textContent = dateTimeString;
+        }
+
+        // Function to set the footer text based on the config value
+        function setFooterText(footerText) {
+            const footerTextElement = document.getElementById('footerText');
+            footerTextElement.textContent = footerText || '';
+        }
+
+        // Load the configuration from config.json
+        fetch('config.json')
+            .then(response => response.json())
+            .then(config => {
+                setFooterText(config.footerText);
+                if (config.showFooter) {
+                    setPrintDateTime();
+                }
+            })
+            .catch(error => console.error('Error loading config:', error));
+    </script>
 </body>
 </html>

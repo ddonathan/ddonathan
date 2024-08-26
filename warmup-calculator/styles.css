@@ -1,0 +1,175 @@
+:root {
+    --table-header-bg: #333; /* Default dark background color for header */
+    --table-header-color: #fff; /* Default white text color for header */
+    --table-body-bg: #fff; /* Default background color for table body */
+    --table-body-color: #000; /* Default text color for table body */
+    --table-header-bg-light: #f0f0f0; /* Light background color for header */
+    --table-header-color-light: #000; /* Dark text color for header */
+    --table-body-bg-light: #fff; /* Light background color for table body */
+    --table-body-color-light: #000; /* Dark text color for table body */
+    --table-header-bg-dark: #333; /* Dark background color for header */
+    --table-header-color-dark: #fff; /* Light text color for header */
+    --table-body-bg-dark: #222; /* Dark background color for table body */
+    --table-body-color-dark: #fff; /* Light text color for table body */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+input, button, select, textarea {
+    margin: 10px 0;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-group label {
+    margin-right: 10px;
+}
+
+.form-group select, .form-group input {
+    flex: 1;
+    max-width: 200px;
+}
+
+.textarea-container {
+    display: none;
+    width: 100%;
+}
+
+.textarea-container textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    page-break-inside: avoid; /* Prevent table from breaking across pages */
+}
+
+th, td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+    page-break-inside: avoid; /* Prevent table cells from breaking across pages */
+}
+
+th {
+    background-color: var(--table-header-bg); /* Use CSS variable for background color */
+    color: var(--table-header-color); /* Use CSS variable for text color */
+}
+
+td.first-column, tfoot td {
+    background-color: var(--table-header-bg); /* Use CSS variable for background color */
+    color: var(--table-header-color); /* Use CSS variable for text color */
+}
+
+.warning {
+    background-color: red;
+    color: white;
+}
+
+.close-warning {
+    background-color: orange;
+    color: white;
+}
+
+@media print {
+    html, body {
+        margin: 0; /* Remove margin for print */
+        padding: 0; /* Remove padding for print */
+    }
+    body {
+        font-size: 12pt;
+    }
+    table {
+        width: 100%;
+        background-color: #fff; /* White background for table body */
+    }
+    th, td.first-column, tfoot td {
+        background-color: #d3d3d3; /* Light gray background for header, first column, and footer */
+        color: #000; /* Black text color */
+    }
+    th, td.first-column, tfoot td, .warning, .close-warning {
+        -webkit-print-color-adjust: exact; /* Force print background colors */
+        print-color-adjust: exact; /* Standard property */
+    }
+    .form-group, input, button, select, textarea, .textarea-container, .error, h1, label {
+        display: none; /* Hide form elements, title, and labels when printing */
+    }
+    .table-container {
+        page-break-inside: avoid; /* Prevent page breaks inside table container */
+    }
+    h2 {
+        margin: 0; /* Remove margin for h2 */
+        padding: 0; /* Remove padding for h2 */
+    }
+    #lift2Container h2 {
+        margin-top: 20px; /* Add margin between the first table and the second lift name */
+    }
+    footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        display: flex; /* Show footer only when printing */
+        justify-content: space-between;
+        padding: 10px;
+        font-size: 10pt;
+        box-sizing: border-box; /* Ensure padding is included in the width */
+    }
+    .footer-left {
+        margin-left: 10px; /* Add margin to the left side */
+    }
+    .footer-right {
+        margin-right: 10px; /* Add margin to the right side */
+    }
+}
+
+@media screen {
+    footer {
+        display: none; /* Hide footer on screen */
+    }
+    body {
+        background-color: var(--table-body-bg-light); /* Light background for light theme */
+        color: var(--table-body-color-light); /* Dark text color */
+    }
+    table {
+        background-color: var(--table-body-bg-light); /* Use CSS variable for table body background */
+        color: var(--table-body-color-light); /* Use CSS variable for table body text color */
+    }
+    th, td.first-column, tfoot td {
+        background-color: var(--table-header-bg-light); /* Use CSS variable for background color */
+        color: var(--table-header-color-light); /* Use CSS variable for text color */
+    }
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: var(--table-body-bg-dark); /* Dark background for dark theme */
+            color: var(--table-body-color-dark); /* Light text color */
+        }
+        table {
+            background-color: var(--table-body-bg-dark); /* Use CSS variable for table body background */
+            color: var(--table-body-color-dark); /* Use CSS variable for table body text color */
+        }
+        th, td.first-column, tfoot td {
+            background-color: var(--table-header-bg-dark); /* Use CSS variable for background color */
+            color: var(--table-header-color-dark); /* Use CSS variable for text color */
+        }
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+    display: none;
+}

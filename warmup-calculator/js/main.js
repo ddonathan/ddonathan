@@ -39,8 +39,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             config = JSON.parse(document.getElementById('configTextarea').value);
             saveToLocalStorage();
             calculateWarmupSets();
+            clearError();
         } catch (e) {
-            console.error('Invalid JSON in config textarea:', e);
+            displayError('Invalid JSON in config textarea: ' + e.message);
         }
     });
     document.getElementById('inventoryTextarea').addEventListener('input', () => {
@@ -49,8 +50,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             inventory = JSON.parse(document.getElementById('inventoryTextarea').value);
             saveToLocalStorage();
             calculateWarmupSets();
+            clearError();
         } catch (e) {
-            console.error('Invalid JSON in inventory textarea:', e);
+            displayError('Invalid JSON in inventory textarea: ' + e.message);
         }
     });
 
@@ -59,6 +61,18 @@ window.addEventListener('DOMContentLoaded', async () => {
         await loadInventoryTemplate();
     });
 });
+
+function displayError(message) {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = message;
+    errorContainer.style.display = 'block';
+}
+
+function clearError() {
+    const errorContainer = document.getElementById('errorContainer');
+    errorContainer.textContent = '';
+    errorContainer.style.display = 'none';
+}
 
 function calculateWarmupSets() {
     const targetWeights = [
@@ -95,9 +109,9 @@ function calculateWarmupSets() {
         // Calculate the weights and reps for each warm-up set
         const warmupSets = config.warmupPercentages.map(pct => ({
             percentage: pct.percentage,
-            weight: Math.round(targetWeight * pct.percentage),
+            weight: formatWeight(targetWeight * pct.percentage), // Format weight
             reps: pct.reps,
-            plates: calculatePlates(Math.round(targetWeight * pct.percentage))
+            plates: calculatePlates(targetWeight * pct.percentage) // Format weight
         }));
 
         // Create header row with percentages, weights, and reps
@@ -114,6 +128,7 @@ function calculateWarmupSets() {
             const row = document.createElement('tr');
             const weightCell = document.createElement('td');
             weightCell.textContent = `${plate.mass}`;
+            weightCell.classList.add('first-column'); // Apply first-column class
             if (config.showColors) {
                 weightCell.style.color = plate.color;
             }
@@ -137,13 +152,14 @@ function calculateWarmupSets() {
         const totalWeightRow = document.createElement('tr');
         const totalWeightCell = document.createElement('td');
         totalWeightCell.textContent = 'Total Weight';
+        totalWeightCell.classList.add('first-column'); // Apply first-column class
         totalWeightRow.appendChild(totalWeightCell);
 
         let warning = false;
         warmupSets.forEach(set => {
             const totalWeightDataCell = document.createElement('td');
             const actualWeight = set.plates.reduce((sum, plate) => sum + plate.mass * plate.count * 2, inventory.barbell);
-            totalWeightDataCell.textContent = actualWeight;
+            totalWeightDataCell.textContent = formatWeight(actualWeight); // Format weight
 
             const weightDifference = Math.abs(actualWeight - set.weight);
             if (weightDifference > 5) {
@@ -167,6 +183,10 @@ function calculateWarmupSets() {
             warmupFooters[index].appendChild(warningRow);
         }
     });
+}
+
+function formatWeight(weight) {
+    return weight % 1 === 0 ? weight.toFixed(0) : weight.toFixed(1);
 }
 
 function calculatePlates(weight) {
