@@ -89,7 +89,7 @@ function calculateWarmupSets() {
             if (weightDifference > 5) {
                 totalWeightDataCell.classList.add('warning');
                 warning = true;
-            } else if (weightDifference > 0) {
+            } else if (weightDifference > .5) {
                 totalWeightDataCell.classList.add('close-warning');
             }
 
