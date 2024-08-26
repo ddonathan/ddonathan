@@ -1,5 +1,28 @@
 {
-    "lifts": ["Deadlift", "Squat", "Bench Press", "Overhead Press", "Other"],
+    "lifts": [
+        "Bench Press",
+        "Bent Over Row",
+        "Clean",
+        "Clean and Jerk",
+        "Deadlift",
+        "Front Squat",
+        "Good Morning",
+        "Jerk",
+        "Overhead Press",
+        "Overhead Squat",
+        "Pendlay Row",
+        "Power Clean",
+        "Power Snatch",
+        "Push Jerk",
+        "Push Press",
+        "Romanian Deadlift",
+        "Snatch",
+        "Squat",
+        "Strict Press",
+        "Sumo Deadlift High Pull",
+        "Thruster",
+        "Other"
+      ],
     "warmupPercentages": [
         { "percentage": 0.4, "reps": 5 },
         { "percentage": 0.55, "reps": 4 },
@@ -9,5 +32,7 @@
     ],
     "showColors": false,
     "showFooter": true,
-    "footerText": "Created by WarmupCalculator.com"
+    "footerText": "Created by WarmupCalculator.com",
+    "warningThreshold": 5,
+    "closeWarningThreshold": 0.5
 }

@@ -79,6 +79,9 @@ function calculateWarmupSets() {
         totalWeightCell.classList.add('first-column'); // Apply first-column class
         totalWeightRow.appendChild(totalWeightCell);
 
+        const warningThreshold = config.warningThreshold;
+        const closeWarningThreshold = config.closeWarningThreshold;
+
         let warning = false;
         warmupSets.forEach(set => {
             const totalWeightDataCell = document.createElement('td');
@@ -86,10 +89,10 @@ function calculateWarmupSets() {
             totalWeightDataCell.textContent = formatWeight(actualWeight); // Format weight
 
             const weightDifference = Math.abs(actualWeight - set.weight);
-            if (weightDifference > 5) {
+            if (weightDifference > warningThreshold) {
                 totalWeightDataCell.classList.add('warning');
                 warning = true;
-            } else if (weightDifference > .5) {
+            } else if (weightDifference > closeWarningThreshold) {
                 totalWeightDataCell.classList.add('close-warning');
             }
 
