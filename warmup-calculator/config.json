@@ -1,5 +1,5 @@
 {
-    "lifts": ["Deadlift", "Squat", "Bench Press", "Overhead Press"],
+    "lifts": ["Deadlift", "Squat", "Bench Press", "Overhead Press", "Other"],
     "warmupPercentages": [
         { "percentage": 0.4, "reps": 5 },
         { "percentage": 0.55, "reps": 4 },

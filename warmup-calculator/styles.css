@@ -11,6 +11,12 @@
     --table-header-color-dark: #fff; /* Light text color for header */
     --table-body-bg-dark: #222; /* Dark background color for table body */
     --table-body-color-dark: #fff; /* Light text color for table body */
+    --primary-color: #007bff; /* Primary color for form elements */
+    --secondary-color: #6c757d; /* Secondary color for form elements */
+    --border-radius: 4px; /* Border radius for form elements */
+    --input-padding: 10px; /* Padding for input elements */
+    --button-padding: 10px 20px; /* Padding for button elements */
+    --gray-color: #6c757d; /* Gray color for toggle buttons */
 }
 
 body {
@@ -20,6 +26,44 @@ body {
 
 input, button, select, textarea {
     margin: 10px 0;
+    padding: var(--input-padding);
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: var(--button-padding);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto; /* Ensure buttons are not full width */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darken primary color on hover */
+}
+
+.toggle-button {
+    background-color: var(--gray-color);
+    color: #fff;
+    padding: var(--button-padding);
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: auto; /* Ensure buttons are not full width */
+}
+
+.toggle-button:hover {
+    background-color: darken(var(--gray-color), 10%);
+}
+
+.button-group {
+    display: flex;
+    gap: 10px; /* Space between buttons */
 }
 
 .form-group {
@@ -30,6 +74,7 @@ input, button, select, textarea {
 
 .form-group label {
     margin-right: 10px;
+    font-weight: bold;
 }
 
 .form-group select, .form-group input {
@@ -45,6 +90,10 @@ input, button, select, textarea {
 .textarea-container textarea {
     width: 100%;
     box-sizing: border-box;
+    padding: var(--input-padding);
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--border-radius);
+    font-size: 16px;
 }
 
 table {
