@@ -93,31 +93,7 @@
     </footer>
 
     <script src="js/config.js"></script>
-    <script src="js/main.js"></script>
-    <script>
-        // Function to set the current date and time in the footer
-        function setPrintDateTime() {
-            const now = new Date();
-            const dateTimeString = now.toLocaleString();
-            document.getElementById('printDateTime').textContent = dateTimeString;
-        }
-
-        // Function to set the footer text based on the config value
-        function setFooterText(footerText) {
-            const footerTextElement = document.getElementById('footerText');
-            footerTextElement.textContent = footerText || '';
-        }
-
-        // Load the configuration from config.json
-        fetch('config.json')
-            .then(response => response.json())
-            .then(config => {
-                setFooterText(config.footerText);
-                if (config.showFooter) {
-                    setPrintDateTime();
-                }
-            })
-            .catch(error => console.error('Error loading config:', error));
-    </script>
+    <script src="js/ui.js"></script>
+    <script src="js/logic.js"></script>
 </body>
 </html>
