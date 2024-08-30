@@ -1,5 +1,6 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const moment = require('moment-timezone');
 
 // Connect to the SQLite database
 const db = new sqlite3.Database(path.join(__dirname, './', 'database.db'));
@@ -47,21 +48,22 @@ function reinitializeDb() {
 
             // Insert historical lifts for the user
             const lifts = [
-                { date: '2023-08-26T00:00:00Z', exercise: 'Squat', weight: 185, reps: 5 },
-                { date: '2023-08-26T00:00:00Z', exercise: 'Overhead Press', weight: 120, reps: 5 },
-                { date: '2023-08-28T00:00:00Z', exercise: 'Bench Press', weight: 140, reps: 5 },
-                { date: '2023-08-28T00:00:00Z', exercise: 'Deadlift', weight: 215, reps: 5 }
+                { date: '2023-08-26T07:00:00', exercise: 'Squat', weight: 185, reps: 5 },
+                { date: '2023-08-26T07:00:00', exercise: 'Overhead Press', weight: 120, reps: 5 },
+                { date: '2023-08-28T07:00:00', exercise: 'Bench Press', weight: 140, reps: 5 },
+                { date: '2023-08-28T07:00:00', exercise: 'Deadlift', weight: 215, reps: 5 }
             ];
 
             let completedLifts = 0;
 
             lifts.forEach(lift => {
+                // const utcDate = moment.tz(lift.date, 'America/Los_Angeles').utc().format('YYYY-MM-DDTHH:mm:ss[Z]');
                 db.run(`INSERT INTO progress (userId, exercise, weight, reps, date) VALUES (?, ?, ?, ?, ?)`, 
                     [userId, lift.exercise, lift.weight, lift.reps, lift.date], function(err) {
                     if (err) {
                         console.error('Error inserting lift:', err);
                     } else {
-                        console.log('Inserted Lift:', { id: this.lastID, userId, ...lift });
+                        console.log('Inserted Lift:', { id: this.lastID, userId, ...lift, date: lift.date });
                     }
 
                     completedLifts++;
