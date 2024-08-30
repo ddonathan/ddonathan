@@ -5,7 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 
 // Initialize the database connection
-const db = new sqlite3.Database('./database.db', (err) => {
+const db = new sqlite3.Database(path.join(__dirname, 'database', 'database.db'), (err) => {
     if (err) {
         console.error('Error opening database:', err);
     } else {
@@ -19,6 +19,9 @@ db.serialize(() => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        age INTEGER NOT NULL,
+        weight REAL NOT NULL,
         workoutDays TEXT
     )`);
 
@@ -97,18 +100,38 @@ app.get('/check-auth', (req, res) => {
     if (req.session && req.session.userId) {
         res.json({ authenticated: true });
     } else {
-        res.status(401).json({ authenticated: false });
+        res.json({ authenticated: false });
     }
 });
 
 // Get user profile
-app.get('/getUserProfile', checkAuth, (req, res) => {
-    db.get(`SELECT * FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
+app.get('/profile', checkAuth, (req, res) => {
+    db.get(`SELECT email, name, age, weight, workoutDays FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
         if (err) {
             console.error('Error fetching user profile:', err);
             return res.json({ success: false });
         }
-        res.json({ success: true, user });
+
+        db.all(`SELECT * FROM progress WHERE userId = ?`, [req.session.userId], (err, progress) => {
+            if (err) {
+                console.error('Error fetching user progress:', err);
+                return res.json({ success: false });
+            }
+
+            res.json({ success: true, user, progress });
+        });
+    });
+});
+
+// Update user profile
+app.post('/edit-profile', checkAuth, (req, res) => {
+    const { email, password, name, age, weight, workoutDays } = req.body;
+    db.run(`UPDATE users SET email = ?, password = ?, name = ?, age = ?, weight = ?, workoutDays = ? WHERE id = ?`, [email, password, name, age, weight, workoutDays, req.session.userId], function(err) {
+        if (err) {
+            console.error('Error updating user profile:', err);
+            return res.json({ success: false, message: 'Profile update failed' });
+        }
+        res.json({ success: true });
     });
 });
 
@@ -120,6 +143,7 @@ app.post('/addLift', checkAuth, (req, res) => {
             console.error('Error adding lift:', err);
             return res.json({ success: false, message: 'Failed to add lift' });
         }
+        console.log('Lift added:', { id: this.lastID, userId: req.session.userId, exercise, weight, reps, date });
         res.json({ success: true, liftId: this.lastID });
     });
 });
@@ -137,6 +161,8 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
             return res.json({ success: false });
         }
 
+        console.log('User Workout Days:', user.workoutDays);
+
         const workoutDays = user.workoutDays.split(',');
 
         // Generate the next two weeks of dates for the selected workout days
@@ -150,6 +176,8 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                 dates.push(date.toISOString().split('T')[0]);
             }
         }
+
+        console.log('Generated Dates:', dates);
 
         // Define the workout schedule
         const schedule = [
@@ -169,11 +197,13 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                     return res.json({ success: false });
                 }
 
+                console.log(`Last Performance for ${lift}:`, row);
+
                 const lastPerformance = row || { exercise: lift, weight: null, reps: null, date: null };
-                let nextWeight = lastPerformance.weight !== null && lastPerformance.reps >= 5 ? lastPerformance.weight + (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : lastPerformance.weight !== null ? lastPerformance.weight - (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : null;
+                const nextWeight = lastPerformance.weight !== null && lastPerformance.reps >= 5 ? lastPerformance.weight + (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : lastPerformance.weight !== null ? lastPerformance.weight - (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : null;
 
                 dates.forEach((date, i) => {
-                    const dayIndex = i % 3; // Cycle through the 3-day schedule (Monday, Wednesday, Friday)
+                    const dayIndex = i % 6; // Cycle through the 6-day schedule
                     if (schedule[dayIndex].includes(lift)) {
                         const result = {
                             date,
@@ -183,9 +213,6 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                             press: lift === 'Overhead Press' ? nextWeight : undefined
                         };
                         results.push(result);
-
-                        // Increment the weight for the next workout
-                        nextWeight += (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5);
                     }
                 });
 
@@ -193,6 +220,7 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                 if (completedRequests === lifts.length) {
                     // Sort results by date
                     results.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    console.log('Forecast Results:', results);
                     res.json({ success: true, results });
                 }
             });

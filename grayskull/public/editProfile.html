@@ -25,50 +25,59 @@
                 const profile = await response.json();
                 console.log('Profile data:', profile); // Log the profile data
 
-                if (profile.email) document.getElementById('email').value = profile.email;
-                if (profile.name) document.getElementById('name').value = profile.name;
-                if (profile.age) document.getElementById('age').value = profile.age;
-                if (profile.weight) document.getElementById('weight').value = profile.weight;
-                if (profile.workoutDays) {
-                    profile.workoutDays.split(',').forEach(day => {
-                        const dayBlock = document.querySelector(`.day-block[data-day="${day}"]`);
-                        if (dayBlock) {
-                            dayBlock.classList.add('selected');
-                        }
-                    });
+                if (profile.success) {
+                    if (profile.user.email) document.getElementById('email').value = profile.user.email;
+                    if (profile.user.name) document.getElementById('name').value = profile.user.name;
+                    if (profile.user.age) document.getElementById('age').value = profile.user.age;
+                    if (profile.user.weight) document.getElementById('weight').value = profile.user.weight;
+                    if (profile.user.workoutDays) {
+                        profile.user.workoutDays.split(',').forEach(day => {
+                            const dayBlock = document.querySelector(`.day-block[data-day="${day}"]`);
+                            if (dayBlock) {
+                                dayBlock.classList.add('selected');
+                            }
+                        });
+                    }
+                } else {
+                    console.error('Error fetching profile data:', profile.message);
                 }
             } catch (error) {
                 console.error('Error fetching profile data:', error);
             }
-        });
 
-        document.querySelectorAll('.day-block').forEach(block => {
-            block.addEventListener('click', () => {
-                const selectedBlocks = document.querySelectorAll('.day-block.selected');
-                if (block.classList.contains('selected')) {
-                    block.classList.remove('selected');
-                } else if (selectedBlocks.length < 3) {
-                    block.classList.add('selected');
-                }
+            document.querySelectorAll('.day-block').forEach(block => {
+                block.addEventListener('click', () => {
+                    const selectedBlocks = document.querySelectorAll('.day-block.selected');
+                    if (block.classList.contains('selected')) {
+                        block.classList.remove('selected');
+                    } else if (selectedBlocks.length < 3) {
+                        block.classList.add('selected');
+                    }
+                });
             });
-        });
 
-        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            data.workoutDays = Array.from(document.querySelectorAll('.day-block.selected')).map(el => el.getAttribute('data-day')).join(',');
-            const response = await fetch('/edit-profile', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert('Profile updated successfully!');
-                window.location.href = '/';
+            const form = document.getElementById('editProfileForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    const data = Object.fromEntries(formData.entries());
+                    data.workoutDays = Array.from(document.querySelectorAll('.day-block.selected')).map(el => el.getAttribute('data-day')).join(',');
+                    const response = await fetch('/edit-profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        alert('Profile updated successfully!');
+                        window.location.href = '/';
+                    } else {
+                        alert('Profile update failed!');
+                    }
+                });
             } else {
-                alert('Profile update failed!');
+                console.error('Form element not found');
             }
         });
     </script>
@@ -110,6 +119,7 @@
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel</button>
         </form>
     </div>
 </body>

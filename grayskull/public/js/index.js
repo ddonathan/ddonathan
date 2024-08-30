@@ -81,7 +81,7 @@ async function getLastPerformance() {
 
 async function getProgress() {
     try {
-        const response = await fetch('/getUserProfile');
+        const response = await fetch('/profile');
         if (!response.ok) {
             if (response.status === 401) {
                 document.getElementById('main-content').style.display = 'none';
@@ -108,7 +108,7 @@ async function getProgress() {
                 successCell.innerText = entry.success ? 'Yes' : 'No';
             });
         } else {
-            console.error('Failed to fetch user profile data:', data);
+            console.error('Failed to fetch user profile data:', data.message);
         }
     } catch (error) {
         console.error('Error fetching user profile:', error);
