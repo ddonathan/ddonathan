@@ -170,7 +170,7 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                 }
 
                 const lastPerformance = row || { exercise: lift, weight: null, reps: null, date: null };
-                const nextWeight = lastPerformance.weight !== null && lastPerformance.reps >= 5 ? lastPerformance.weight + (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : lastPerformance.weight !== null ? lastPerformance.weight - (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : null;
+                let nextWeight = lastPerformance.weight !== null && lastPerformance.reps >= 5 ? lastPerformance.weight + (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : lastPerformance.weight !== null ? lastPerformance.weight - (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5) : null;
 
                 dates.forEach((date, i) => {
                     const dayIndex = i % 3; // Cycle through the 3-day schedule (Monday, Wednesday, Friday)
@@ -183,6 +183,9 @@ app.get('/getLastPerformance', checkAuth, (req, res) => {
                             press: lift === 'Overhead Press' ? nextWeight : undefined
                         };
                         results.push(result);
+
+                        // Increment the weight for the next workout
+                        nextWeight += (lift === 'Bench Press' || lift === 'Overhead Press' ? 2.5 : 5);
                     }
                 });
 
