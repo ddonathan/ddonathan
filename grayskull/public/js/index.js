@@ -104,7 +104,7 @@ async function getProgress() {
                 exerciseCell.innerText = entry.exercise;
                 weightCell.innerText = entry.weight;
                 repsCell.innerText = entry.reps;
-                dateCell.innerText = formatDate(entry.date);
+                dateCell.innerText = formatDateToLocal(entry.date, data.user.timezone);
                 successCell.innerText = entry.success ? 'Yes' : 'No';
             });
         } else {
@@ -113,6 +113,11 @@ async function getProgress() {
     } catch (error) {
         console.error('Error fetching user profile:', error);
     }
+}
+
+function formatDateToLocal(dateString, timezone) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { timeZone: timezone });
 }
 
 async function addLift(event) {

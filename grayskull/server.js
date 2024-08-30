@@ -104,9 +104,21 @@ app.get('/check-auth', (req, res) => {
     }
 });
 
+// Update user profile
+app.post('/edit-profile', checkAuth, (req, res) => {
+    const { email, password, name, age, weight, workoutDays, timezone } = req.body;
+    db.run(`UPDATE users SET email = ?, password = ?, name = ?, age = ?, weight = ?, workoutDays = ?, timezone = ? WHERE id = ?`, [email, password, name, age, weight, workoutDays, timezone, req.session.userId], function(err) {
+        if (err) {
+            console.error('Error updating user profile:', err);
+            return res.json({ success: false, message: 'Profile update failed' });
+        }
+        res.json({ success: true });
+    });
+});
+
 // Get user profile
 app.get('/profile', checkAuth, (req, res) => {
-    db.get(`SELECT email, name, age, weight, workoutDays FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
+    db.get(`SELECT email, name, age, weight, workoutDays, timezone FROM users WHERE id = ?`, [req.session.userId], (err, user) => {
         if (err) {
             console.error('Error fetching user profile:', err);
             return res.json({ success: false });
@@ -123,27 +135,16 @@ app.get('/profile', checkAuth, (req, res) => {
     });
 });
 
-// Update user profile
-app.post('/edit-profile', checkAuth, (req, res) => {
-    const { email, password, name, age, weight, workoutDays } = req.body;
-    db.run(`UPDATE users SET email = ?, password = ?, name = ?, age = ?, weight = ?, workoutDays = ? WHERE id = ?`, [email, password, name, age, weight, workoutDays, req.session.userId], function(err) {
-        if (err) {
-            console.error('Error updating user profile:', err);
-            return res.json({ success: false, message: 'Profile update failed' });
-        }
-        res.json({ success: true });
-    });
-});
-
 // Add lift
 app.post('/addLift', checkAuth, (req, res) => {
     const { exercise, weight, reps, date } = req.body;
-    db.run(`INSERT INTO progress (userId, exercise, weight, reps, date) VALUES (?, ?, ?, ?, ?)`, [req.session.userId, exercise, weight, reps, date], function(err) {
+    const utcDate = new Date(date).toISOString(); // Convert to UTC
+    db.run(`INSERT INTO progress (userId, exercise, weight, reps, date) VALUES (?, ?, ?, ?, ?)`, [req.session.userId, exercise, weight, reps, utcDate], function(err) {
         if (err) {
             console.error('Error adding lift:', err);
             return res.json({ success: false, message: 'Failed to add lift' });
         }
-        console.log('Lift added:', { id: this.lastID, userId: req.session.userId, exercise, weight, reps, date });
+        console.log('Lift added:', { id: this.lastID, userId: req.session.userId, exercise, weight, reps, date: utcDate });
         res.json({ success: true, liftId: this.lastID });
     });
 });

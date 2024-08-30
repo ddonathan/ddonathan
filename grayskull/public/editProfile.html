@@ -38,6 +38,7 @@
                             }
                         });
                     }
+                    if (profile.user.timezone) document.getElementById('timezone').value = profile.user.timezone;
                 } else {
                     console.error('Error fetching profile data:', profile.message);
                 }
@@ -117,6 +118,17 @@
                     <div class="day-block" data-day="Saturday">Sat</div>
                     <div class="day-block" data-day="Sunday">Sun</div>
                 </div>
+            </div>
+            <div class="form-group">
+                <label for="timezone">Timezone:</label>
+                <select id="timezone" name="timezone" required class="form-control">
+                    <option value="UTC">UTC</option>
+                    <option value="America/New_York">America/New_York</option>
+                    <option value="America/Chicago">America/Chicago</option>
+                    <option value="America/Denver">America/Denver</option>
+                    <option value="America/Los_Angeles">America/Los_Angeles</option>
+                    <!-- Add more timezones as needed -->
+                </select><br>
             </div>
             <button type="submit" class="btn btn-primary">Save Changes</button>
             <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">Cancel</button>
