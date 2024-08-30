@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="css/styles.css"> <!-- Include your common CSS file -->
+    <script>
+        async function checkAuth() {
+            try {
+                const response = await fetch('/check-auth');
+                if (!response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error checking authentication:', error);
+                window.location.href = '/';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+            try {
+                const response = await fetch('/profile');
+                const profile = await response.json();
+                console.log('Profile data:', profile); // Log the profile data
+
+                if (profile.email) document.getElementById('email').value = profile.email;
+                if (profile.name) document.getElementById('name').value = profile.name;
+                if (profile.age) document.getElementById('age').value = profile.age;
+                if (profile.weight) document.getElementById('weight').value = profile.weight;
+                if (profile.workoutDays) {
+                    profile.workoutDays.split(',').forEach(day => {
+                        const dayBlock = document.querySelector(`.day-block[data-day="${day}"]`);
+                        if (dayBlock) {
+                            dayBlock.classList.add('selected');
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+            }
+        });
+
+        document.querySelectorAll('.day-block').forEach(block => {
+            block.addEventListener('click', () => {
+                const selectedBlocks = document.querySelectorAll('.day-block.selected');
+                if (block.classList.contains('selected')) {
+                    block.classList.remove('selected');
+                } else if (selectedBlocks.length < 3) {
+                    block.classList.add('selected');
+                }
+            });
+        });
+
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            data.workoutDays = Array.from(document.querySelectorAll('.day-block.selected')).map(el => el.getAttribute('data-day')).join(',');
+            const response = await fetch('/edit-profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Profile updated successfully!');
+                window.location.href = '/';
+            } else {
+                alert('Profile update failed!');
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Profile</h1>
+        <form id="editProfileForm" class="form">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight:</label>
+                <input type="number" id="weight" name="weight" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label>Workout Days:</label>
+                <div class="day-blocks">
+                    <div class="day-block" data-day="Monday">Mon</div>
+                    <div class="day-block" data-day="Tuesday">Tue</div>
+                    <div class="day-block" data-day="Wednesday">Wed</div>
+                    <div class="day-block" data-day="Thursday">Thu</div>
+                    <div class="day-block" data-day="Friday">Fri</div>
+                    <div class="day-block" data-day="Saturday">Sat</div>
+                    <div class="day-block" data-day="Sunday">Sun</div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+</body>
+</html>

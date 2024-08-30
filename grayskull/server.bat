@@ -1,0 +1,13 @@
+@echo off
+:loop
+echo Starting the server...
+start /B node server.js
+
+echo Press any key to stop the server and restart it...
+pause >nul
+
+echo Stopping the server...
+taskkill /F /IM node.exe
+
+echo Restarting the server...
+goto loop

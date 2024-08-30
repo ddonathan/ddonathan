@@ -1,3 +1,4 @@
 
 .prettierrc
 sales/node_modules/*
+/grayskull/node_modules

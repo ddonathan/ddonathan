@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="css/styles.css"> <!-- Include your common CSS file -->
+    <script>
+        async function register(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const workoutDays = document.getElementById('workoutDays').value;
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password, workoutDays })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert('Registration successful');
+                    window.location.href = '/';
+                } else {
+                    alert('Registration failed: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error registering:', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Register</h1>
+        <form onsubmit="register(event)" class="form">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight:</label>
+                <input type="number" id="weight" name="weight" required class="form-control"><br>
+            </div>
+            <div class="form-group">
+                <label>Workout Days:</label>
+                <div class="day-blocks">
+                    <div class="day-block" data-day="Monday">Mon</div>
+                    <div class="day-block" data-day="Tuesday">Tue</div>
+                    <div class="day-block" data-day="Wednesday">Wed</div>
+                    <div class="day-block" data-day="Thursday">Thu</div>
+                    <div class="day-block" data-day="Friday">Fri</div>
+                    <div class="day-block" data-day="Saturday">Sat</div>
+                    <div class="day-block" data-day="Sunday">Sun</div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+        </form>
+    </div>
+</body>
+</html>
