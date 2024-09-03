@@ -20,7 +20,7 @@ const lifts = [
         exercise: 'benchpress',
         weight: 140,
         reps: 5,
-        date: '2023-08-26T14:00:00Z',  // Converted to UTC as per the original script
+        date: '2024-08-26T14:00:00Z',  // Example past date
         week: 1,
         day: 1
     },
@@ -30,7 +30,7 @@ const lifts = [
         exercise: 'squat',
         weight: 185,
         reps: 5,
-        date: '2023-08-26T14:00:00Z',
+        date: '2024-08-26T14:00:00Z',
         week: 1,
         day: 1
     },
@@ -40,7 +40,7 @@ const lifts = [
         exercise: 'overheadpress',
         weight: 120,
         reps: 5,
-        date: '2023-08-28T14:00:00Z',
+        date: '2024-08-28T14:00:00Z',
         week: 1,
         day: 2
     },
@@ -50,7 +50,7 @@ const lifts = [
         exercise: 'deadlift',
         weight: 215,
         reps: 5,
-        date: '2023-08-28T14:00:00Z',
+        date: '2024-08-28T14:00:00Z',
         week: 1,
         day: 2
     },
@@ -60,7 +60,7 @@ const lifts = [
         exercise: 'benchpress',
         weight: 140,
         reps: 5,
-        date: '2023-09-02T14:00:00Z',  // Converted to UTC as per the original script
+        date: '2024-09-02T14:00:00Z',  // Example current week
         week: 1,
         day: 1
     },
@@ -70,7 +70,7 @@ const lifts = [
         exercise: 'squat',
         weight: 185,
         reps: 5,
-        date: '2023-09-02T14:00:00Z',
+        date: '2024-09-02T14:00:00Z',
         week: 1,
         day: 1
     }
@@ -134,13 +134,35 @@ function calculateNextWeight(exercise, mostRecentLift) {
     return Math.max(mostRecentLift.weight + adjustment, 0); // Ensure weight doesn't go negative
 }
 
+// Function to generate workouts from historical data within the valid date range
+function generateWorkoutsFromHistory(lifts, mostRecentSunday) {
+    const days = {};
+
+    lifts.forEach(lift => {
+        const liftDate = moment(lift.date);
+        if (liftDate.isSameOrAfter(mostRecentSunday)) {
+            const dateStr = liftDate.format('YYYY-MM-DD');
+            if (!days[dateStr]) {
+                days[dateStr] = {
+                    date: dateStr,
+                    week: lift.week,
+                    day: lift.day
+                };
+            }
+            days[dateStr][lift.exercise] = lift.weight;
+        }
+    });
+
+    return Object.values(days);
+}
+
 // Generate future workouts with adjusted weights
 function generateFutureWorkouts(lifts, weekSchedule, user) {
     const recentWeights = getMostRecentWeights(lifts);
+    const futureWorkouts = generateWorkoutsFromHistory(lifts, mostRecentSunday);
 
-    const days = [];
     let lastLift = lifts[lifts.length - 1];
-    let currentDate = mostRecentSunday.clone();  // Start from the most recent Sunday
+    let currentDate = moment.max(moment(lastLift.date), mostRecentSunday).add(1, 'day').startOf('day');
     let currentWeek = lastLift.week;
     let currentDay = lastLift.day + 1;
 
@@ -158,16 +180,21 @@ function generateFutureWorkouts(lifts, weekSchedule, user) {
             const workout = weekSchedule.find(ws => ws.week === currentWeek && ws.day === currentDay);
 
             if (workout) {
+                let dayObject = futureWorkouts.find(day => day.date === dateStr);
+                if (!dayObject) {
+                    dayObject = {
+                        date: dateStr,
+                        week: currentWeek,
+                        day: currentDay
+                    };
+                    futureWorkouts.push(dayObject);
+                }
+
                 workout.exercises.forEach(exercise => {
                     const mostRecentLift = recentWeights[exercise];
                     const nextWeight = calculateNextWeight(exercise, mostRecentLift);
 
-                    let exerciseObject = {};
-                    exerciseObject['date'] = dateStr;
-                    exerciseObject['week'] = currentWeek;
-                    exerciseObject['day'] = currentDay;
-                    exerciseObject[exercise] = nextWeight;
-                    days.push(exerciseObject);
+                    dayObject[exercise] = nextWeight;
                 });
             }
 
@@ -181,7 +208,7 @@ function generateFutureWorkouts(lifts, weekSchedule, user) {
         currentDate.add(1, 'day');
     }
 
-    return days;
+    return futureWorkouts;
 }
 
 // Generate the workouts
