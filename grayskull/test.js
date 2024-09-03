@@ -94,7 +94,7 @@ const currentDayOfWeek = today.day(); // Sunday = 0, Monday = 1, ..., Saturday =
 const mostRecentSunday = today.clone().subtract(currentDayOfWeek, 'days');
 const twoWeeksSaturday = mostRecentSunday.clone().add(13, 'days');
 
-// Function to get the most recent weight for each lift
+// Function to get the most recent weight and reps for each lift
 function getMostRecentWeights(lifts) {
     const recentWeights = {};
 
@@ -149,7 +149,10 @@ function generateWorkoutsFromHistory(lifts, mostRecentSunday) {
                     day: lift.day
                 };
             }
-            days[dateStr][lift.exercise] = lift.weight;
+            days[dateStr][lift.exercise] = {
+                weight: lift.weight,
+                reps: lift.reps
+            };
         }
     });
 
@@ -194,7 +197,10 @@ function generateFutureWorkouts(lifts, weekSchedule, user) {
                     const mostRecentLift = recentWeights[exercise];
                     const nextWeight = calculateNextWeight(exercise, mostRecentLift);
 
-                    dayObject[exercise] = nextWeight;
+                    dayObject[exercise] = {
+                        weight: nextWeight,
+                        reps: null // Future workouts won't have reps data
+                    };
                 });
             }
 
