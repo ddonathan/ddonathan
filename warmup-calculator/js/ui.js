@@ -25,6 +25,45 @@ async function loadConfigFromFile() {
     }
 }
 
+// Function to get query string parameters
+function getQueryParams() {
+    const params = {};
+    const queryString = window.location.search.substring(1);
+    const regex = /([^&=]+)=([^&]*)/g;
+    let m;
+    while (m = regex.exec(queryString)) {
+        params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
+    }
+    return params;
+}
+
+// Function to set lift and weight from query string and trigger calculation
+function setLiftAndWeightFromQuery() {
+    const params = getQueryParams();
+    let shouldCalculate = false;
+
+    if (params.lift1) {
+        document.getElementById('liftSelect1').value = params.lift1;
+        shouldCalculate = true;
+    }
+    if (params.weight1) {
+        document.getElementById('targetWeight1').value = params.weight1;
+        shouldCalculate = true;
+    }
+    if (params.lift2) {
+        document.getElementById('liftSelect2').value = params.lift2;
+        shouldCalculate = true;
+    }
+    if (params.weight2) {
+        document.getElementById('targetWeight2').value = params.weight2;
+        shouldCalculate = true;
+    }
+
+    if (shouldCalculate) {
+        calculateWarmupSets();
+    }
+}
+
 // Modify the DOMContentLoaded event listener
 window.addEventListener('DOMContentLoaded', async () => {
     loadFromLocalStorage();
@@ -46,6 +85,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load templates based on saved selection
     await loadConfig();
     await loadInventoryTemplate();
+
+    // Set lift and weight from query string and trigger calculation
+    setLiftAndWeightFromQuery();
 
     // Add event listeners for automatic calculation
     document.getElementById('liftSelect1').addEventListener('change', () => {
