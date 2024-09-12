@@ -44,6 +44,7 @@ function setLiftAndWeightFromQuery() {
 
     if (params.lift1) {
         document.getElementById('liftSelect1').value = params.lift1;
+        document.getElementById('liftName1').textContent = params.lift1;
         shouldCalculate = true;
     }
     if (params.weight1) {
@@ -52,6 +53,7 @@ function setLiftAndWeightFromQuery() {
     }
     if (params.lift2) {
         document.getElementById('liftSelect2').value = params.lift2;
+        document.getElementById('liftName2').textContent = params.lift2;
         shouldCalculate = true;
     }
     if (params.weight2) {
