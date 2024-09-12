@@ -1,26 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NovoCardModule, NovoLoadingModule } from 'novo-elements';
+import { NovoCardModule, NovoLoadingModule, NovoButtonModule } from 'novo-elements';
 import { AppBridge } from 'novo-elements';
 import { BridgeService } from './bridge.service';
 
 @Component({
   selector: 'app-bullhorn-info-card',
   standalone: true,
-  imports: [CommonModule, NovoCardModule, NovoLoadingModule],
+  imports: [CommonModule, NovoCardModule, NovoLoadingModule, NovoButtonModule],
   template: `
     <novo-card class="bullhorn-info-card">
       <novo-card-header>Bullhorn Info Card</novo-card-header>
       <novo-card-content>
+        <button theme="primary" icon="clipboard" (click)="copyToClipboard()" [disabled]="loading">Copy to Clipboard</button>
         <novo-loading *ngIf="loading"></novo-loading>
-        <table *ngIf="!loading" class="info-table">
-          <tbody>
-            <tr *ngFor="let item of infoItems">
-              <td class="label-cell">{{ item.label }}</td>
-              <td class="value-cell" [innerHTML]="item.value"></td>
-            </tr>
-          </tbody>
-        </table>
+        <div *ngIf="!loading">
+          <table class="info-table">
+            <tbody>
+              <tr *ngFor="let item of infoItems">
+                <td class="label-cell">{{ item.label }}</td>
+                <td class="value-cell" [innerHTML]="item.value"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </novo-card-content>
     </novo-card>
   `,
@@ -33,6 +36,7 @@ import { BridgeService } from './bridge.service';
     .info-table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 15px;
     }
     .info-table tr {
       border-bottom: 1px solid #e0e0e0;
@@ -51,6 +55,9 @@ import { BridgeService } from './bridge.service';
       white-space: pre-wrap;
       font-family: monospace;
     }
+    button {
+      margin-bottom: 15px;
+    }
   `]
 })
 export class BullhornInfoCardComponent implements OnInit {
@@ -67,7 +74,7 @@ export class BullhornInfoCardComponent implements OnInit {
   async fetchBullhornInfo(): Promise<any> {
     return new Promise((resolve, reject) => {
       this.bridge.execute((appBridge: AppBridge) => {
-        appBridge.httpGET(`settings/corporationId,corporationName,userId,bboName,deptId,allPrivateLabelIds,userTypeId,privateLabelId,userDepartments`).then((response: any) => {
+        appBridge.httpGET(`settings/corporationId,corporationName,userId,bboName,deptId,allPrivateLabelIds,userTypeId,privateLabelId,userDepartments,jobResponseStatusList,multiratePlacementEnabled,novoEnabled,novoTaxInfoTab,placementApprovalStatus,placementTracksEnabled,rejectedJobResponseStatus,submissionPlacedStatus,wfrEnabled,accountLockoutDuration,bullhornStaffingHost,candidatePlacedStatusList,companyOwnershipEnabled,contactLocationsEnabled,enableClientLocation,entityTitleCandidate,entityTitleClientContact,entityTitleClientCorporation,entityTitleJobOrder,entityTitleJobSubmission,entityTitleLead,entityTitleLocation,entityTitlePlacement,fileTypeList,jobResponseStatusList,jobBoardPublishingApprovedStatus,suppressPlacementEffectiveDateFieldInteraction,taxesV2Enabled`).then((response: any) => {
           this.info = response.data;
           this.processSettings();
           this.loading = false;
@@ -114,5 +121,24 @@ export class BullhornInfoCardComponent implements OnInit {
   private formatObject(obj: any): string {
     const entries = Object.entries(obj);
     return entries.map(([key, value]) => `${key}: ${this.formatValue(value)}`).join('<br>');
+  }
+
+  copyToClipboard() {
+    const clipboardText = JSON.stringify(this.info, null, 2);
+
+    const textArea = document.createElement('textarea');
+    textArea.value = clipboardText;
+    document.body.appendChild(textArea);
+    textArea.select();
+
+    try {
+      document.execCommand('copy');
+      console.log('Copied original object to clipboard successfully');
+      // Optionally, you can add a toast notification here to inform the user
+    } catch (err) {
+      console.error('Could not copy text: ', err);
+    } finally {
+      document.body.removeChild(textArea);
+    }
   }
 }
