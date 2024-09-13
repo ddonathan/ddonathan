@@ -33,6 +33,9 @@ async function loadInventoryTemplate() {
         case 'advanced':
             inventoryUrl = 'inventory-advanced.json';
             break;
+        case 'dumbbell':
+            inventoryUrl = 'inventory-dumbbell.json';
+            break;
         case 'custom':
             const savedInventory = localStorage.getItem('inventory');
             if (savedInventory) {

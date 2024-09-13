@@ -1,0 +1,65 @@
+{
+    "barbell": 0,
+    "plates": [
+      {
+        "mass": 5,
+        "color": "blue",
+        "diameter": 0.422,
+        "pairs": 1
+      },
+      {
+        "mass": 10,
+        "color": "white",
+        "diameter": 0.75,
+        "pairs": 1
+      },
+      {
+        "mass": 15,
+        "color": "black",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 20,
+        "color": "red",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 25,
+        "color": "green",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 30,
+        "color": "orange",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 35,
+        "color": "yellow",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 40,
+        "color": "purple",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 45,
+        "color": "blue",
+        "diameter": 1,
+        "pairs": 1
+      },
+      {
+        "mass": 50,
+        "color": "black",
+        "diameter": 1,
+        "pairs": 1
+      }
+    ]
+  }
