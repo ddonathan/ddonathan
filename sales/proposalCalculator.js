@@ -20,7 +20,7 @@ function setPackageItems() {
       document.getElementById("time_expense").checked = true;
       document.getElementById("invoicing").checked = true;
       document.getElementById("analytics").value = "analyticsGrowth";
-      document.getElementById("automation").value = "autoEss";
+      document.getElementById("automation").value = "autoFnd";
       document.getElementById("onboarding").value = "onbClassic";
       break;
     case package == "smbGrowth" && market !== "NOAM":
@@ -28,7 +28,7 @@ function setPackageItems() {
       document.getElementById("time_expense").checked = false;
       document.getElementById("invoicing").checked = false;
       document.getElementById("analytics").value = "analyticsGrowth";
-      document.getElementById("automation").value = "autoEss";
+      document.getElementById("automation").value = "autoFnd";
       document.getElementById("onboarding").value = "onbClassic";
       break;
     case package == "fieldGrowth" && market === "NOAM":
@@ -36,26 +36,11 @@ function setPackageItems() {
       document.getElementById("time_expense").checked = true;
       document.getElementById("invoicing").checked = true;
       document.getElementById("analytics").value = "";
-
-      // Depending on user count, set essentials or intermediate
-      if (userCount < 25) {
-        document.getElementById("automation").value = "autoEss";
-      } else {
-        document.getElementById("automation").value = "autoInt";
-      }
-      break;
     case package == "fieldGrowth" && market !== "NOAM":
       document.getElementById("ats").value = "ats_enterprise";
       document.getElementById("time_expense").checked = false;
       document.getElementById("invoicing").checked = false;
       document.getElementById("analytics").value = "";
-
-      // Depending on user count, set essentials or intermediate
-      if (userCount < 25) {
-        document.getElementById("automation").value = "autoEss";
-      } else {
-        document.getElementById("automation").value = "autoInt";
-      }
       document.getElementById("onboarding").value = "onb365";
       break;
     default:
@@ -161,25 +146,14 @@ function generate() {
         switch (item.id) {
           case "ats_essentials":
           case "ats_premium":
-          case "autoEss":
-          case "autoInt":
-          case "autoAdv":
-          case "autoTra":
+          case "autoFnd":
           case "talentPlatformFdn":
           case "talentPlatformFndHc":
             dataToSend[item.id] = true;
             break;
 
             // Find and remove the bundled items from dataToSend
-            delete dataToSend.autoEss;
-
-            break;
-          case "talentPlatformInt":
-            dataToSend.talentPlatform = true;
-            dataToSend[item.id] = true;
-
-            // Find and remove the bundled items from dataToSend
-            delete dataToSend.autoInt;
+            delete dataToSend.autoFnd;
 
             break;
         }
