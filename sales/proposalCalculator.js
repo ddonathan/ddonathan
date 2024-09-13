@@ -41,7 +41,7 @@ function setPackageItems() {
       document.getElementById("time_expense").checked = false;
       document.getElementById("invoicing").checked = false;
       document.getElementById("analytics").value = "";
-      document.getElementById("onboarding").value = "onb365";
+      document.getElementById("onboarding").value = "talentPlatformFnd";
       break;
     default:
       document.getElementById("ats").checked = false;
