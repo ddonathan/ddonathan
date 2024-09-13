@@ -40,10 +40,8 @@ function setPackageItems() {
       // Depending on user count, set essentials or intermediate
       if (userCount < 25) {
         document.getElementById("automation").value = "autoEss";
-        document.getElementById("onboarding").value = "onbTalentEss";
       } else {
         document.getElementById("automation").value = "autoInt";
-        document.getElementById("onboarding").value = "onbTalentInt";
       }
       break;
     case package == "fieldGrowth" && market !== "NOAM":
@@ -68,29 +66,6 @@ function setPackageItems() {
       document.getElementById("automation").value = "";
       document.getElementById("onboarding").value = "";
       break;
-  }
-}
-
-// Get Value of Package and update products
-function getTalentPlatform(e) {
-  let package = document.getElementById("talentPlatform").value;
-
-  // If Talent Platform, select Talent Edition for Onboarding and Essentials or Intermediate for Automation
-  if (package == "talentPlatformEss") {
-    document.getElementById("onboarding").value = "onbTalentEss";
-    document.getElementById("onboarding").disabled = true;
-    document.getElementById("automation").value = "autoEss";
-    document.getElementById("automation").disabled = true;
-  } else if (package == "talentPlatformInt") {
-    document.getElementById("onboarding").value = "onbTalentInt";
-    document.getElementById("onboarding").disabled = true;
-    document.getElementById("automation").value = "autoInt";
-    document.getElementById("automation").disabled = true;
-  } else if (package == "") {
-    document.getElementById("onboarding").value = "";
-    document.getElementById("automation").value = "";
-    document.getElementById("onboarding").disabled = false;
-    document.getElementById("automation").disabled = false;
   }
 }
 
@@ -190,21 +165,13 @@ function generate() {
           case "autoInt":
           case "autoAdv":
           case "autoTra":
+          case "talentPlatformFdn":
+          case "talentPlatformFndHc":
             dataToSend[item.id] = true;
             break;
-          case "onbTalentEss":
-          case "onbTalentInt":
-            dataToSend.talentEdition = true;
-            dataToSend[item.id] = true;
-            break;
-          case "talentPlatformEss":
-            dataToSend.talentPlatform = true;
-            dataToSend[item.id] = true;
 
             // Find and remove the bundled items from dataToSend
-            delete dataToSend.talentEdition;
             delete dataToSend.autoEss;
-            delete dataToSend.onbTalentEss;
 
             break;
           case "talentPlatformInt":
@@ -212,9 +179,7 @@ function generate() {
             dataToSend[item.id] = true;
 
             // Find and remove the bundled items from dataToSend
-            delete dataToSend.talentEdition;
             delete dataToSend.autoInt;
-            delete dataToSend.onbTalentInt;
 
             break;
         }
@@ -824,8 +789,6 @@ function resetChoices() {
       document.getElementById("invoicing-form-element").style.display = "none";
       document.getElementById("time_expense-form-element").style.display =
         "none";
-      document.getElementById("talent_platform-form-element").style.display =
-        "none";
       // document.getElementById('backoffice_options').style.display = 'none';
       // document.getElementById('payroll_exports_option').style.display = 'none';
 
@@ -861,10 +824,6 @@ function resetChoices() {
       document.getElementById("invoicing-form-element").style.display = "block";
       document.getElementById("time_expense-form-element").style.display =
         "block";
-      document.getElementById("talent_platform-form-element").style.display =
-        "flex";
-      // document.getElementById('backoffice_options').style.display = 'block';
-      // document.getElementById('payroll_exports_option').style.display = 'block';
 
       // Reset Onboarding Options
       var selectBox = document.getElementById("onboarding");
@@ -872,12 +831,6 @@ function resetChoices() {
       selectBox.options.add(new Option("", ""));
       selectBox.options.add(new Option("SMB Edition", "onbClassic"));
       selectBox.options.add(new Option("365 Edition", "onb365"));
-      selectBox.options.add(
-        new Option("Talent Edition Essentials", "onbTalentEss"),
-      );
-      selectBox.options.add(
-        new Option("Talent Edition Intermediate", "onbTalentInt"),
-      );
       selectBox.selectedIndex = 0;
 
       // Change the Calendly URL
@@ -901,10 +854,6 @@ function resetChoices() {
       document.getElementById("invoicing-form-element").style.display = "none";
       document.getElementById("time_expense-form-element").style.display =
         "none";
-      document.getElementById("talent_platform-form-element").style.display =
-        "none";
-      // document.getElementById('backoffice_options').style.display = 'none';
-      // document.getElementById('payroll_exports_option').style.display = 'none';
 
       // Reset Onboarding Options
       var selectBox = document.getElementById("onboarding");
@@ -933,10 +882,6 @@ function resetChoices() {
       document.getElementById("invoicing-form-element").style.display = "none";
       document.getElementById("time_expense-form-element").style.display =
         "none";
-      document.getElementById("talent_platform-form-element").style.display =
-        "none";
-      // document.getElementById('backoffice_options').style.display = 'none';
-      // document.getElementById('payroll_exports_option').style.display = 'none';
 
       // Restore options that are available
       document.getElementById("package-form-element").style.display = "flex";
@@ -1719,13 +1664,6 @@ window.onload = function () {
   document.getElementById("package").addEventListener("change", function () {
     setPackageItems();
   });
-
-  // Add event listener for when talent platform changes
-  document
-    .getElementById("talentPlatform")
-    .addEventListener("change", function () {
-      getTalentPlatform();
-    });
 
   // Add event listener for when package changes
   document.getElementById("onboarding").addEventListener("change", function () {
