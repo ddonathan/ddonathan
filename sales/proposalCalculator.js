@@ -805,6 +805,8 @@ function resetChoices() {
       selectBox.options.add(new Option("", ""));
       selectBox.options.add(new Option("SMB Edition", "onbClassic"));
       selectBox.options.add(new Option("365 Edition", "onb365"));
+      selectBox.options.add(new Option("Talent Platform Foundations", "talentPlatformFnd"));
+      selectBox.options.add(new Option("Talent Platform Foundations (Healthcare)", "talentPlatformFndHc"));
       selectBox.selectedIndex = 0;
 
       // Change the Calendly URL

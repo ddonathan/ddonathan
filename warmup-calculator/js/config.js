@@ -36,6 +36,9 @@ async function loadInventoryTemplate() {
         case 'dumbbell':
             inventoryUrl = 'inventory-dumbbell.json';
             break;
+        case 'technique':
+            inventoryUrl = 'inventory-technique.json';
+            break;
         case 'custom':
             const savedInventory = localStorage.getItem('inventory');
             if (savedInventory) {
