@@ -1,4 +1,6 @@
 function calculateWarmupSets() {
+    const barbellWeight = getBarbellWeight();
+    console.log("Calculating warm-up sets with barbell weight:", barbellWeight);
     const targetWeights = [
         parseFloat(document.getElementById('targetWeight1').value),
         parseFloat(document.getElementById('targetWeight2').value)
@@ -110,6 +112,9 @@ function calculateWarmupSets() {
             warmupFooters[index].appendChild(warningRow);
         }
     });
+
+    // Update barbell weight display after calculations
+    updateBarbellWeight();
 }
 
 function formatWeight(weight) {
@@ -144,3 +149,62 @@ function calculatePlates(weight) {
         return platesToUse;
     }
 }
+
+// Function to get the barbell weight from the inventory
+function getBarbellWeight() {
+    const inventoryText = document.getElementById('inventoryTextarea').value.trim();
+    if (!inventoryText) {
+        console.log("Inventory is empty, using default barbell weight");
+        return 45; // Default weight if inventory is empty
+    }
+    try {
+        const inventory = JSON.parse(inventoryText);
+        console.log("Parsed inventory:", inventory);
+        // Check if barbell property exists and is not null/undefined
+        if ('barbell' in inventory) {
+            return inventory.barbell; // This will return 0 for dumbbells
+        }
+        return 45; // Default to 45 if barbell property is not present
+    } catch (error) {
+        console.error("Error parsing inventory:", error);
+        return 45; // Default to 45 if there's an error
+    }
+}
+
+// Function to update the displayed barbell weight
+function updateBarbellWeight() {
+    const weight = getBarbellWeight();
+    console.log("Updating barbell weight to:", weight);
+    const displayText = `Barbell Weight: ${weight} lbs`;
+    document.getElementById('barbellWeight1').textContent = displayText;
+    document.getElementById('barbellWeight2').textContent = displayText;
+}
+
+// Call this when the inventory changes
+function onInventoryChange() {
+    console.log("Inventory changed");
+    updateBarbellWeight();
+    calculateWarmupSets(); // Recalculate warm-up sets if needed
+}
+
+// Add event listener to inventory textarea
+document.getElementById('inventoryTextarea').addEventListener('input', onInventoryChange);
+
+// Call this when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM content loaded");
+    updateBarbellWeight();
+    calculateWarmupSets(); // Calculate warm-up sets on page load
+});
+
+// Function to clear tables (if not already defined)
+function clearTables() {
+    document.getElementById('warmupTable1').innerHTML = '';
+    document.getElementById('warmupTable2').innerHTML = '';
+    document.getElementById('warmupHeader1').innerHTML = '<tr><th>Weight</th></tr>';
+    document.getElementById('warmupHeader2').innerHTML = '<tr><th>Weight</th></tr>';
+    document.getElementById('warmupFooter1').innerHTML = '';
+    document.getElementById('warmupFooter2').innerHTML = '';
+}
+
+// ... rest of your existing functions ...

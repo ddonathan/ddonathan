@@ -222,3 +222,10 @@ td.first-column, tfoot td {
     font-weight: bold;
     display: none;
 }
+
+#barbellWeight1, #barbellWeight2 {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    padding-left: 10px; /* Adds indentation */
+}
