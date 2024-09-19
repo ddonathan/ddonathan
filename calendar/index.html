@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Redirect</title>
+    <script>
+        window.onload = function() {
+            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
+            const redirectUrl = `https://www.timeanddate.com/calendar/custom.html?year=2024&month=${currentMonth}&months=12&country=1&typ=2&display=1&cdt=1&df=1`;
+            window.location.href = redirectUrl;
+        };
+    </script>
+</head>
+<body>
+    <p>Redirecting to calendar...</p>
+</body>
+</html>
