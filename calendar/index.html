@@ -6,8 +6,10 @@
     <title>Calendar Redirect</title>
     <script>
         window.onload = function() {
-            const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
-            const redirectUrl = `https://www.timeanddate.com/calendar/custom.html?year=2024&month=${currentMonth}&months=12&country=1&typ=2&display=1&cdt=1&df=1`;
+            const currentDate = new Date();
+            const currentYear = currentDate.getFullYear();
+            const currentMonth = currentDate.getMonth() + 1; // getMonth() returns 0-11
+            const redirectUrl = `https://www.timeanddate.com/calendar/custom.html?year=${currentYear}&month=${currentMonth}&months=12&country=1&typ=2&display=1&cdt=1&df=1`;
             window.location.href = redirectUrl;
         };
     </script>
