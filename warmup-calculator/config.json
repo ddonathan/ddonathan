@@ -13,7 +13,7 @@
         { "percentage": 0.85, "reps": 2 },
         { "percentage": 1, "reps": 5 }
     ],
-    "showColors": false,
+    "showColors": true,
     "showFooter": true,
     "footerText": "",
     "warningThreshold": 5,
