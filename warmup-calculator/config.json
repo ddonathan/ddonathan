@@ -8,9 +8,9 @@
       ],
     "warmupPercentages": [
         { "percentage": 0.4, "reps": 5 },
-        { "percentage": 0.55, "reps": 4 },
-        { "percentage": 0.7, "reps": 3 },
-        { "percentage": 0.85, "reps": 2 },
+        { "percentage": 0.6, "reps": 4 },
+        { "percentage": 0.8, "reps": 3 },
+        { "percentage": 0.9, "reps": 2 },
         { "percentage": 1, "reps": 5 }
     ],
     "showColors": true,
